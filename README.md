@@ -146,7 +146,3 @@ The app will run at `http://localhost:3000`.
 
 This project is licensed under the [MIT License](LICENSE).
 
-## Contact
-
-- **GitHub**: [Your GitHub](https://github.com/your-profile)
-- **Email**: [youremail@example.com](mailto:youremail@example.com)
