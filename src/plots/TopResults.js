@@ -27,31 +27,31 @@ export const TopResults = ({ data, onSNPClick }) => {
       label: 'Ref',
       tooltip: 'Reference allele'
     },
-    {
-      key: 'ALT',
-      label: 'Alt',
-      tooltip: 'Alternative allele'
-    },
-    {
-      key: 'BETA',
-      label: 'Beta',
-      tooltip: 'Effect size estimate'
-    },
-    {
-      key: 'SE',
-      label: 'SE',
-      tooltip: 'Standard error of the effect size'
-    },
+    // {
+    //   key: 'ALT',
+    //   label: 'Alt',
+    //   tooltip: 'Alternative allele'
+    // },
+    // {
+    //   key: 'BETA',
+    //   label: 'Beta',
+    //   tooltip: 'Effect size estimate'
+    // },
+    // {
+    //   key: 'SE',
+    //   label: 'SE',
+    //   tooltip: 'Standard error of the effect size'
+    // },
     {
       key: 'P',
       label: 'P-value',
       tooltip: 'Statistical significance'
     },
-    {
-      key: 'LOG10P',
-      label: 'Log10(P)',
-      tooltip: 'Negative log10 of the p-value'
-    },
+    // {
+    //   key: 'LOG10P',
+    //   label: 'Log10(P)',
+    //   tooltip: 'Negative log10 of the p-value'
+    // },
     {
       key: 'SE_LDSC',
       label: 'SE LDSC',
@@ -62,21 +62,21 @@ export const TopResults = ({ data, onSNPClick }) => {
       label: 'P LDSC',
       tooltip: 'LDSC-adjusted p-value'
     },
-    {
-      key: 'LOG10P_LDSC',
-      label: 'Log10(P) LDSC',
-      tooltip: 'LDSC-adjusted negative log10 p-value'
-    },
-    {
-      key: 'AAF',
-      label: 'AAF',
-      tooltip: 'Alternative allele frequency'
-    },
-    {
-      key: 'AAC',
-      label: 'AAC',
-      tooltip: 'Alternative allele count'
-    },
+    // {
+    //   key: 'LOG10P_LDSC',
+    //   label: 'Log10(P) LDSC',
+    //   tooltip: 'LDSC-adjusted negative log10 p-value'
+    // },
+    // {
+    //   key: 'AAF',
+    //   label: 'AAF',
+    //   tooltip: 'Alternative allele frequency'
+    // },
+    // {
+    //   key: 'AAC',
+    //   label: 'AAC',
+    //   tooltip: 'Alternative allele count'
+    // },
     {
       key: 'N',
       label: 'N Total',
@@ -87,16 +87,16 @@ export const TopResults = ({ data, onSNPClick }) => {
       label: 'N Studies',
       tooltip: 'Number of studies'
     },
-    {
-      key: 'EFFECT',
-      label: 'Effect',
-      tooltip: 'Direction of effect across studies'
-    },
-    {
-      key: 'P_HETERO',
-      label: 'P Hetero',
-      tooltip: 'Heterogeneity p-value'
-    }
+    // {
+    //   key: 'EFFECT',
+    //   label: 'Effect',
+    //   tooltip: 'Direction of effect across studies'
+    // },
+    // {
+    //   key: 'P_HETERO',
+    //   label: 'P Hetero',
+    //   tooltip: 'Heterogeneity p-value'
+    // }
   ];
 
   const filteredData = data.filter(item => 
@@ -204,20 +204,20 @@ export const TopResults = ({ data, onSNPClick }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.CHR}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.POS, 'number')}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.REF}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.ALT}</td>
+                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.ALT}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.BETA, 'float4')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.SE, 'float4')}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.SE, 'float4')}</td> */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.P, 'exp')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.LOG10P, 'float2')}</td>
+                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.LOG10P, 'float2')}</td> */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.SE_LDSC, 'float4')}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.P_LDSC, 'exp')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.LOG10P_LDSC, 'float2')}</td>
+                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.LOG10P_LDSC, 'float2')}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.AAF, 'float4')}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.AAC, 'float2')}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.AAC, 'float2')}</td> */}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.N, 'number')}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.N_STUDY}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.EFFECT}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.P_HETERO, 'float4')}</td>
+                {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.EFFECT}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatValue(row.P_HETERO, 'float4')}</td> */}
               </tr>
             ))}
           </tbody>
