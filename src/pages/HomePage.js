@@ -12,7 +12,8 @@ import {
   Database,
   Users,
   ChartBar,
-  Search
+  Search,
+  Dna
 
 } from 'lucide-react';
 import { MessageSquare } from 'lucide-react';
@@ -679,6 +680,7 @@ export const HomePage = () => {
               <Network className="mr-4 h-10 w-10 text-white" />
               <div>
                 {/* Update the title to "PLATLAS" */}
+    
                 <h1 className="text-4xl font-bold text-white mb-2">
                   PLATLAS
                 </h1>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Github, Linkedin, Network, Share2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -113,75 +113,45 @@ const TeamMember = ({ name, role, description, imageUrl, socialLinks, isReversed
 };
 
 const AboutPage = () => {
-  const teamMembers = [
-    {
-      name: "Dr. Sarah Johnson",
-      role: "Principal Investigator",
-      description: "Leading expert in statistical genetics with over 15 years of experience in GWAS analysis.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Michael Chen",
-      role: "Lead Bioinformatician",
-      description: "Specializes in developing computational tools for genomic data analysis.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Emily Rodriguez",
-      role: "Statistical Geneticist",
-      description: "Expert in population genetics and statistical methodology.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. David Kim",
-      role: "Data Scientist",
-      description: "Specialized in machine learning applications in genomics.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Lisa Wang",
-      role: "Population Geneticist",
-      description: "Expert in multi-ethnic genetic studies and diversity research.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. James Martinez",
-      role: "Computational Biologist",
-      description: "Focuses on algorithm development for genomic analysis.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Anna Kowalski",
-      role: "Research Scientist",
-      description: "Specializes in functional genomics and biomarker discovery.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Robert Thompson",
-      role: "Biostatistician",
-      description: "Expert in statistical methods for large-scale genetic studies.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. Maria Garcia",
-      role: "Software Engineer",
-      description: "Leads the development of visualization tools and web interfaces.",
-      imageUrl: "/api/placeholder/400/320"
-    },
-    {
-      name: "Dr. John Smith",
-      role: "Research Coordinator",
-      description: "Manages research projects and international collaborations.",
-      imageUrl: "/api/placeholder/400/320"
-    }
-  ].map(member => ({
-    ...member,
-    socialLinks: {
-      email: `${member.name.toLowerCase().replace(' ', '.')}@example.com`,
-      github: `https://github.com/${member.name.toLowerCase().replace(' ', '')}`,
-      linkedin: `https://linkedin.com/in/${member.name.toLowerCase().replace(' ', '')}`
-    }
-  }));
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  // Fetch team members data from landingPageData.json
+  useEffect(() => {
+    fetch('/landingPageData.json')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch landing page data.');
+        }
+        return response.json();
+      })
+      .then((jsonData) => {
+        setTeamMembers(jsonData.teamMembers);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching team members:', error);
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-xl text-gray-700">Loading team members...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-xl text-red-500">Failed to load team members. Please try again later.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -262,7 +232,11 @@ const AboutPage = () => {
           {teamMembers.map((member, index) => (
             <TeamMember 
               key={member.name}
-              {...member}
+              name={member.name}
+              role={member.role}
+              description={member.description}
+              imageUrl={member.imageUrl}
+              socialLinks={member.socialLinks}
               isReversed={index % 2 !== 0}
             />
           ))}

@@ -47,7 +47,7 @@ const ResearchSection = () => {
   return (
     <div className="space-y-20 py-16">
       {/* Research Highlights Section */}
-      <div className="max-w-7xl mx-auto px-4">
+      {/* <div className="max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-3 gap-8">
           {researchHighlights.map((highlight, index) => (
             <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
@@ -69,7 +69,7 @@ const ResearchSection = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Publication Section */}
       <div className="max-w-7xl mx-auto px-4">

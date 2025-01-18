@@ -733,7 +733,7 @@ const GWASPage = () => {
       }
 
       const data = await response.json();
-      
+      console.log(data)
       setCachedData((prevData) => ({
         ...prevData,
         cohortData: {
@@ -832,6 +832,7 @@ const GWASPage = () => {
   };
 
   const generateQQData = (df) => {
+    console.log(df)
     const n = df.length;
     const observed = df.map((row) => row.log_p).sort((a, b) => a - b);
     const theoretical = Array.from({ length: n }, (_, i) => -Math.log10((i + 0.5) / n)).sort((a, b) => a - b);
@@ -1015,12 +1016,12 @@ return (
                   </div>
                 </div>
 
-                <div className="bg-gray-100 rounded-lg shadow p-4">
+                {/* <div className="bg-gray-100 rounded-lg shadow p-4">
                   <h3 className="text-lg font-semibold text-gray-800">Q-Q Plot</h3>
                   <div className="overflow-hidden max-h-[500px]">
                     <QQ data={qq} />
                   </div>
-                </div>
+                </div> */}
               </div>
 
               <div className="bg-gray-100 rounded-lg shadow p-4">

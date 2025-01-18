@@ -1,68 +1,61 @@
-import React, { useState } from 'react';
-import { File, Code, Database, ChevronRight, ExternalLink, BookOpen, Search, Network, Share2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronRight, ExternalLink, BookOpen, Search, Code, Database, Network, Share2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+// Icon Mapping Utility
+const iconMap = {
+  BookOpen: <BookOpen className="h-5 w-5 text-indigo-600" />,
+  Database: <Database className="h-5 w-5 text-indigo-600" />,
+  Code: <Code className="h-5 w-5 text-indigo-600" />,
+  Search: <Search className="h-5 w-5 text-indigo-600" />,
+  ExternalLink: <ExternalLink className="h-5 w-5 text-indigo-600" />
+  // Add more mappings as needed
+};
 
 const DocumentationPage = () => {
   const [activeSection, setActiveSection] = useState('getting-started');
+  const [sections, setSections] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-  const sections = [
-    {
-      id: 'getting-started',
-      title: 'Getting Started',
-      icon: BookOpen,
-      content: [
-        {
-          title: 'Introduction',
-          description: 'PLATLAS is a comprehensive platform for analyzing and visualizing genome-wide association studies across multiple ancestries.',
-          subsections: [
-            'Platform Overview',
-            'Key Features',
-            'System Requirements'
-          ]
-        },
-        {
-          title: 'Quick Start Guide',
-          description: 'Learn how to get started with PLATLAS and perform your first analysis.',
-          subsections: [
-            'Basic Navigation',
-            'Data Upload',
-            'Visualization Tools'
-          ]
+  // Fetch documentation data from JSON
+  useEffect(() => {
+    fetch('/documentationData.json')
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to fetch documentation data.');
         }
-      ]
-    },
-    {
-      id: 'data-formats',
-      title: 'Data Formats',
-      icon: Database,
-      content: [
-        {
-          title: 'Input Data Requirements',
-          description: 'Specifications for GWAS summary statistics and other input data formats.',
-          subsections: [
-            'Summary Statistics Format',
-            'Phenotype Data Format',
-            'Cohort Information'
-          ]
-        }
-      ]
-    },
-    {
-      id: 'api-reference',
-      title: 'API Reference',
-      icon: Code,
-      content: [
-        {
-          title: 'REST API Documentation',
-          description: 'Complete reference for the PLATLAS REST API endpoints.',
-          subsections: [
-            'Authentication',
-            'Endpoints',
-            'Rate Limits'
-          ]
-        }
-      ]
-    }
-  ];
+        return response.json();
+      })
+      .then((jsonData) => {
+        setSections(jsonData.sections);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching documentation data:', error);
+        setError(true);
+        setLoading(false);
+      });
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-xl text-gray-700">Loading documentation...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-xl text-red-500">Failed to load documentation. Please try again later.</p>
+      </div>
+    );
+  }
+
+  // Find the active section based on activeSection state
+  const currentSection = sections.find(section => section.id === activeSection);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,7 +74,7 @@ const DocumentationPage = () => {
           </p>
         </div>
 
-        {/* Animated elements */}
+        {/* Animated Elements */}
         <Share2 
           className="absolute left-[15%] top-[30%] opacity-20 text-white"
           size={24}
@@ -111,7 +104,7 @@ const DocumentationPage = () => {
                         : 'hover:bg-gray-50 text-gray-600'
                     }`}
                   >
-                    <section.icon className="h-5 w-5" />
+                    {iconMap[section.icon]}
                     <span className="font-medium">{section.title}</span>
                   </button>
                 ))}
@@ -121,31 +114,30 @@ const DocumentationPage = () => {
 
           {/* Content Area */}
           <div className="lg:col-span-3 space-y-8">
-            {sections
-              .find(section => section.id === activeSection)
-              ?.content.map((item, index) => (
-                <div key={index} className="bg-white rounded-xl shadow-lg p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                    {item.title}
-                  </h2>
-                  <p className="text-gray-600 mb-6">{item.description}</p>
-                  <div className="space-y-4">
-                    {item.subsections.map((subsection, idx) => (
-                      <div 
-                        key={idx}
-                        className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors cursor-pointer group"
-                      >
-                        <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
-                        <span>{subsection}</span>
-                      </div>
-                    ))}
-                  </div>
+            {currentSection && currentSection.content.map((item, index) => (
+              <div key={index} className="bg-white rounded-xl shadow-lg p-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                  {item.title}
+                </h2>
+                <p className="text-gray-600 mb-6">{item.description}</p>
+                <div className="space-y-4">
+                  {item.subsections.map((subsection, idx) => (
+                    <div 
+                      key={idx}
+                      className="flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors cursor-pointer group"
+                    >
+                      <ChevronRight className="h-4 w-4 text-gray-400 group-hover:text-blue-600" />
+                      <span>{subsection}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
+      {/* Animation Keyframes */}
       <style jsx>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
