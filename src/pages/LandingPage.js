@@ -97,13 +97,13 @@ const LandingPage = () => {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center">
               <img 
                 src="/images/platypus.png"
                 alt="Platypus Logo" 
-                className="h-20 w-20 object-contain"
+                className="h-20 w-24 object-cover"
               />
-              <span className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+              <span className="text-4xl -ml-2 mt-3 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
                 {data?.navigation.title}
               </span>
             </div>
@@ -304,7 +304,7 @@ Publication
               <img 
                 src={data.hero.image} 
                 alt="Research Visualization" 
-                className="rounded-lg shadow-xl relative z-10 md:h-[450px]"
+                className="rounded-lg shadow-xl relative z-10 md:h-[420px] md:w-[750px]"
               />
             </div>
           </div>

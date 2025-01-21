@@ -675,25 +675,31 @@ export const HomePage = () => {
         >
           {/* Header content */}
           <div className="max-w-7xl mx-auto px-4 pt-8">
-            <div className="flex items-center">
-              {/* Replace Fingerprint with Network icon */}
-              <Network className="mr-4 h-10 w-10 text-white" />
-              <div>
-                {/* Update the title to "PLATLAS" */}
-    
-                <h1 className="text-4xl font-bold text-white mb-2">
-                  PLATLAS
-                </h1>
-                <p className="text-blue-100 opacity-75">
-                  Advancing genomic research through cutting-edge data visualization and analysis tools.
-                </p>
-              </div>
-            </div>
+          <div className="flex items-center">
+          <div>
+  <img 
+    src="/images/platypushomepage.png"
+    alt="Platypus Logo" 
+    className="h-32 w-28 object-cover mt-2" // Increased height from h-12 to h-20
+  />   
+    </div>
+    <div>
+    <h1 className="text-3xl -ml-4 mt-5 font-bold text-white mb-2">
+      PLATLAS
+    </h1>  
+    <p className="text-blue-100 -ml-4 -mt-2 opacity-75">
+      Advancing genomic research through cutting-edge data visualization and analysis tools.
+    </p>
+    </div>
+  
+  <div>
+  </div>
+</div>
             <button
       onClick={() => setIsChatOpen(true)}
       className="flex items-center space-x-2 px-4 py-2 bg-white/10 
                  hover:bg-white/20 rounded-lg text-white transition-all
-                 border border-white/20 backdrop-blur-sm"
+                 border border-white/20 backdrop-blur-sm -mt-3 ml-5"
     >
       <MessageSquare className="w-5 h-5" />
       <span>Ask AI Assistant</span>

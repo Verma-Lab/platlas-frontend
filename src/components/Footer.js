@@ -92,10 +92,10 @@ const Footer = () => {
               <img 
                 src="/images/platypus.png"
                 alt="Platypus Logo" 
-                className="h-12 w-12 object-contain"
+                className="h-22 w-24 object-contain"
               />
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
-                PLATLAS
+              <h2 className="text-4xl -ml-7 mt-4 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text">
+              PLATLAS
               </h2>
             </div>
             <p className="text-gray-600">
