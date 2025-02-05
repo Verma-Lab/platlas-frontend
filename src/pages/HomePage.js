@@ -16,6 +16,7 @@ import {
   Dna
 
 } from 'lucide-react';
+import { useCallback } from 'react';
 import { MessageSquare } from 'lucide-react';
 import ChatInterface from './ChatInterface';
 import { Loader2 } from 'lucide-react';
@@ -25,41 +26,53 @@ import LeadVariantsTable from '../components/GwasMetaTable';
 import ResearchSection from '../components/ResearchSection';
 // Shared cohort styling function
 
-const AnimatedCounter = ({ end, duration = 8000 }) => {
+const AnimatedCounter = ({ end, duration = 2000 }) => {
   const [count, setCount] = useState(0);
   const countRef = useRef(null);
   const startTime = useRef(null);
 
-  const animate = (timestamp) => {
-    if (!startTime.current) {
-      startTime.current = timestamp;
-    }
-
-    const progress = timestamp - startTime.current;
-    const percentage = Math.min(progress / duration, 1);
-    const easeOutQuart = 1 - Math.pow(1 - percentage, 4);
-    const currentCount = Math.floor(end * easeOutQuart);
-
-    setCount(currentCount);
-
-    if (progress < duration) {
-      countRef.current = requestAnimationFrame(animate);
-    }
-  };
+  const targetValue = typeof end === 'string' ? 
+    parseInt(end.replace(/,/g, '')) : 
+    parseInt(end) || 0;
 
   useEffect(() => {
+    const animate = (timestamp) => {
+      if (!startTime.current) {
+        startTime.current = timestamp;
+      }
+
+      const progress = timestamp - startTime.current;
+      const percentage = Math.min(progress / duration, 1);
+      
+      const easing = 1 - Math.pow(1 - percentage, 3);
+      const currentValue = Math.round(targetValue * easing);
+      
+      setCount(currentValue);
+
+      if (progress < duration) {
+        countRef.current = requestAnimationFrame(animate);
+      } else {
+        setCount(targetValue);
+      }
+    };
+
+    startTime.current = null;
     countRef.current = requestAnimationFrame(animate);
+
     return () => {
       if (countRef.current) {
         cancelAnimationFrame(countRef.current);
       }
     };
-  }, [end]);
+  }, [targetValue, duration]);
 
   return <span>{count.toLocaleString()}</span>;
 };
 
 const StatCard = ({ icon: Icon, label, value, isVisible }) => {
+  // Ensure value is properly parsed as a number
+  const numericValue = parseInt(value) || 0;
+  
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 transform translate-y-1/2">
       <div className="flex items-start gap-2">
@@ -72,9 +85,12 @@ const StatCard = ({ icon: Icon, label, value, isVisible }) => {
             <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
               Total
             </span>
-            {/* Increased text size for the numbers */}
             <span className="text-2xl font-bold text-gray-900">
-              {isVisible ? <AnimatedCounter end={value} /> : '0'}
+              {isVisible && numericValue > 0 ? (
+                <AnimatedCounter end={numericValue} />
+              ) : (
+                numericValue.toLocaleString()
+              )}
             </span>
           </div>
         </div>
@@ -83,11 +99,54 @@ const StatCard = ({ icon: Icon, label, value, isVisible }) => {
   );
 };
 
-const StatsCard = ({ metadata, projects }) => {
+const StatsCard = () => {
+  const [stats, setStats] = useState({
+    uniquePhenotypes: 0,
+    totalSnps: 0,
+    totalPopulation: 0
+  });
   const [isVisible, setIsVisible] = useState(false);
+  const [error, setError] = useState(null);
   const cardRef = useRef(null);
 
   useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch(`${baseURL}/getGWASStatsRoute`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const responseText = await response.text();
+        console.log('Raw response:', responseText);
+
+        const data = JSON.parse(responseText);
+        console.log('Parsed stats:', data);
+
+        // Validate and parse the data
+        const parsedStats = {
+          uniquePhenotypes: parseInt(data.uniquePhenotypes) || 0,
+          totalSnps: parseInt(data.totalSnps) || 0,
+          totalPopulation: parseInt(data.totalPopulation) || 0
+        };
+
+        console.log('Processed stats:', parsedStats);
+        
+        // Only update state if we have valid numbers
+        if (Object.values(parsedStats).some(val => val > 0)) {
+          setStats(parsedStats);
+        } else {
+          console.warn('Received invalid stats data:', data);
+        }
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+        setError(err.message);
+      }
+    };
+
+    fetchStats();
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -108,35 +167,13 @@ const StatsCard = ({ metadata, projects }) => {
     };
   }, []);
 
-  // Group by phenotype first to avoid double counting
-  const totalStats = metadata.reduce((acc, item) => {
-    if (!acc.phenoStats[item.phenotype_id]) {
-      acc.phenoStats[item.phenotype_id] = {
-        snps: new Set(),  // Use Set to track unique SNPs per phenotype
-        maxSamples: 0     // Track maximum sample size across cohorts
-      };
-    }
-    
-    // For SNPs, add to the phenotype's set
-    acc.phenoStats[item.phenotype_id].snps.add(item.num_snps);
-    
-    // For samples, keep the maximum across cohorts
-    acc.phenoStats[item.phenotype_id].maxSamples = Math.max(
-      acc.phenoStats[item.phenotype_id].maxSamples,
-      item.num_samples || 0
+  if (error) {
+    return (
+      <div className="text-red-500 p-4">
+        Error loading stats: {error}
+      </div>
     );
-    
-    return acc;
-  }, { phenoStats: {} });
-
-  // Calculate final totals
-  const finalTotals = Object.values(totalStats.phenoStats).reduce(
-    (acc, pheno) => ({
-      snps: acc.snps + Math.max(...pheno.snps), // Take max SNPs per phenotype
-      samples: acc.samples + pheno.maxSamples    // Sum up max samples per phenotype
-    }),
-    { snps: 0, samples: 0 }
-  );
+  }
 
   return (
     <div 
@@ -146,24 +183,26 @@ const StatsCard = ({ metadata, projects }) => {
       <StatCard 
         icon={ChartBar}
         label="Phenotypes"
-        value={projects.length}
+        value={stats.uniquePhenotypes}
         isVisible={isVisible}
       />
       <StatCard 
         icon={Database}
         label="SNPs"
-        value={finalTotals.snps}
+        value={stats.totalSnps}
         isVisible={isVisible}
       />
       <StatCard 
         icon={Users}
         label="Sample Size"
-        value={finalTotals.samples}
+        value={stats.totalPopulation}
         isVisible={isVisible}
       />
     </div>
   );
 };
+
+
 // Update the header section of HomePage component:
 const HeaderContent = ({ metadata, projects }) => {
   return (
@@ -277,6 +316,7 @@ const CohortStats = ({ cohortData, phenotypeId, onCohortClick }) => {
 };
 
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api'
+
 const GWASMetadataTable = () => {
   const [metadata, setMetadata] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -581,20 +621,20 @@ const SearchSection = ({ projects }) => {
             >
               Search for a gene, SNP, or phenotype:
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <SearchBar 
-                items={projects}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg 
-                          bg-white shadow-sm focus:outline-none focus:ring-2 
-                          focus:ring-blue-500 focus:border-blue-500
-                          text-sm placeholder-gray-400
-                          transition duration-150 ease-in-out"
-                placeholder="Type to search..."
-              />
-            </div>
+            <div className="relative mb-8">  {/* Added margin-bottom */}
+  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <Search className="h-5 w-5 text-gray-400" />
+  </div>
+  <SearchBar 
+    items={projects}
+    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg 
+              bg-white shadow-sm focus:outline-none focus:ring-2 
+              focus:ring-blue-500 focus:border-blue-500
+              text-sm placeholder-gray-400
+              transition duration-150 ease-in-out"
+    placeholder="Type to search..."
+  />
+</div>
             
             {/* Quick Filters */}
             <div className="flex gap-2 mt-4 flex-wrap">
@@ -637,6 +677,7 @@ export const HomePage = () => {
     const fetchMetadata = async () => {
       try {
         const response = await fetch(`${baseURL}/getGWASMetadata`);
+        console.log(response)
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();
         

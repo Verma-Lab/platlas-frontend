@@ -118,9 +118,9 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/documentation" className="text-gray-600 hover:text-blue-600 transition-colors">
+                {/* <Link to="/documentation" className="text-gray-600 hover:text-blue-600 transition-colors">
                   Documentation
-                </Link>
+                </Link> */}
               </li>
             </ul>
           </div>

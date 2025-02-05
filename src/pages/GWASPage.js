@@ -86,137 +86,80 @@ const AnimatedDNA = () => (
 const StatsBar = ({ phenoStats, leadVariants }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const getCohortStyle = (cohort) => {
-    const styles = {
-      Meta: {
-        tag: 'bg-gradient-to-r from-violet-500 to-purple-500 text-white',
-        bar: 'bg-gradient-to-r from-violet-500/20 to-purple-500/20',
-        text: 'text-violet-700'
-      },
-      EUR: {
-        tag: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white',
-        bar: 'bg-gradient-to-r from-blue-500/20 to-blue-600/20',
-        text: 'text-blue-700'
-      },
-      EAS: {
-        tag: 'bg-gradient-to-r from-emerald-500 to-green-600 text-white',
-        bar: 'bg-gradient-to-r from-emerald-500/20 to-green-600/20',
-        text: 'text-emerald-700'
-      },
-      AFR: {
-        tag: 'bg-gradient-to-r from-amber-500 to-orange-600 text-white',
-        bar: 'bg-gradient-to-r from-amber-500/20 to-orange-600/20',
-        text: 'text-amber-700'
-      },
-      AMR: {
-        tag: 'bg-gradient-to-r from-rose-500 to-red-600 text-white',
-        bar: 'bg-gradient-to-r from-rose-500/20 to-red-600/20',
-        text: 'text-rose-700'
-      },
-      default: {
-        tag: 'bg-gradient-to-r from-gray-500 to-gray-600 text-white',
-        bar: 'bg-gradient-to-r from-gray-500/20 to-gray-600/20',
-        text: 'text-gray-700'
-      }
-    };
-    return styles[cohort] || styles['default'];
-  };
+  // Calculate total SNPs (taking the first cohort's value since they're all the same)
+  const totalSNPs = Object.values(phenoStats.snps_by_cohort || {})[0] || 0;
+  
+  // Calculate total sample size (taking the first cohort's value since they're all the same)
+  const totalSampleSize = Object.values(phenoStats.samples_by_cohort || {})[0] || 0;
 
   return (
     <div className="grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
-      {/* SNPs by Cohort */}
+      {/* Total SNPs */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
           <Database className="w-4 h-4" />
-          SNPs by Cohort
+          SNPs Size
         </h3>
-        <div className="space-y-2">
-          {Object.entries(phenoStats.snps_by_cohort || {})
-            .sort(([a], [b]) => a === 'META' ? -1 : b === 'META' ? 1 : a.localeCompare(b))
-            .map(([cohort, count]) => {
-              const style = getCohortStyle(cohort);
-              return (
-                <div key={cohort} className="flex items-center space-x-2">
-                  <span className={`px-2 py-1 rounded-md text-xs font-medium ${style.tag}`}>
-                    {cohort}
-                  </span>
-                  <span className="text-sm font-medium text-gray-700">
-                    {count.toLocaleString()} SNPs
-                  </span>
-                </div>
-              );
-            })}
+        <div className="flex items-center space-x-2">
+          <span className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
+            {totalSNPs.toLocaleString()} SNPs
+          </span>
         </div>
       </div>
 
-      {/* Sample Size & Lead Variants Combined */}
-      <div className="col-span-2 grid grid-cols-2 gap-8">
-        {/* Sample Size by Cohort */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
-            <Users className="w-4 h-4" />
-            Sample Size by Cohort
-          </h3>
-          <div className="space-y-2">
-            {Object.entries(phenoStats.samples_by_cohort || {})
-              .sort(([a], [b]) => a === 'META' ? -1 : b === 'META' ? 1 : a.localeCompare(b))
-              .map(([cohort, count]) => {
-                const style = getCohortStyle(cohort);
-                return (
-                  <div key={cohort} className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${style.tag}`}>
-                      {cohort}
-                    </span>
-                    <span className="text-sm font-medium text-gray-700">
-                      {count.toLocaleString()} samples
-                    </span>
-                  </div>
-                );
-              })}
-          </div>
+      {/* Total Sample Size */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+          <Users className="w-4 h-4" />
+          Sample Size
+        </h3>
+        <div className="flex items-center space-x-2">
+          <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-medium">
+            {totalSampleSize.toLocaleString()} samples
+          </span>
         </div>
+      </div>
 
-        {/* Lead Variants Dropdown */}
-        <div className="relative">
-          <div className="space-y-4">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="w-full flex items-center justify-between text-sm font-semibold text-gray-600 hover:text-gray-800"
-            >
-              <div className="flex items-center gap-2">
-                <Target className="w-4 h-4" />
-                Lead Variants ({leadVariants?.length || 0})
-              </div>
-              {isDropdownOpen ? (
-                <ChevronUp className="w-4 h-4" />
-              ) : (
-                <ChevronDown className="w-4 h-4" />
-              )}
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-50 max-h-64 overflow-y-auto">
-                <div className="space-y-3">
-                  {leadVariants?.map((variant, index) => (
-                    <div key={index} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-2 py-1 rounded-md text-xs font-medium bg-gray-200`}>
-                          {variant.cohort}
-                        </span>
-                        <span className="text-sm font-medium text-gray-700">
-                          {variant.rsid}
-                        </span>
-                      </div>
-                      <div className="text-xs text-gray-500 pl-2 flex items-center gap-4">
-                        <span>-log10(p): {variant.log10p.toFixed(2)}</span>
-                        <span>• {variant.n_study} studies</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      {/* Lead Variants */}
+      <div className="relative">
+        <div className="space-y-4">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full flex items-center justify-between text-sm font-semibold text-gray-600 hover:text-gray-800"
+          >
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Lead Variants ({leadVariants?.length || 0})
+            </div>
+            {isDropdownOpen ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
             )}
-          </div>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-50 max-h-64 overflow-y-auto">
+              <div className="space-y-3">
+                {leadVariants?.map((variant, index) => (
+                  <div key={index} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200">
+                        {variant.cohort}
+                      </span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {variant.rsid}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 pl-2 flex items-center gap-4">
+                      <span>-log10(p): {variant.log10p.toFixed(2)}</span>
+                      <span>• {variant.n_study} studies</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -657,49 +600,41 @@ const GWASPage = () => {
 
   // Load metadata for the cohort and phenotype
   useEffect(() => {
-    const loadMetadata = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${baseURL}/getGWASMetadata`);
-        
-        if (!response.ok) throw new Error('Failed to fetch metadata');
-        const data = await response.json();
-        
-        const phenoMetadata = data.filter(item => item.phenotype_id === phenoId);
-        if (phenoMetadata.length > 0) {
-          const availableCohorts = [...new Set(phenoMetadata.map(item => item.cohort))];
-          setCohorts(availableCohorts);
-          if (!selectedCohort && availableCohorts.length > 0) {
-            setSelectedCohort(availableCohorts[0]);
-          }
-
-          const stats = {
-            snps_by_cohort: {},
-            samples_by_cohort: {}
-          };
-          
-          phenoMetadata.forEach(item => {
-            stats.snps_by_cohort[item.cohort] = item.num_snps;
-            stats.samples_by_cohort[item.cohort] = item.num_samples;
-          });
-          
-          setPhenoStats(stats);
-          
-          setAbout([{
-            Info: `Phenotype: ${phenoId}`,
-            Description: `Available in ${availableCohorts.length} cohorts: ${availableCohorts.join(', ')}`
-          }]);
-        } else {
-          console.error('No metadata found for phenotype:', phenoId);
-          handleShowModal();
-        }
-      } catch (error) {
-        console.error('Error loading metadata:', error);
-        handleShowModal();
-      } finally {
-        setLoading(false);
+const loadMetadata = async () => {
+  try {
+    setLoading(true);
+    const response = await fetch(`${baseURL}/getPhenotypeStats/${phenoId}`);  // Changed this line
+    
+    if (!response.ok) throw new Error('Failed to fetch metadata');
+    const data = await response.json();
+    
+    // Data will now be directly for the specific phenotype, no need to filter
+    if (data) {
+      // Set cohorts from the populations in data
+      const availableCohorts = Object.keys(data.stats.snps_by_cohort || {});
+      setCohorts(availableCohorts);
+      if (!selectedCohort && availableCohorts.length > 0) {
+        setSelectedCohort(availableCohorts[0]);
       }
-    };
+
+      // Set phenotype stats directly
+      setPhenoStats(data.stats);
+      
+      setAbout([{
+        Info: `Phenotype: ${data.phenotype_id}`,
+        Description: `Available in ${availableCohorts.length} cohorts: ${availableCohorts.join(', ')}`
+      }]);
+    } else {
+      console.error('No metadata found for phenotype:', phenoId);
+      handleShowModal();
+    }
+  } catch (error) {
+    console.error('Error loading metadata:', error);
+    handleShowModal();
+  } finally {
+    setLoading(false);
+  }
+};
     
     loadMetadata();
   }, [phenoId]);

@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageSquare, Send, Loader2 } from 'lucide-react';
 
+
+const baseURL = 'http://localhost:5001/api' || ''
 const ChatInterface = ({ isOpen, onClose }) => {
   const [messages, setMessages] = useState([
     {
@@ -35,7 +37,7 @@ const ChatInterface = ({ isOpen, onClose }) => {
 
     try {
       // Properly encode the question parameter in the URL
-      const response = await fetch(`http://localhost:5001/api/askgpt?question=${encodeURIComponent(input)}`, {
+      const response = await fetch(`${baseURL}/askgpt?question=${encodeURIComponent(input)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
