@@ -10,7 +10,9 @@ const PheWASPlot = ({ data, selectedSNP }) => {
   useEffect(() => {
     const fetchMapping = async () => {
       try {
-        const response = await fetch(`${baseURL}/getPhenotypeMapping`);
+        // const response = await fetch(`${baseURL}/getPhenotypeMapping`);
+        const response = await fetch(`/api/getPhenotypeMapping`);
+
         if (!response.ok) throw new Error('Failed to fetch mapping');
         const mapping = await response.json();
         setPhenoMapping(mapping);

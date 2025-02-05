@@ -25,7 +25,7 @@ export const SearchBar = () => {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const response = await fetch(`${baseURL}/getGWASMetadata`);
+        const response = await fetch(`/api/getGWASMetadata`);
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();
         

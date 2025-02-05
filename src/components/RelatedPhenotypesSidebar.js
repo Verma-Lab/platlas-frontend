@@ -17,7 +17,9 @@ const RelatedPhenotypesSidebar = ({ currentPhenoId, isOpen, onClose }) => {
     const fetchLeadVariants = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`${baseURL}/getLeadVariants`);
+        // const response = await fetch(`${baseURL}/getLeadVariants`);
+        const response = await fetch(`/api/getLeadVariants`);
+
         if (response.ok) {
           const data = await response.json();
           

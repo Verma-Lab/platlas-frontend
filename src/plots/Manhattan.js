@@ -870,7 +870,9 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     useEffect(() => {
         const fetchLeadSNPs = async () => {
             try {
-                const response = await fetch(`${baseURL}/getLeadVariants`);
+                // const response = await fetch(`${baseURL}/getLeadVariants`);
+                const response = await fetch(`/api/getLeadVariants`);
+
                 if (!response.ok) throw new Error('Failed to fetch lead SNPs');
                 const data = await response.json();
                 

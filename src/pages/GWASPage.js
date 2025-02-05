@@ -394,9 +394,13 @@ const GWASPage = () => {
   const fetchHudsonTopData = async (ancestry) => {
     try {
       setLoadingTop(true);
+      // const response = await fetch(
+      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+      // );
       const response = await fetch(
-        `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+        `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
       );
+      
       
       if (!response.ok) {
         setDynTop([]);
@@ -442,8 +446,11 @@ const GWASPage = () => {
   const fetchHudsonBottomData = async (ancestry) => {
     try {
       setLoadingBottom(true);
+      // const response = await fetch(
+      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+      // );
       const response = await fetch(
-        `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+        `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
       );
       
       if (!response.ok) {
@@ -489,7 +496,9 @@ const GWASPage = () => {
   useEffect(() => {
     const fetchLeadVariants = async () => {
       try {
-        const response = await fetch(`${baseURL}/getLeadVariants`);
+        // const response = await fetch(`${baseURL}/getLeadVariants`);
+        const response = await fetch(`/api/getLeadVariants`);
+
         if (!response.ok) throw new Error('Failed to fetch data');
         const allVariants = await response.json();
         
@@ -552,7 +561,9 @@ const GWASPage = () => {
       if (!phenoId) return;
       try {
         setLoading(true);
-        const response = await fetch(`${baseURL}/findfiles?phenoId=${phenoId}`);
+        // const response = await fetch(`${baseURL}/findfiles?phenoId=${phenoId}`);
+        const response = await fetch(`/api/findfiles?phenoId=${phenoId}`);
+
         if (!response.ok) {
           throw new Error('Failed to fetch available studies and cohorts');
         }
@@ -603,7 +614,8 @@ const GWASPage = () => {
 const loadMetadata = async () => {
   try {
     setLoading(true);
-    const response = await fetch(`${baseURL}/getPhenotypeStats/${phenoId}`);  // Changed this line
+    // const response = await fetch(`${baseURL}/getPhenotypeStats/${phenoId}`);  // Changed this line
+    const response = await fetch(`/api/getPhenotypeStats/${phenoId}`);  // Changed this line
     
     if (!response.ok) throw new Error('Failed to fetch metadata');
     const data = await response.json();
@@ -650,10 +662,12 @@ const loadMetadata = async () => {
 
     try {
       setLoading(true);
+      // const response = await fetch(
+      //   `${baseURL}/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+      // );
       const response = await fetch(
-        `${baseURL}/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+        `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
       );
-      
       if (response.status === 404) {
         handleShowModal();
         setDynData([]);
@@ -697,7 +711,9 @@ const loadMetadata = async () => {
 
     try {
       setLoading(true);
-      const url = `${baseURL}/getTopResults?cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+      // const url = `${baseURL}/getTopResults?cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+      const url = `/api/getTopResults?cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -729,7 +745,9 @@ const loadMetadata = async () => {
   const handleSNPClick = async (snpData) => {
     setSelectedSNP(snpData);
     try {
-        const url = `${baseURL}/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${selectedStudy}`;
+        // const url = `${baseURL}/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${selectedStudy}`;
+        const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${selectedStudy}`;
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);

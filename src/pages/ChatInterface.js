@@ -37,7 +37,13 @@ const ChatInterface = ({ isOpen, onClose }) => {
 
     try {
       // Properly encode the question parameter in the URL
-      const response = await fetch(`${baseURL}/askgpt?question=${encodeURIComponent(input)}`, {
+      // const response = await fetch(`${baseURL}/askgpt?question=${encodeURIComponent(input)}`, {
+      //   method: 'GET',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   }
+      // });
+      const response = await fetch(`/api/askgpt?question=${encodeURIComponent(input)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

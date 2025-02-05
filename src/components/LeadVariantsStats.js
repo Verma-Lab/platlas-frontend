@@ -9,7 +9,9 @@ const LeadVariantStats = ({ phenoId, selectedCohort }) => {
   useEffect(() => {
     const fetchLeadVariants = async () => {
       try {
-        const response = await fetch(`${baseURL}/getLeadVariants`);
+        // const response = await fetch(`${baseURL}/getLeadVariants`);
+        const response = await fetch(`/api/getLeadVariants`);
+
         if (!response.ok) throw new Error('Failed to fetch data');
         const allVariants = await response.json();
         

@@ -112,7 +112,8 @@ const StatsCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch(`${baseURL}/getGWASStatsRoute`);
+        // const response = await fetch(`${baseURL}/getGWASStatsRoute`);
+        const response = await fetch(`/api/getGWASStatsRoute`);
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -676,7 +677,9 @@ export const HomePage = () => {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const response = await fetch(`${baseURL}/getGWASMetadata`);
+        // const response = await fetch(`${baseURL}/getGWASMetadata`);
+        const response = await fetch(`/api/getGWASMetadata`);
+
         console.log(response)
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();

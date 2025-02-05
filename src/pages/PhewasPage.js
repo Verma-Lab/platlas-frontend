@@ -382,7 +382,9 @@ const PheWASPage = () => {
     const fetchData = async () => {
       try {
         // Fetch phenotype mappings
-        const response = await fetch(`${baseURL}/getPhenotypeMapping`);
+        // const response = await fetch(`${baseURL}/getPhenotypeMapping`);
+        const response = await fetch(`/api/getPhenotypeMapping`);
+
         if (!response.ok) throw new Error('Failed to fetch phenotype mapping');
         const phenoMapping = await response.json();
 

@@ -277,7 +277,8 @@ const LeadVariantsTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseURL}/getLeadVariants`);
+        // const response = await fetch(`${baseURL}/getLeadVariants`);
+        const response = await fetch("/api/getLeadVariants");
         if (!response.ok) throw new Error('Failed to fetch data');
         const leadVariants = await response.json();
         
@@ -338,7 +339,7 @@ const LeadVariantsTable = () => {
         position: data.lead_snp.position.position
       };
 
-      const url = `${baseURL}/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
+      const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
