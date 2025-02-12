@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@nextui-org/react": "^2.6.11",
     "@tanstack/react-table": "^8.19.3",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
@@ -11,10 +12,10 @@
     "axios": "^1.7.7",
     "boostrap": "^2.0.0",
     "bootstrap": "^5.3.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "flowbite": "^2.3.0",
     "flowbite-react": "^0.8.0",
-    "framer-motion": "^11.13.5",
+    "framer-motion": "^11.18.2",
     "lucide-react": "^0.460.0",
     "papaparse": "^5.4.1",
     "plotly.js": "^2.31.0",
@@ -29,6 +30,7 @@
     "react-router-dom": "^6.23.1",
     "react-scripts": "^5.0.1",
     "react-search-autocomplete": "^8.5.2",
+    "recharts": "^2.15.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

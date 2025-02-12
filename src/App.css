@@ -41,3 +41,16 @@
     transform: rotate(360deg);
   }
 }
+
+@font-face {
+  font-family: 'MontserratAlt1-SemiBold';
+  src: url('./fonts/MontserratAlt1-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'MontserratAlt1-SemiBold';
+  src: url('./fonts/postnobillscolombo-medium.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}

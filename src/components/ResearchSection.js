@@ -38,7 +38,7 @@ const ResearchSection = () => {
   ];
 
   const publicationInfo = {
-    title: "Advancing Multi-Ancestry GWAS Analysis",
+    title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
     journal: "Nature Genetics",
     year: "2024",
     doi: "10.1038/xxx-xxx-xxx"

@@ -54,9 +54,9 @@ export const TopResults = ({ data, onSNPClick }) => {
 
   const headers = [
     {
-      key: 'SNP_ID',
-      label: 'SNP ID',
-      tooltip: 'Single Nucleotide Polymorphism identifier'
+      key: 'category',
+      label: 'Category',
+      tooltip: 'Disease or trait category'
     },
     {
       key: 'phenotype',
@@ -134,7 +134,7 @@ export const TopResults = ({ data, onSNPClick }) => {
       </div>
       
       <div className="overflow-x-auto border rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               {headers.map(header => (
@@ -157,24 +157,19 @@ export const TopResults = ({ data, onSNPClick }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-  {currentData.map((row, index) => (
-    <tr key={`${row.SNP_ID}-${row.phenotype}-${index}`}>
-      <td className="px-6 py-4">
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">
-            {row.trait?.name || 'N/A'}
-          </span>
-          <span className="text-xs text-gray-500">
-            {row.trait?.description || 'No description available'}
-          </span>
-        </div>
-      </td>
-      <td 
-        className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
-        onClick={() => handlePhenotypeClick(row.phenotype)}
-      >
-        {row.phenotype}
-      </td>
+            {currentData.map((row, index) => (
+              <tr key={`${row.trait?.category}-${row.phenotype}-${index}`}>
+                <td className="px-6 py-4">
+                  <span className="text-sm font-medium text-blue-600">
+                    {row.trait?.category || 'Uncategorized'}
+                  </span>
+                </td>
+                <td 
+                  className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+                  onClick={() => handlePhenotypeClick(row.phenotype)}
+                >
+                  {row.phenotype}
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.chromosome}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.position}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{row.ref_allele}</td>

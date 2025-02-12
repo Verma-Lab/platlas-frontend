@@ -7,7 +7,12 @@ export default {
     'node_modules/flowbite-react/**/*.{js,jsx,tstsx}'
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'montserrat-alt': ['MontserratAlt1-SemiBold', 'sans-serif'],
+      },
+
+    },
   },
   plugins: [
     flowbitePlugin // ESModules import for the plugin

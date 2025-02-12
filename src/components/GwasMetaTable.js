@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -13,6 +13,12 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { 
+  Filter,
+  SlidersHorizontal,
+  ArrowUpDown
+} from 'lucide-react';
+import _ from 'lodash';
 
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
 
@@ -261,6 +267,146 @@ const StudiesBreakdownCell = ({ popGwasData, studies }) => {
   );
 };
 
+const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anchorRef }) => {
+  const popoverRef = useRef(null);
+  const [maxHeight, setMaxHeight] = useState(300);
+  
+  useEffect(() => {
+    if (anchorRef.current && popoverRef.current) {
+      const anchorRect = anchorRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate available space below the anchor
+      const spaceBelow = viewportHeight - anchorRect.bottom - 8;
+      
+      // Set position
+      popoverRef.current.style.position = 'fixed';
+      popoverRef.current.style.left = `${anchorRect.left}px`;
+      popoverRef.current.style.top = `${anchorRect.bottom + 8}px`;
+      
+      // Set max height based on available space
+      const calculatedMaxHeight = Math.min(400, spaceBelow - 16);
+      setMaxHeight(calculatedMaxHeight);
+    }
+
+    // Prevent main page scroll when popover is open
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, [anchorRef]);
+
+  return (
+    <>
+      <div 
+        className="fixed inset-0 bg-black bg-opacity-10" 
+        onClick={onClose}
+        style={{ zIndex: 40 }}
+      />
+      <div 
+        ref={popoverRef}
+        className="fixed bg-white rounded-lg shadow-lg border border-gray-200"
+        style={{ 
+          zIndex: 50,
+          width: '256px',
+          maxHeight: `${maxHeight}px`,
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* Header - Always visible */}
+        <div className="flex justify-between items-center p-3 border-b border-gray-100 bg-white">
+          <span className="text-sm font-medium text-gray-700">Filter {column}</span>
+          <button 
+            onClick={onClose} 
+            className="text-gray-400 hover:text-gray-600"
+          >
+            ✕
+          </button>
+        </div>
+        
+        {/* Scrollable content */}
+        <div 
+          className="overflow-y-auto flex-1 p-3"
+          style={{
+            overflowY: 'auto',
+            overflowX: 'hidden',
+            maxHeight: `${maxHeight - 56}px` // Subtract header height
+          }}
+        >
+          <div className="space-y-2">
+            {options.map((option, idx) => (
+              <label 
+                key={idx} 
+                className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedValues.includes(option)}
+                  onChange={(e) => {
+                    const newValues = e.target.checked
+                      ? [...selectedValues, option]
+                      : selectedValues.filter(val => val !== option);
+                    onChange(newValues);
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm text-gray-600">{option}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
+
+
+const ColumnHeader = ({ title, onSort, sortConfig, onFilter, hasFilter = true, hasSort = true }) => {
+  const [showFilter, setShowFilter] = useState(false);
+  const filterButtonRef = useRef(null);
+  
+  return (
+    <th className="px-6 py-3 text-left">
+      <div className="flex items-center space-x-2">
+        {hasSort ? (
+          <div className="flex items-center space-x-1">
+            <button 
+              onClick={onSort}
+              className="group flex items-center space-x-1 text-xs font-medium text-gray-500 hover:text-gray-700"
+            >
+              <span>{title}</span>
+              <ArrowUpDown className={`w-4 h-4 ${
+                sortConfig?.key === title.toLowerCase() 
+                  ? 'text-blue-600' 
+                  : 'text-gray-400 group-hover:text-gray-600'
+              }`} />
+            </button>
+          </div>
+        ) : (
+          <span className="text-xs font-medium text-gray-500">{title}</span>
+        )}
+        
+        {hasFilter && (
+          <button
+            ref={filterButtonRef}
+            onClick={() => {
+              setShowFilter(!showFilter);
+              onFilter(filterButtonRef);
+            }}
+            className={`p-1 rounded-md hover:bg-gray-100 ${
+              showFilter ? 'bg-blue-50 text-blue-600' : 'text-gray-400'
+            }`}
+          >
+            <Filter className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+    </th>
+  );
+};
 /**
  * Main component to display the Lead Variants Table.
  */
@@ -272,13 +418,114 @@ const LeadVariantsTable = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({ key: 'leadsnps', direction: 'desc' });
+  const [filters, setFilters] = useState({
+    category: [],
+    populations: [],
+    leadsnps: [],
+    studies: []
+  });
+  const [activeFilter, setActiveFilter] = useState(null);
+  const handleSort = (key) => {
+    setSortConfig(current => ({
+      key,
+      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+  const [filterAnchorRef, setFilterAnchorRef] = useState(null);
+
+  const handleFilterClick = (columnKey, buttonRef) => {
+    setFilterAnchorRef(buttonRef);
+    setActiveFilter(activeFilter === columnKey ? null : columnKey);
+  };
   const navigate = useNavigate();
 
+  const getSortValue = (item, key) => {
+    switch (key) {
+      case 'trait':
+        return item.trait.name.toLowerCase();
+      case 'category':
+        return item.category.toLowerCase();
+      case 'populations':
+        return item.cohorts.length;
+      case 'leadsnps':
+        return item.variants.length;
+      case 'studies':
+        return Object.values(item.studies_by_pop).reduce((a, b) => a + b, 0);
+      default:
+        return item[key];
+    }
+  };
+
+  const sortedData = React.useMemo(() => {
+    if (!sortConfig.key) return groupedData;
+    
+    return [...groupedData].sort((a, b) => {
+      const aValue = getSortValue(a, sortConfig.key);
+      const bValue = getSortValue(b, sortConfig.key);
+      
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [groupedData, sortConfig]);
+
+  const filteredData = React.useMemo(() => {
+    return sortedData.filter(item => {
+      // Search term filter
+      const searchLower = searchTerm.toLowerCase();
+      const matchesSearch = 
+        item.trait.name?.toLowerCase().includes(searchLower) ||
+        item.trait.description?.toLowerCase().includes(searchLower) ||
+        item.category?.toLowerCase().includes(searchLower);
+
+      // Column filters
+      const matchesCategory = filters.category.length === 0 || 
+        filters.category.includes(item.category);
+      
+      const matchesPopulations = filters.populations.length === 0 ||
+        item.cohorts.some(cohort => filters.populations.includes(cohort));
+      
+      const matchesLeadSnps = filters.leadsnps.length === 0 ||
+        filters.leadsnps.includes(item.variants.length.toString());
+      
+      const totalStudies = Object.values(item.studies_by_pop).reduce((a, b) => a + b, 0);
+      const matchesStudies = filters.studies.length === 0 ||
+        filters.studies.includes(totalStudies.toString());
+
+      return matchesSearch && matchesCategory && matchesPopulations && 
+             matchesLeadSnps && matchesStudies;
+    });
+  }, [sortedData, searchTerm, filters]);
+
+  // Get unique values for filters
+  const getFilterOptions = (key) => {
+    const options = new Set();
+    groupedData.forEach(item => {
+      switch (key) {
+        case 'category':
+          options.add(item.category);
+          break;
+        case 'populations':
+          item.cohorts.forEach(cohort => options.add(cohort));
+          break;
+        case 'leadsnps':
+          options.add(item.variants.length.toString());
+          break;
+        case 'studies':
+          const totalStudies = Object.values(item.studies_by_pop)
+            .reduce((a, b) => a + b, 0);
+          options.add(totalStudies.toString());
+          break;
+      }
+    });
+    return Array.from(options).sort();
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const response = await fetch(`${baseURL}/getLeadVariants`);
-        const response = await fetch("/api/getLeadVariants");
+        const response = await fetch(`${baseURL}/getLeadVariants`);
+        // const response = await fetch("/api/getLeadVariants");
         if (!response.ok) throw new Error('Failed to fetch data');
         const leadVariants = await response.json();
         
@@ -340,6 +587,8 @@ const LeadVariantsTable = () => {
       };
 
       const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
+      // const url = `${baseURL}/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -361,14 +610,14 @@ const LeadVariantsTable = () => {
   /**
    * Filter data based on search term.
    */
-  const filteredData = groupedData.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.trait.name?.toLowerCase().includes(searchLower) ||
-      item.trait.description?.toLowerCase().includes(searchLower) ||
-      item.category?.toLowerCase().includes(searchLower)
-    );
-  });
+  // const filteredData = groupedData.filter(item => {
+  //   const searchLower = searchTerm.toLowerCase();
+  //   return (
+  //     item.trait.name?.toLowerCase().includes(searchLower) ||
+  //     item.trait.description?.toLowerCase().includes(searchLower) ||
+  //     item.category?.toLowerCase().includes(searchLower)
+  //   );
+  // });
 
   /**
    * Pagination logic.
@@ -450,29 +699,31 @@ const LeadVariantsTable = () => {
       </motion.div>
 
       {/* Lead Variants Table */}
-      <motion.div 
-        className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden"
-        initial={{ y: 20 }}
-        animate={{ y: 0 }}
-      >
+      <motion.div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            {[
-              'Trait',
-              'Category',
-              'Populations',
-              'Lead SNPs',
-              'Sample Sizes',
-              'Studies'
-            ].map((header) => (
-              <th key={header} className="px-6 py-3 text-left text-xs ml-10 font-medium text-gray-500 uppercase tracking-wider">
-                {header}
-              </th>
-            ))}
-          </tr>
-        </thead>
+          <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+              <tr>
+                {[
+                  { title: 'Trait', key: 'trait', hasFilter: false, hasSort: false },
+                  { title: 'Category', key: 'category' },
+                  { title: 'Populations', key: 'populations' },
+                  { title: 'Lead SNPs', key: 'leadsnps' },
+                  { title: 'Sample Sizes', key: 'samplesize', hasFilter: false },
+                  { title: 'Studies', key: 'studies' }
+                ].map(({ title, key, hasFilter = true, hasSort = true }) => (
+                  <ColumnHeader
+                    key={key}
+                    title={title}
+                    onSort={() => handleSort(key, hasSort)}
+                    sortConfig={sortConfig}
+                    hasFilter={hasFilter}
+                    hasSort={hasSort}
+                    onFilter={(buttonRef) => handleFilterClick(key, buttonRef)}
+                  />
+                ))}
+              </tr>
+            </thead>
         <tbody className="divide-y divide-gray-200">
           {currentItems.map((group, idx) => (
             <tr key={idx} className="hover:bg-gray-50">
@@ -549,6 +800,19 @@ const LeadVariantsTable = () => {
         ))}
       </motion.div>
       */}
+      {activeFilter && filterAnchorRef && (
+        <FilterPopover
+          column={activeFilter}
+          options={getFilterOptions(activeFilter)}
+          selectedValues={filters[activeFilter]}
+          onChange={(newValues) => setFilters({ ...filters, [activeFilter]: newValues })}
+          onClose={() => {
+            setActiveFilter(null);
+            setFilterAnchorRef(null);
+          }}
+          anchorRef={filterAnchorRef}
+        />
+      )}
     </motion.div>
   );
 };

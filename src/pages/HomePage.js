@@ -24,6 +24,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LeadVariantsTable from '../components/GwasMetaTable';
 import ResearchSection from '../components/ResearchSection';
+import NavigationBar from '../components/NavigationBar';
+import SummarySection from '../components/SummarySection';
 // Shared cohort styling function
 
 const AnimatedCounter = ({ end, duration = 2000 }) => {
@@ -69,10 +71,7 @@ const AnimatedCounter = ({ end, duration = 2000 }) => {
   return <span>{count.toLocaleString()}</span>;
 };
 
-const StatCard = ({ icon: Icon, label, value, isVisible }) => {
-  // Ensure value is properly parsed as a number
-  const numericValue = parseInt(value) || 0;
-  
+const StatCard = ({ icon: Icon, label, mainValue, subValues, isVisible }) => {
   return (
     <div className="bg-white rounded-lg shadow-lg p-4 transform translate-y-1/2">
       <div className="flex items-start gap-2">
@@ -81,18 +80,49 @@ const StatCard = ({ icon: Icon, label, value, isVisible }) => {
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-medium text-gray-500 truncate">{label}</h3>
-          <div className="flex items-center gap-2 mt-1">
-            <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
-              Total
-            </span>
-            <span className="text-2xl font-bold text-gray-900">
-              {isVisible && numericValue > 0 ? (
-                <AnimatedCounter end={numericValue} />
-              ) : (
-                numericValue.toLocaleString()
-              )}
-            </span>
-          </div>
+          {subValues ? (
+            // For SNPs with GWAMA and MR-MEGA breakdown
+            <div className="space-y-2 mt-1">
+              <div className="flex items-center gap-2">
+                <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
+                  Total SNPs
+                </span>
+                <span className="text-2xl font-bold text-gray-900">
+                  {isVisible && subValues.gwama > 0 ? (
+                    <AnimatedCounter end={subValues.gwama} />
+                  ) : (
+                    subValues.gwama.toLocaleString()
+                  )}
+                </span>
+              </div>
+              {/* <div className="flex items-center gap-2">
+                <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-1 rounded">
+                  MR-MEGA
+                </span>
+                <span className="text-lg font-bold text-gray-900">
+                  {isVisible && subValues.mrmega > 0 ? (
+                    <AnimatedCounter end={subValues.mrmega} />
+                  ) : (
+                    subValues.mrmega.toLocaleString()
+                  )}
+                </span>
+              </div> */}
+            </div>
+          ) : (
+            // For other stats (Phenotypes and Sample Size)
+            <div className="flex items-center gap-2 mt-1">
+              <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
+                Total
+              </span>
+              <span className="text-2xl font-bold text-gray-900">
+                {isVisible && mainValue > 0 ? (
+                  <AnimatedCounter end={mainValue} />
+                ) : (
+                  mainValue.toLocaleString()
+                )}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -102,7 +132,10 @@ const StatCard = ({ icon: Icon, label, value, isVisible }) => {
 const StatsCard = () => {
   const [stats, setStats] = useState({
     uniquePhenotypes: 0,
-    totalSnps: 0,
+    snpStats: {
+      gwama: 0,
+      mrmega: 0
+    },
     totalPopulation: 0
   });
   const [isVisible, setIsVisible] = useState(false);
@@ -112,34 +145,27 @@ const StatsCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // const response = await fetch(`${baseURL}/getGWASStatsRoute`);
-        const response = await fetch(`/api/getGWASStatsRoute`);
-        
+        const response = await fetch('/api/getGWASStatsRoute');
+        // const response = await fetch(`${baseURL}/getGWASStatsRoute`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        const responseText = await response.text();
-        console.log('Raw response:', responseText);
-
-        const data = JSON.parse(responseText);
+        const data = await response.json();
         console.log('Parsed stats:', data);
 
         // Validate and parse the data
         const parsedStats = {
           uniquePhenotypes: parseInt(data.uniquePhenotypes) || 0,
-          totalSnps: parseInt(data.totalSnps) || 0,
+          snpStats: {
+            gwama: parseInt(data.snpStats?.gwama) || 0,
+            mrmega: parseInt(data.snpStats?.mrmega) || 0
+          },
           totalPopulation: parseInt(data.totalPopulation) || 0
         };
 
         console.log('Processed stats:', parsedStats);
-        
-        // Only update state if we have valid numbers
-        if (Object.values(parsedStats).some(val => val > 0)) {
-          setStats(parsedStats);
-        } else {
-          console.warn('Received invalid stats data:', data);
-        }
+        setStats(parsedStats);
       } catch (err) {
         console.error('Error fetching stats:', err);
         setError(err.message);
@@ -184,19 +210,19 @@ const StatsCard = () => {
       <StatCard 
         icon={ChartBar}
         label="Phenotypes"
-        value={stats.uniquePhenotypes}
+        mainValue={1913}
         isVisible={isVisible}
       />
       <StatCard 
         icon={Database}
         label="SNPs"
-        value={stats.totalSnps}
+        subValues={stats.snpStats}
         isVisible={isVisible}
       />
       <StatCard 
         icon={Users}
         label="Sample Size"
-        value={stats.totalPopulation}
+        mainValue={stats.totalPopulation}
         isVisible={isVisible}
       />
     </div>
@@ -330,7 +356,9 @@ const GWASMetadataTable = () => {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        const response = await fetch(`${baseURL}/getGWASMetadata`);
+        // const response = await fetch(`${baseURL}/getGWASMetadata`);
+        const response = await fetch(`/api/getGWASMetadata`);
+
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();
         setMetadata(data);
@@ -620,7 +648,7 @@ const SearchSection = ({ projects }) => {
               htmlFor="search-input" 
               className="block text-sm font-medium text-gray-700"
             >
-              Search for a gene, SNP, or phenotype:
+              Search for a SNP, or phenotype:
             </label>
             <div className="relative mb-8">  {/* Added margin-bottom */}
   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -639,10 +667,10 @@ const SearchSection = ({ projects }) => {
             
             {/* Quick Filters */}
             <div className="flex gap-2 mt-4 flex-wrap">
-              <button className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 
+              {/* <button className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 
                                rounded-full hover:bg-blue-100 transition-colors duration-200">
                 Genes
-              </button>
+              </button> */}
               <button className="px-3 py-1 text-xs font-medium text-purple-600 bg-purple-50 
                                rounded-full hover:bg-purple-100 transition-colors duration-200">
                 SNPs
@@ -717,37 +745,46 @@ export const HomePage = () => {
             borderRadius: '0 0 2rem 2rem'
           }}
         >
+          
           {/* Header content */}
           <div className="max-w-7xl mx-auto px-4 pt-8">
-          <div className="flex items-center">
-          <div>
-  <img 
-    src="/images/platypushomepage.png"
-    alt="Platypus Logo" 
-    className="h-32 w-28 object-cover mt-2" // Increased height from h-12 to h-20
-  />   
+            {/* Top section with Nav and Logo */}
+            <div className="flex justify-between items-start">
+              {/* Logo and Title Section */}
+              <div className="flex items-center">
+                <div>
+                  <img 
+                    src="/images/platypushomepage.png"
+                    alt="Platypus Logo" 
+                    className="h-32 w-28 object-cover mt-2"
+                  />   
+                </div>
+                <div>
+                  <h1 className="text-3xl -ml-4 mt-5 font-bold text-white mb-2">
+                    PLATLAS
+                  </h1>  
+                  <p className="text-blue-100 -ml-4 -mt-2 opacity-75">
+                  PLeiotropic ATLAS 
+                  </p>
+                  
+                </div>
+              </div>
+              <div className="flex-1 flex justify-center">
+      <NavigationBar />
     </div>
-    <div>
-    <h1 className="text-3xl -ml-4 mt-5 font-bold text-white mb-2">
-      PLATLAS
-    </h1>  
-    <p className="text-blue-100 -ml-4 -mt-2 opacity-75">
-      Advancing genomic research through cutting-edge data visualization and analysis tools.
-    </p>
-    </div>
-  
-  <div>
-  </div>
-</div>
-            <button
-      onClick={() => setIsChatOpen(true)}
-      className="flex items-center space-x-2 px-4 py-2 bg-white/10 
-                 hover:bg-white/20 rounded-lg text-white transition-all
-                 border border-white/20 backdrop-blur-sm -mt-3 ml-5"
-    >
-      <MessageSquare className="w-5 h-5" />
-      <span>Ask AI Assistant</span>
-    </button>
+              {/* Navigation Bar */}
+              
+            </div>
+
+            {/* <button
+              onClick={() => setIsChatOpen(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/10 
+                        hover:bg-white/20 rounded-lg text-white transition-all
+                        border border-white/20 backdrop-blur-sm -mt-3 ml-5"
+            >
+              <MessageSquare className="w-5 h-5" />
+              <span>Ask AI Assistant</span>
+            </button> */}
           </div>
 
           <AnimatedDNA />
@@ -771,23 +808,39 @@ export const HomePage = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="relative -mt-36 mb-8">
+        <div className="relative -mt-40 mb-8">
           <StatsCard metadata={metadata} projects={projects} />
+          
         </div>
 
         <div className="max-w-7xl mx-auto px-4">
-          {/* Replace the old Card with the new SearchSection */}
-          <SearchSection projects={projects} />
-          
-          <div className="container mx-auto p-4">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Available GWAS Studies
-            </h2>
-            <LeadVariantsTable />
+          {/* Search Section */}
+          <div id="search" className="scroll-mt-16">
+            <SearchSection projects={projects} />
           </div>
-          <ResearchSection/>
+          
+          {/* Table Section */}
+          <div id="table" className="scroll-mt-16">
+            <div className="container mx-auto p-4">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Overview of Association Results 
+              </h2>
+              <LeadVariantsTable />
+            </div>
+          </div>
+
+          {/* Teams Section */}
+          <div id="summary" className="scroll-mt-16">
+  <SummarySection />
+</div>
+
+          {/* Summary Section */}
+          <div id="paper" className="scroll-mt-16">
+            <ResearchSection/>
+          </div>
         </div>
       </div>
+
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0); }
@@ -795,10 +848,11 @@ export const HomePage = () => {
         }
       `}</style>
 
-<ChatInterface 
-  isOpen={isChatOpen} 
-  onClose={() => setIsChatOpen(false)} 
-/>
+
+      <ChatInterface 
+        isOpen={isChatOpen} 
+        onClose={() => setIsChatOpen(false)} 
+      />
     </>
   );
 };

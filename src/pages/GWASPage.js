@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
 import Col from 'react-bootstrap/Col';
@@ -18,6 +18,7 @@ import { OptionBar } from '../components/OptionBar';
 import AncestryFilter from '../components/CohortFilters';
 import PheWASPlot from '../plots/PheWASPlot';
 import { useNavigate } from 'react-router-dom';
+import QQPlotView from '../components/QQPlotView';
 import classNames from 'classnames';
 import { FaInfoCircle, FaChartLine, FaChartBar } from 'react-icons/fa';
 import {
@@ -85,29 +86,46 @@ const AnimatedDNA = () => (
 
 const StatsBar = ({ phenoStats, leadVariants }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // Calculate total SNPs (taking the first cohort's value since they're all the same)
-  const totalSNPs = Object.values(phenoStats.snps_by_cohort || {})[0] || 0;
   
-  // Calculate total sample size (taking the first cohort's value since they're all the same)
+  // Group SNP counts by analysis type
+  const groupedSNPs = useMemo(() => {
+    const snps = phenoStats.snps_by_cohort || {};
+    return {
+      gwama: Object.entries(snps)
+        .filter(([cohort]) => cohort !== 'ALL')
+        .reduce((acc, [cohort, count]) => ({...acc, [cohort]: count}), {}),
+      mrmega: snps['ALL'] || 0
+    };
+  }, [phenoStats.snps_by_cohort]);
+
+  // Calculate total sample size
   const totalSampleSize = Object.values(phenoStats.samples_by_cohort || {})[0] || 0;
 
   return (
     <div className="grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
-      {/* Total SNPs */}
+      {/* SNPs Size */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
           <Database className="w-4 h-4" />
           SNPs Size
         </h3>
-        <div className="flex items-center space-x-2">
-          <span className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
-            {totalSNPs.toLocaleString()} SNPs
-          </span>
+        <div className="flex flex-col gap-2">
+          {/* GWAMA SNPs */}
+          {Object.entries(groupedSNPs.gwama).map(([cohort, count]) => (
+            <span key={cohort} className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
+              GWAMA {cohort}: {count.toLocaleString()} SNPs
+            </span>
+          ))}
+          {/* MR-MEGA SNPs */}
+          {groupedSNPs.mrmega > 0 && (
+            <span className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
+              MR-MEGA: {groupedSNPs.mrmega.toLocaleString()} SNPs
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Total Sample Size */}
+      {/* Sample Size */}
       <div className="space-y-4">
         <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
           <Users className="w-4 h-4" />
@@ -120,7 +138,7 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
         </div>
       </div>
 
-      {/* Lead Variants */}
+      {/* Lead Variants - No changes needed here */}
       <div className="relative">
         <div className="space-y-4">
           <button
@@ -131,11 +149,7 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
               <Target className="w-4 h-4" />
               Lead Variants ({leadVariants?.length || 0})
             </div>
-            {isDropdownOpen ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
+            {isDropdownOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
 
           {isDropdownOpen && (
@@ -355,7 +369,7 @@ const GWASPage = () => {
   const [ticks, setTicks] = useState([]);
   const [qq, setQQ] = useState(null);
   const [about, setAbout] = useState([]);
-  const [tab, setTab] = useState('about');
+  const [tab, setTab] = useState('man');
   const [dynTop, setDynTop] = useState([]);
   const [statTop, setStatTop] = useState([]);
   const [dynBott, setDynBott] = useState([]);
@@ -983,7 +997,15 @@ return (
               </div>
             </div>
           </Tab>
-
+          <Tab eventKey="qq" title="QQ Plot">
+         <div className="p-4">
+         <QQPlotView
+                 phenoId={phenoId}
+                 selectedCohort={selectedCohort}
+                selectedStudy={selectedStudy}
+                />
+         </div>
+        </Tab>  
           <Tab eventKey="hudson" title="Compare Ancestries">
             <div className="p-4">
               <div className="bg-gray-100 rounded-lg shadow p-4 mt-4">
