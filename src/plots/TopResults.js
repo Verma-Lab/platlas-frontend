@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Info, ChevronRight, ChevronLeft } from 'lucide-react';
 
 export const TopResults = ({ data, onSNPClick }) => {
+  console.log("TopResults received data:", data);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const rowsPerPage = 10;
