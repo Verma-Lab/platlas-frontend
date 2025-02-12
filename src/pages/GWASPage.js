@@ -409,7 +409,7 @@ const GWASPage = () => {
     try {
       setLoadingTop(true);
       // const response = await fetch(
-      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+      //   // `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
       // );
       const response = await fetch(
         `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`

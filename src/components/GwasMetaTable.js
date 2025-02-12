@@ -524,8 +524,8 @@ const LeadVariantsTable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseURL}/getLeadVariants`);
-        // const response = await fetch("/api/getLeadVariants");
+        // const response = await fetch(`${baseURL}/getLeadVariants`);
+        const response = await fetch("/api/getLeadVariants");
         if (!response.ok) throw new Error('Failed to fetch data');
         const leadVariants = await response.json();
         

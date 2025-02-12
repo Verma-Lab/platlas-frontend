@@ -1,56 +1,160 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Brain, Search, MessagesSquare, ArrowLeft, Menu } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Send, Brain, Search, MessagesSquare, ArrowLeft, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import axios from 'axios';
+import LoginModal from '../components/AiLogin/LoginModal';
+
+const baseURL = 'http://localhost:5001/aiapi';
+
 const HomoSapieus = () => {
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
+
+  // Existing states for the chat area
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [selectedOption, setSelectedOption] = useState('HomoSapieus');
-
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
   const [isDownloadSidebarOpen, setIsDownloadSidebarOpen] = useState(false);
+  const [file, setFile] = useState(null);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  // New states for conversation list and the selected conversation ID
+  const [conversations, setConversations] = useState([]);
+  const [selectedConversation, setSelectedConversation] = useState(null);
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
   };
 
+  // Scroll to the latest message
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Fetch the conversation history when the component mounts (or when the user changes)
+//   useEffect(() => {
+//     if (user) {
+//       const token = localStorage.getItem('token');
+//       axios
+//         .get(`${baseURL}/chat/history`, {
+//           headers: { Authorization: `Bearer ${token}` },
+//         })
+//         .then((response) => {
+//           // Assume response.data is an array of conversation objects.
+//           // Each conversation object could have the structure:
+//           // { id, messages: [ { role, content, createdAt, ... }, ... ] }
+//           setConversations(response.data);
+//         })
+//         .catch((err) => console.error('Error fetching conversation history:', err));
+//     }
+//   }, [user]);
+useEffect(() => {
+    if (user) {
+      const token = localStorage.getItem('token');
+      axios
+        .get(`/api/chat/history`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          // Assume response.data is an array of conversation objects.
+          // Each conversation object could have the structure:
+          // { id, messages: [ { role, content, createdAt, ... }, ... ] }
+          setConversations(response.data);
+        })
+        .catch((err) => console.error('Error fetching conversation history:', err));
+    }
+  }, [user]);
+
+  // Function to start a new conversation
+  const handleNewConversation = () => {
+    setSelectedConversation(null);
+    setMessages([]); // Clear the chat area for a new conversation
+  };
+
+  // When a conversation is clicked, load its messages into the chat area.
+  const handleConversationSelect = (conversation) => {
+    setSelectedConversation(conversation.id);
+    // Here we assume that the conversation object has a "messages" field.
+    setMessages(conversation.messages);
+  };
+
+  const handleFileUpload = async () => {
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+    //   const response = await axios.post(`${baseURL}/documents/upload`, formData, {
+    //     headers: {
+    //       Authorization: `Bearer ${localStorage.getItem('token')}`,
+    //       'Content-Type': 'multipart/form-data',
+    //     },
+    //   });
+    const response = await axios.post(`/api/documents/upload`, formData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      if (response.status === 200 || response.data?.status === 200) {
+        setIsDocsModalOpen(false);
+      }
+    } catch (error) {
+      console.error('Error uploading document:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
+    // Append the new user message to the chat area
     setMessages((prev) => [...prev, { role: 'user', content: inputValue }]);
     setInputValue('');
     setIsTyping(true);
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'This is a simulated genomics analysis response.'
-        }
-      ]);
-      setIsTyping(false);
-    }, 1000);
-  };
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoginModalOpen(true);
+        return;
+      }
 
-  const handleOptionSelect = (option) => {
-    setSelectedOption(option);
+    //   const response = await axios.post(
+    //     `${baseURL}/chat/message`,
+    //     { message: inputValue },
+    //     {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //     }
+    //   );
+    const response = await axios.post(
+        `/api/chat/message`,
+        { message: inputValue },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      // Append the assistant's reply
+      setMessages((prev) => [...prev, { role: 'assistant', content: response.data.message }]);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const options = [
     { name: 'HomoSapieus', icon: Brain },
     { name: 'Gemini', icon: MessagesSquare },
     { name: 'Web Search', icon: Search },
-    { name: 'GPT', icon: Brain }
+    { name: 'GPT', icon: Brain },
   ];
 
   const gradientTextStyle = {
@@ -59,7 +163,7 @@ const HomoSapieus = () => {
     WebkitBackgroundClip: 'text',
     backgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-    display: 'inline-block'
+    display: 'inline-block',
   };
 
   return (
@@ -79,20 +183,23 @@ const HomoSapieus = () => {
 
             {/* Right side */}
             <div className="flex items-center space-x-8">
-            <button 
+              <button
                 onClick={() => setIsDocsModalOpen(true)}
                 className="text-gray-700 hover:text-gray-900 font-medium"
               >
                 Docs
               </button>
-              <button 
+              <button
                 onClick={() => setIsDownloadSidebarOpen(true)}
                 className="text-gray-700 hover:text-gray-900 font-medium"
               >
                 Downloads
               </button>
-              <button className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                Login
+              <button
+                onClick={() => setIsLoginModalOpen(true)}
+                className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                {user ? user.email : 'Login'}
               </button>
             </div>
           </div>
@@ -102,7 +209,7 @@ const HomoSapieus = () => {
       {/* Left sidebar */}
       <div
         className={`w-80 bg-white border-r border-gray-200 flex flex-col h-full transition-transform duration-300 ease-in-out fixed mt-16 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          'translate-x-0'
         }`}
       >
         {/* Company Title & Menu */}
@@ -110,21 +217,22 @@ const HomoSapieus = () => {
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <Brain className="w-7 h-7 text-gray-800" />
-              <span 
-                className="text-xl font-semibold font-montserrat-alt"
-                style={gradientTextStyle}
-              >
+              <span className="text-xl font-semibold font-montserrat-alt" style={gradientTextStyle}>
                 HOMOSAPIEUS
               </span>
             </div>
             <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              onClick={() => {}}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5 text-gray-800" />
             </button>
           </div>
-          <button className="w-full bg-gray-800 text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-700 transition-all shadow-sm">
+          {/* New Conversation Button */}
+          <button
+            onClick={handleNewConversation}
+            className="w-full bg-gray-800 text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-700 transition-all shadow-sm"
+          >
             <MessagesSquare className="w-4 h-4" />
             <span className="font-medium">New Conversation</span>
           </button>
@@ -138,41 +246,53 @@ const HomoSapieus = () => {
             </h3>
           </div>
           <div className="space-y-0.5">
-            {[1, 2, 3].map((_, i) => (
-              <button
-                key={i}
-                className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Genomics Analysis {i + 1}
-              </button>
-            ))}
+            {conversations.length > 0 ? (
+              conversations.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  onClick={() => handleConversationSelect(conversation)}
+                  className={`w-full text-left px-4 py-3 text-sm transition-colors ${
+                    selectedConversation === conversation.id ? 'bg-gray-100' : 'hover:bg-gray-50'
+                  }`}
+                >
+                  {/* Show a snippet of the conversation.
+                      For example, use the beginning of the first user message or a timestamp. */}
+                  {conversation.messages && conversation.messages.length > 0
+                    ? conversation.messages[0].content.substring(0, 20) + '...'
+                    : 'Conversation'}
+                </button>
+              ))
+            ) : (
+              <div className="px-4 py-3 text-sm text-gray-500">No conversations found.</div>
+            )}
           </div>
         </div>
       </div>
 
-      {isDocsModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-lg max-w-2xl w-full mx-4">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold">Documentation</h2>
+      {/* Upload Document Button & Modal */}
+      <div>
+        <button onClick={() => setIsDocsModalOpen(true)}>Upload Document</button>
+        {isDocsModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white rounded-lg p-6">
+              <h2 className="text-xl font-semibold mb-4">Upload Document</h2>
+              <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+              <button onClick={handleFileUpload} className="mt-4 bg-blue-500 text-white p-2 rounded">
+                Upload
+              </button>
               <button
                 onClick={() => setIsDocsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="mt-4 bg-gray-500 text-white p-2 rounded"
               >
-                <X className="w-5 h-5 text-gray-800" />
+                Close
               </button>
             </div>
-            <div className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Getting Started</h3>
-              <p className="text-gray-600 mb-4">
-                Welcome to HomoSapieus documentation. Here you'll find everything you need to know about using our platform.
-              </p>
-              {/* Add more documentation content */}
-            </div>
           </div>
-        </div>
-      )}
-      <div 
+        )}
+      </div>
+
+      {/* Download Sidebar */}
+      <div
         className={`fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
           isDownloadSidebarOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
@@ -210,21 +330,14 @@ const HomoSapieus = () => {
           </div>
         </div>
       </div>
+
       {/* Main chat area */}
       <div
         className={`flex-1 flex flex-col transition-all duration-300 ${
-          isSidebarOpen ? 'ml-80' : 'ml-0'
+          'ml-80'
         } mt-16`}
       >
-        {/* Toggle button for closed sidebar */}
-        {!isSidebarOpen && (
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="absolute top-20 left-4 p-2 bg-white rounded-lg shadow-sm hover:bg-gray-50"
-          >
-            <Menu className="w-5 h-5 text-gray-800" />
-          </button>
-        )}
+        {/* (If you ever collapse the sidebar, you could add a toggle button here) */}
 
         {messages.length === 0 ? (
           // Empty state UI
@@ -232,9 +345,11 @@ const HomoSapieus = () => {
             <div className="flex-1 flex flex-col items-center justify-center">
               <div className="flex flex-col items-center mb-8">
                 <Brain className="w-16 h-16 text-gray-800 mb-4" />
-                <h1 className="text-4xl font-semibold mb-2 font-montserrat-alt" 
-                    style={gradientTextStyle}>
-                  HI, I'M  HOMOSAPIEUS
+                <h1
+                  className="text-4xl font-semibold mb-2 font-montserrat-alt"
+                  style={gradientTextStyle}
+                >
+                  HI, I'M HOMOSAPIEUS
                 </h1>
                 <p className="text-xl text-gray-800">How can I help you today?</p>
               </div>
@@ -266,7 +381,7 @@ const HomoSapieus = () => {
                         <button
                           key={option.name}
                           type="button"
-                          onClick={() => handleOptionSelect(option.name)}
+                          onClick={() => setSelectedOption(option.name)}
                           className={`flex items-center gap-2 text-sm transition-all rounded-full px-3 py-1 ${
                             selectedOption === option.name
                               ? 'bg-gray-800 bg-opacity-20 text-gray-800'
@@ -306,13 +421,15 @@ const HomoSapieus = () => {
                       </div>
                       <div className={`flex-1 ${message.role === 'user' ? 'text-right' : ''}`}>
                         <div
-                          className={`inline-flex items-center rounded-2xl px-4 h-10 shadow-sm ${
+                          className={`inline-block whitespace-pre-wrap break-words max-w-full rounded-2xl px-4 py-2 shadow-sm ${
                             message.role === 'assistant'
-                              ? 'bg-white'
+                              ? 'bg-white text-gray-800'
                               : 'bg-gray-800 text-white'
                           }`}
                         >
-                          <span className="leading-none">{message.content}</span>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                          </ReactMarkdown>
                         </div>
                       </div>
                     </div>
@@ -324,7 +441,7 @@ const HomoSapieus = () => {
                       <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm">
                         HS
                       </div>
-                      <div className="bg-white rounded-2xl px-4 h-10 shadow-sm flex items-center">
+                      <div className="bg-white rounded-2xl px-4 py-2 shadow-sm flex items-center">
                         <div className="flex gap-1">
                           <span
                             className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
@@ -376,7 +493,7 @@ const HomoSapieus = () => {
                         <button
                           key={option.name}
                           type="button"
-                          onClick={() => handleOptionSelect(option.name)}
+                          onClick={() => setSelectedOption(option.name)}
                           className={`flex items-center gap-2 text-sm transition-all rounded-full px-3 py-1 ${
                             selectedOption === option.name
                               ? 'bg-gray-800 bg-opacity-20 text-gray-800'
@@ -395,6 +512,12 @@ const HomoSapieus = () => {
           </>
         )}
       </div>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </div>
   );
 };
