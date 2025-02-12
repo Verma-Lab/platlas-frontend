@@ -950,7 +950,7 @@ return (
           />
         </div>
         <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>
-          <Tab eventKey="about" title="About">
+          {/* <Tab eventKey="about" title="About">
             <div className="p-4">
               {Array.isArray(about) && about.length > 0 ? (
                 about.map((d, index) => (
@@ -963,7 +963,7 @@ return (
                 <p className="text-gray-600">No data available for the selected cohort.</p>
               )}
             </div>
-          </Tab>
+          </Tab> */}
 
           <Tab eventKey="man" title="Analysis">
             <div className="space-y-6">
