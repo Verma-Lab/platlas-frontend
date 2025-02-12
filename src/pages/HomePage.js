@@ -685,7 +685,7 @@ const SearchSection = ({ projects }) => {
             <div className="mt-4 text-xs text-gray-500">
               <p>
                 <span className="font-medium">Pro tip:</span> Use quotes for exact matches, 
-                e.g., "rs1234" or "Type 2 Diabetes"
+                e.g., "rs1234"
               </p>
             </div>
           </div>

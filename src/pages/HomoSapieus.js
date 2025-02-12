@@ -221,12 +221,12 @@ useEffect(() => {
                 HOMOSAPIEUS
               </span>
             </div>
-            <button
+            {/* <button
               onClick={() => {}}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <Menu className="w-5 h-5 text-gray-800" />
-            </button>
+            </button> */}
           </div>
           {/* New Conversation Button */}
           <button
