@@ -1063,7 +1063,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                     source: imageUrl,
                     xref: 'x',
                     yref: 'y',
-                    x: -0.059,
+                    x: -0.056,
                     y: absoluteMaxY <= 10 ? 9.6 : 15.2,
                     sizex: 1.22,
                     sizey: absoluteMaxY <= 10 ? 11 : 17.5,
