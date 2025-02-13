@@ -978,12 +978,27 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     
         const xAxisTicks = calculateChromosomePositions();
         const xAxisLabels = Array.from({length: CHR_COUNT}, (_, i) => (i + 1).toString());    
-        const getImagePath = (isSmallPlot) => {
-            const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
-            const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
-            return `/api/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`;
+        
+        const getImagePath = async (isSmallPlot) => {
+            try {
+                const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
+                const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
+                const response = await fetch(
+                    `/api/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Manhattan plot');
+                }
+                
+                const blob = await response.blob();
+                return URL.createObjectURL(blob);
+            } catch (error) {
+                console.error('Error fetching Manhattan plot:', error);
+                return null;
+            }
         };
-
+    
         const shapes = threshold ? [{
             type: 'line',
             xref: 'paper',
@@ -999,62 +1014,67 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             }
         }] : [];
     
-        setLayout({
-            autosize: true,
-            height: 600,
-            paper_bgcolor: 'white',
-            plot_bgcolor: 'white',
-            showlegend: true,
-            xaxis: {
-                title: 'Chromosome',
-                titlefont: { size: 14 },
-                tickmode: 'array',
-                tickvals: xAxisTicks,
-                ticktext: xAxisLabels,
-                showgrid: false,
-                zeroline: false,
-                showline: true,
-                linewidth: 1,
-                range: [-0.01, 1.05],
-                fixedrange: true
-            },
-            yaxis: {
-                title: '-log₁₀(p)',
-                titlefont: { size: 14 },
-                showgrid: false,
-                zeroline: false,
-                showline: true,
-                linewidth: 1,
-                tickmode: 'array',
-                tickvals: tickPositions,
-                ticktext: ticks.map(String),
-                range: [0, transformYValue(absoluteMaxY) + 1], // Set minimum to 0 to prevent axis extending below
-                fixedrange: true // Add to prevent zoom
-            },
-            margin: { l: 60, r: 40, t: 20, b: 40 },
-            shapes,
-            images: [{
-                source: absoluteMaxY <= 10 
-                ? getImagePath(true)  
-                : getImagePath(false), 
-                xref: 'x',
-                yref: 'y',
-                x: -0.03,
-                y: absoluteMaxY <= 10
-                    ? 7
-                    : 15.2,
-                sizex: 1.07,
-                sizey: absoluteMaxY <= 10
-                    ? 9
-                    : 16,
-                xanchor: 'left',
-                yanchor: 'top',
-                sizing: 'stretch',
-                opacity: 1,
-                layer: 'below'
-            }]
-        });
-    }, [stat, dyn, threshold, leadSNPs]);
+        (async () => {
+            const imageUrl = await getImagePath(absoluteMaxY <= 10);
+            
+            setLayout({
+                autosize: true,
+                height: 600,
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+                showlegend: true,
+                xaxis: {
+                    title: 'Chromosome',
+                    titlefont: { size: 14 },
+                    tickmode: 'array',
+                    tickvals: xAxisTicks,
+                    ticktext: xAxisLabels,
+                    showgrid: false,
+                    zeroline: false,
+                    showline: true,
+                    linewidth: 1,
+                    range: [-0.01, 1.05],
+                    fixedrange: true
+                },
+                yaxis: {
+                    title: '-log₁₀(p)',
+                    titlefont: { size: 14 },
+                    showgrid: false,
+                    zeroline: false,
+                    showline: true,
+                    linewidth: 1,
+                    tickmode: 'array',
+                    tickvals: tickPositions,
+                    ticktext: ticks.map(String),
+                    range: [0, transformYValue(absoluteMaxY) + 1],
+                    fixedrange: true
+                },
+                margin: { l: 60, r: 40, t: 20, b: 40 },
+                shapes,
+                images: [{
+                    source: imageUrl,
+                    xref: 'x',
+                    yref: 'y',
+                    x: -0.03,
+                    y: absoluteMaxY <= 10 ? 7 : 15.2,
+                    sizex: 1.07,
+                    sizey: absoluteMaxY <= 10 ? 9 : 16,
+                    xanchor: 'left',
+                    yanchor: 'top',
+                    sizing: 'stretch',
+                    opacity: 1,
+                    layer: 'below'
+                }]
+            });
+        })();
+    
+        return () => {
+            const currentLayout = layout?.images?.[0]?.source;
+            if (currentLayout && currentLayout.startsWith('blob:')) {
+                URL.revokeObjectURL(currentLayout);
+            }
+        };
+    }, [stat, dyn, threshold, leadSNPs, phenoId, selectedCohort, selectedStudy]);
     
     const prepareRegularData = () => {
         const regularTraces = [];
