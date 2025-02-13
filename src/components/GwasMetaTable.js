@@ -19,6 +19,7 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import _ from 'lodash';
+import { X } from 'lucide-react';
 
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
 
@@ -269,78 +270,49 @@ const StudiesBreakdownCell = ({ popGwasData, studies }) => {
 
 const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anchorRef }) => {
   const popoverRef = useRef(null);
-  const [maxHeight, setMaxHeight] = useState(300);
   
   useEffect(() => {
-    if (anchorRef.current && popoverRef.current) {
-      const anchorRect = anchorRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
+    if (anchorRef && popoverRef.current) {
+      const buttonRect = anchorRef.getBoundingClientRect();
+      const popover = popoverRef.current;
       
-      // Calculate available space below the anchor
-      const spaceBelow = viewportHeight - anchorRect.bottom - 8;
-      
-      // Set position
-      popoverRef.current.style.position = 'fixed';
-      popoverRef.current.style.left = `${anchorRect.left}px`;
-      popoverRef.current.style.top = `${anchorRect.bottom + 8}px`;
-      
-      // Set max height based on available space
-      const calculatedMaxHeight = Math.min(400, spaceBelow - 16);
-      setMaxHeight(calculatedMaxHeight);
+      popover.style.position = 'fixed';
+      popover.style.top = `${buttonRect.bottom + 8}px`;
+      popover.style.left = `${buttonRect.left}px`;
+      popover.style.width = '280px';
+      popover.style.maxHeight = '400px';
+      popover.style.zIndex = '51';
     }
-
-    // Prevent main page scroll when popover is open
-    const originalStyle = window.getComputedStyle(document.body).overflow;
-    document.body.style.overflow = 'hidden';
-    
-    return () => {
-      document.body.style.overflow = originalStyle;
-    };
   }, [anchorRef]);
 
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black bg-opacity-10" 
+        className="fixed inset-0 bg-black/5"
         onClick={onClose}
-        style={{ zIndex: 40 }}
+        style={{ zIndex: 50 }}
       />
+      
       <div 
         ref={popoverRef}
-        className="fixed bg-white rounded-lg shadow-lg border border-gray-200"
-        style={{ 
-          zIndex: 50,
-          width: '256px',
-          maxHeight: `${maxHeight}px`,
-          display: 'flex',
-          flexDirection: 'column'
-        }}
+        className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
       >
-        {/* Header - Always visible */}
-        <div className="flex justify-between items-center p-3 border-b border-gray-100 bg-white">
+        <div className="flex justify-between items-center p-3 border-b border-gray-100">
           <span className="text-sm font-medium text-gray-700">Filter {column}</span>
           <button 
-            onClick={onClose} 
+            onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
-        
-        {/* Scrollable content */}
-        <div 
-          className="overflow-y-auto flex-1 p-3"
-          style={{
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            maxHeight: `${maxHeight - 56}px` // Subtract header height
-          }}
-        >
+
+        <div className="p-3 max-h-[320px] overflow-y-auto">
           <div className="space-y-2">
             {options.map((option, idx) => (
               <label 
                 key={idx} 
-                className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded cursor-pointer"
+                className="flex items-center space-x-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
               >
                 <input
                   type="checkbox"
@@ -348,7 +320,7 @@ const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anc
                   onChange={(e) => {
                     const newValues = e.target.checked
                       ? [...selectedValues, option]
-                      : selectedValues.filter(val => val !== option);
+                      : selectedValues.filter(val => val !== option); // Fixed this line
                     onChange(newValues);
                   }}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -362,51 +334,73 @@ const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anc
     </>
   );
 };
-
-
-const ColumnHeader = ({ title, onSort, sortConfig, onFilter, hasFilter = true, hasSort = true }) => {
-  const [showFilter, setShowFilter] = useState(false);
-  const filterButtonRef = useRef(null);
-  
+const ColumnHeader = ({ title, onSort, sortConfig, hasSort = true }) => {
   return (
     <th className="px-6 py-3 text-left">
       <div className="flex items-center space-x-2">
         {hasSort ? (
-          <div className="flex items-center space-x-1">
-            <button 
-              onClick={onSort}
-              className="group flex items-center space-x-1 text-xs font-medium text-gray-500 hover:text-gray-700"
-            >
-              <span>{title}</span>
-              <ArrowUpDown className={`w-4 h-4 ${
-                sortConfig?.key === title.toLowerCase() 
-                  ? 'text-blue-600' 
-                  : 'text-gray-400 group-hover:text-gray-600'
-              }`} />
-            </button>
-          </div>
-        ) : (
-          <span className="text-xs font-medium text-gray-500">{title}</span>
-        )}
-        
-        {hasFilter && (
-          <button
-            ref={filterButtonRef}
-            onClick={() => {
-              setShowFilter(!showFilter);
-              onFilter(filterButtonRef);
-            }}
-            className={`p-1 rounded-md hover:bg-gray-100 ${
-              showFilter ? 'bg-blue-50 text-blue-600' : 'text-gray-400'
-            }`}
+          <button 
+            onClick={onSort}
+            className="group flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
           >
-            <Filter className="w-4 h-4" />
+            <span>{title}</span>
+            <ArrowUpDown className={`w-4 h-4 ${
+              sortConfig?.key === title.toLowerCase() 
+                ? 'text-blue-600' 
+                : 'text-gray-400 group-hover:text-gray-600'
+            }`} />
           </button>
+        ) : (
+          <span className="text-sm font-medium text-gray-700">{title}</span>
         )}
       </div>
     </th>
   );
 };
+
+// const ColumnHeader = ({ title, onSort, sortConfig, onFilter, hasFilter = true, hasSort = true }) => {
+//   const [showFilter, setShowFilter] = useState(false);
+//   const filterButtonRef = useRef(null);
+  
+//   return (
+//     <th className="px-6 py-3 text-left">
+//       <div className="flex items-center space-x-2">
+//         {hasSort ? (
+//           <div className="flex items-center space-x-1">
+//             <button 
+//               onClick={onSort}
+//               className="group flex items-center space-x-1 text-xs font-medium text-gray-500 hover:text-gray-700"
+//             >
+//               <span>{title}</span>
+//               <ArrowUpDown className={`w-4 h-4 ${
+//                 sortConfig?.key === title.toLowerCase() 
+//                   ? 'text-blue-600' 
+//                   : 'text-gray-400 group-hover:text-gray-600'
+//               }`} />
+//             </button>
+//           </div>
+//         ) : (
+//           <span className="text-xs font-medium text-gray-500">{title}</span>
+//         )}
+        
+//         {hasFilter && (
+//           <button
+//             ref={filterButtonRef}
+//             onClick={() => {
+//               setShowFilter(!showFilter);
+//               onFilter(filterButtonRef);
+//             }}
+//             className={`p-1 rounded-md hover:bg-gray-100 ${
+//               showFilter ? 'bg-blue-50 text-blue-600' : 'text-gray-400'
+//             }`}
+//           >
+//             <Filter className="w-4 h-4" />
+//           </button>
+//         )}
+//       </div>
+//     </th>
+//   );
+// };
 /**
  * Main component to display the Lead Variants Table.
  */
@@ -434,9 +428,20 @@ const LeadVariantsTable = () => {
   };
   const [filterAnchorRef, setFilterAnchorRef] = useState(null);
 
-  const handleFilterClick = (columnKey, buttonRef) => {
+  // const handleFilterClick = (columnKey, buttonRef) => {
+  //   setFilterAnchorRef(buttonRef);
+  //   setActiveFilter(activeFilter === columnKey ? null : columnKey);
+  // };
+  const handleFilterClick = (columnKey) => {
+    const buttonRef = filterRefs[columnKey].current;
     setFilterAnchorRef(buttonRef);
     setActiveFilter(activeFilter === columnKey ? null : columnKey);
+  };
+  const filterRefs = {
+    category: useRef(null),
+    populations: useRef(null),
+    leadsnps: useRef(null),  // Added this
+    studies: useRef(null)
   };
   const navigate = useNavigate();
 
@@ -525,7 +530,7 @@ const LeadVariantsTable = () => {
     const fetchData = async () => {
       try {
         // const response = await fetch(`${baseURL}/getLeadVariants`);
-        const response = await fetch("/api/getLeadVariants");
+        const response = await fetch(`/api/getLeadVariants`);
         if (!response.ok) throw new Error('Failed to fetch data');
         const leadVariants = await response.json();
         
@@ -698,6 +703,91 @@ const LeadVariantsTable = () => {
         </div>
       </motion.div>
 
+{/* Filter Bar */}
+<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+{/* Filter Buttons */}
+{/* Filter Bar */}
+<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+  <div className="flex items-center space-x-4">
+    <span className="text-sm font-medium text-gray-700">Filter by:</span>
+    <div className="flex space-x-2">
+      <button
+        ref={filterRefs.category}
+        onClick={() => handleFilterClick('category')}
+        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-emerald-500 to-green-500 text-white${
+          filters.category.length > 0 
+            ? 'border-blue-200 bg-blue-50 text-white' 
+            : 'border-gray-200 text-white hover:bg-gray-50'
+        }`}
+      >
+        <SlidersHorizontal className="w-4 h-4 mr-2" />
+        <span className="text-sm">Category</span>
+        {filters.category.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
+            {filters.category.length}
+          </span>
+        )}
+      </button>
+
+      <button
+        ref={filterRefs.populations}
+        onClick={() => handleFilterClick('populations')}
+        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-500 to-blue-600 text-white${
+          filters.populations.length > 0 
+            ? 'border-blue-200 bg-blue-50 text-white' 
+            : 'border-gray-200 text-white hover:bg-gray-50'
+        }`}
+      >
+        <Globe className="w-4 h-4 mr-2" />
+        <span className="text-sm">Populations</span>
+        {filters.populations.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
+            {filters.populations.length}
+          </span>
+        )}
+      </button>
+
+      {/* Added Lead SNPs filter button */}
+      <button
+        ref={filterRefs.leadsnps}
+        onClick={() => handleFilterClick('leadsnps')}
+        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-red-400 to-red-600 text-white${
+          filters.leadsnps.length > 0 
+            ? 'border-blue-200 bg-blue-50 text-white' 
+            : 'border-gray-200 text-white hover:bg-gray-50'
+        }`}
+      >
+        <Activity className="w-4 h-4 mr-2" />
+        <span className="text-sm">Lead SNPs</span>
+        {filters.leadsnps.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
+            {filters.leadsnps.length}
+          </span>
+        )}
+      </button>
+
+      <button
+        ref={filterRefs.studies}
+        onClick={() => handleFilterClick('studies')}
+        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-orange-500 to-orange-600 text-white${
+          filters.studies.length > 0 
+            ? 'border-blue-200 bg-blue-50 text-white' 
+            : 'border-gray-200 text-white hover:bg-gray-50'
+        }`}
+      >
+        <BarChart className="w-4 h-4 mr-2" />
+        <span className="text-sm">Studies</span>
+        {filters.studies.length > 0 && (
+          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
+            {filters.studies.length}
+          </span>
+        )}
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+
       {/* Lead Variants Table */}
       <motion.div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
@@ -800,7 +890,7 @@ const LeadVariantsTable = () => {
         ))}
       </motion.div>
       */}
-      {activeFilter && filterAnchorRef && (
+      {activeFilter && (
         <FilterPopover
           column={activeFilter}
           options={getFilterOptions(activeFilter)}

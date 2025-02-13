@@ -826,7 +826,7 @@ const CHROMOSOME_LENGTHS = [
     58617616, 64444167, 46709983, 50818468
 ];
 
-export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort }) => {
+export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort, selectedStudy }) => {
     const [leadSNPs, setLeadSNPs] = useState([]);
     const [layout, setLayout] = useState({});
     const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
@@ -977,8 +977,14 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         const transformedThreshold = threshold ? transformYValue(threshold) : null;
     
         const xAxisTicks = calculateChromosomePositions();
-        const xAxisLabels = Array.from({length: CHR_COUNT}, (_, i) => i.toString());
-    
+        const xAxisLabels = Array.from({length: CHR_COUNT}, (_, i) => (i + 1).toString());    
+        const getImagePath = (isSmallPlot) => {
+            const formattedPhenoId = phenoId.replace('_', '');
+            const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
+            const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
+            return `/nfs/platlas_stor/mh_plots/mh_plots/${plotType}_${formattedPhenoId}.${selectedCohort}.${study}_pval_up_to_0.1.png`;
+        };
+
         const shapes = threshold ? [{
             type: 'line',
             xref: 'paper',
@@ -1030,32 +1036,20 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             shapes,
             images: [{
                 source: absoluteMaxY <= 10 
-                    ? '/images/single_plot11.png'
-                    : absoluteMaxY <= 20 
-                        ? '/images/single_plot12.png'
-                        : absoluteMaxY <= 50 
-                            ? '/images/single_plot13.png'
-                            : '/images/single_plot13.png',
+                ? getImagePath(true)  
+                : getImagePath(false), 
                 xref: 'x',
                 yref: 'y',
-                x: -0.05,
+                x: -0.03,
                 y: absoluteMaxY <= 10
                     ? 7
-                    : absoluteMaxY <= 20 
-                        ? 9.3
-                        : absoluteMaxY <= 50 
-                            ? 15.2
-                            : 15.5,
-                sizex: 1.215,
+                    : 15.2,
+                sizex: 1.07,
                 sizey: absoluteMaxY <= 10
                     ? 9
-                    : absoluteMaxY <= 20 
-                        ? 11
-                        : absoluteMaxY <= 50 
-                            ? 18
-                            : 18,
+                    : 16,
                 xanchor: 'left',
-                yanchor: 'top', // Keep as 'top'
+                yanchor: 'top',
                 sizing: 'stretch',
                 opacity: 1,
                 layer: 'below'
@@ -1087,7 +1081,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                         const originalY = d.y[i];
                         return (
                             `SNP_ID: ${snpID}<br>` +
-                            `Chromosome: ${chrIndex}<br>` +
+                            `Chromosome: ${chrIndex + 1}<br>` +
                             `Position: ${posVal.toLocaleString()}<br>` +
                             `-log10 p-value: ${originalY.toFixed(2)}<br>` +
                             `P-value: ${Math.pow(10, -originalY).toExponential(2)}`

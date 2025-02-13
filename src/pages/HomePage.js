@@ -741,7 +741,7 @@ export const HomePage = () => {
         <div
           className="w-full pb-32 relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, #4F46E5 0%, #2563EB 100%)',
+            background: 'linear-gradient(135deg, #0F33E5 0%, #2563EB 100%)',
             borderRadius: '0 0 2rem 2rem'
           }}
         >
@@ -749,14 +749,14 @@ export const HomePage = () => {
           {/* Header content */}
           <div className="max-w-7xl mx-auto px-4 pt-8">
             {/* Top section with Nav and Logo */}
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between items-start -mt-10">
               {/* Logo and Title Section */}
-              <div className="flex items-center">
+              <div className="flex items-center -mt-19">
                 <div>
                   <img 
                     src="/images/platypushomepage.png"
                     alt="Platypus Logo" 
-                    className="h-32 w-28 object-cover mt-2"
+                    className="h-44 w-28 object-cover mt-2"
                   />   
                 </div>
                 <div>
@@ -769,22 +769,14 @@ export const HomePage = () => {
                   
                 </div>
               </div>
-              <div className="flex-1 flex justify-center">
+              <div className="flex-1 flex justify-center mt-20">
       <NavigationBar />
     </div>
               {/* Navigation Bar */}
               
             </div>
 
-            {/* <button
-              onClick={() => setIsChatOpen(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-white/10 
-                        hover:bg-white/20 rounded-lg text-white transition-all
-                        border border-white/20 backdrop-blur-sm -mt-3 ml-5"
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span>Ask AI Assistant</span>
-            </button> */}
+       
           </div>
 
           <AnimatedDNA />
@@ -820,14 +812,19 @@ export const HomePage = () => {
           </div>
           
           {/* Table Section */}
-          <div id="table" className="scroll-mt-16">
-            <div className="container mx-auto p-4">
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Overview of Association Results 
-              </h2>
-              <LeadVariantsTable />
-            </div>
-          </div>
+          {/* Table Section */}
+<div id="table" className="scroll-mt-16">
+  <div className="container mx-auto p-4">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      <div className="p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          Overview of Association Results 
+        </h2>
+        <LeadVariantsTable />
+      </div>
+    </div>
+  </div>
+</div>
 
           {/* Teams Section */}
           <div id="summary" className="scroll-mt-16">

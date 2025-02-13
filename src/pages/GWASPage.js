@@ -409,7 +409,7 @@ const GWASPage = () => {
     try {
       setLoadingTop(true);
       // const response = await fetch(
-      //   // `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
+      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
       // );
       const response = await fetch(
         `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
@@ -970,16 +970,17 @@ return (
               <div className="space-y-6">
                 <div className="bg-white flex justify-center items-center rounded-lg shadow p-4">
                   <div className="overflow-hidden max-h-[600px] flex justify-center w-full">
-                    <Manhattan
-                      stat={statData}
-                      dyn={dynData}
-                      ticks={ticks}
-                      threshold={logPval}
-                      onSNPClick={handleSNPClick}
-                      history={history}
-                      phenoId={phenoId}
-                      selectedCohort={selectedCohort}
-                    />
+                  <Manhattan
+    stat={statData}
+    dyn={dynData}
+    ticks={ticks}
+    threshold={logPval}
+    onSNPClick={handleSNPClick}
+    history={history}
+    phenoId={phenoId}
+    selectedCohort={selectedCohort}
+    selectedStudy={selectedStudy}  // Add this prop
+/>
                   </div>
                 </div>
 
