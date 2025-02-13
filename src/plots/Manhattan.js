@@ -981,7 +981,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         const getImagePath = (isSmallPlot) => {
             const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
             const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
-            return `/nfs/platlas_stor/mh_plots/mh_plots/${plotType}_${phenoId}.${selectedCohort}.${study}_pval_up_to_0.1.png`;
+            return `/api/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`;
         };
 
         const shapes = threshold ? [{
