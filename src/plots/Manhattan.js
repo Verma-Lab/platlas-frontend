@@ -983,10 +983,12 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             try {
                 const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
                 const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
+                console.log('manhattan logs')
+                console.log(phenoId, selectedCohort, study, plotType)
                 const response = await fetch(
                     `/api/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`
                 );
-                
+                console.log(response)
                 if (!response.ok) {
                     throw new Error('Failed to fetch Manhattan plot');
                 }
