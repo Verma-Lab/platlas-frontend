@@ -979,10 +979,9 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         const xAxisTicks = calculateChromosomePositions();
         const xAxisLabels = Array.from({length: CHR_COUNT}, (_, i) => (i + 1).toString());    
         const getImagePath = (isSmallPlot) => {
-            const formattedPhenoId = phenoId.replace('_', '');
             const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
             const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
-            return `/nfs/platlas_stor/mh_plots/mh_plots/${plotType}_${formattedPhenoId}.${selectedCohort}.${study}_pval_up_to_0.1.png`;
+            return `/nfs/platlas_stor/mh_plots/mh_plots/${plotType}_${phenoId}.${selectedCohort}.${study}_pval_up_to_0.1.png`;
         };
 
         const shapes = threshold ? [{
