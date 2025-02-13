@@ -979,12 +979,18 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         const xAxisTicks = calculateChromosomePositions();
         const xAxisLabels = Array.from({length: CHR_COUNT}, (_, i) => (i + 1).toString());    
         
-        const getImagePath = async (isSmallPlot) => {
+        const getImagePath = async () => {
+            if (absoluteMaxY <= 10) {
+                return '/images/single_plot11.png';
+            }
             try {
                 const study = selectedStudy === 'mrmega' ? 'mrmega' : 'gwama';
-                const plotType = isSmallPlot ? 'single_plot' : 'manhattan';
+                const plotType = 'manhattan';
                 console.log('manhattan logs')
                 console.log(phenoId, selectedCohort, study, plotType)
+                // const response = await fetch(
+                //     `${baseURL}/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`
+                // );
                 const response = await fetch(
                     `/api/getManhattanPlot?phenoId=${phenoId}&cohortId=${selectedCohort}&study=${study}&plotType=${plotType}`
                 );
@@ -1017,7 +1023,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         }] : [];
     
         (async () => {
-            const imageUrl = await getImagePath(absoluteMaxY <= 10);
+            const imageUrl = await getImagePath();
             
             setLayout({
                 autosize: true,
@@ -1057,10 +1063,10 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                     source: imageUrl,
                     xref: 'x',
                     yref: 'y',
-                    x: -0.03,
-                    y: absoluteMaxY <= 10 ? 7 : 15.2,
-                    sizex: 1.07,
-                    sizey: absoluteMaxY <= 10 ? 9 : 16,
+                    x: -0.059,
+                    y: absoluteMaxY <= 10 ? 9.6 : 15.2,
+                    sizex: 1.22,
+                    sizey: absoluteMaxY <= 10 ? 11 : 17.5,
                     xanchor: 'left',
                     yanchor: 'top',
                     sizing: 'stretch',
