@@ -42,7 +42,7 @@ const NavigationBar = () => {
       return;
     }
     if (text === 'HomoSapieus') {
-      navigate('/homosapieus');
+      navigate('/landingPageHomo');
       return;
     }
 

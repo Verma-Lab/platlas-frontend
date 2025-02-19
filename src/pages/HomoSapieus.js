@@ -511,11 +511,11 @@ const HomoSapieus = () => {
             {/* Left side */}
             <div className="flex items-center gap-4">
         <button
-          onClick={() => navigate('/platlas')}
+          onClick={() => navigate('/landingPageHomo')}
           className="flex items-center gap-2 text-gray-800 hover:text-gray-900 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="font-medium">Back to PLatlas</span>
+          <span className="font-medium">Back</span>
         </button>
 
         {/* Add the model selector dropdown here */}

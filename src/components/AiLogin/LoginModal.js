@@ -17,8 +17,8 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
 
     try {
       const endpoint = isLogin ? '/login' : '/signup';
-    //   const response = await axios.post(`http://localhost:5001/api/aiapi${endpoint}`, formData);
-      const response = await axios.post(`/api/aiapi${endpoint}`, formData);
+      const response = await axios.post(`http://localhost:5001/api/aiapi${endpoint}`, formData);
+      // const response = await axios.post(`/api/aiapi${endpoint}`, formData);
 
       
       // Save token
