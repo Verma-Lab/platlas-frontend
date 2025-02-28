@@ -38,7 +38,8 @@ import {
   Users,
   BarChart2,
   Network,
-  ChevronDown, ChevronUp
+  ChevronDown, ChevronUp,
+  ArrowBigDown
 } from 'lucide-react';
 import { Database, ChevronRight } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
@@ -140,7 +141,8 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
         {/* Main SNP counter */}
         <div className="px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium flex justify-between items-center">
           <span>Total SNPs</span>
-          <span className="text-lg">{totalSnps.toLocaleString()}</span>
+          <ArrowBigDown/>
+          {/* <span className="text-lg">{totalSnps.toLocaleString()}</span> */}
         </div>
         
         {/* Expandable detail section */}
