@@ -204,10 +204,10 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                     source: imageUrl,
                     xref: 'x',
                     yref: 'y',
-                    x: -0.062355,
+                    x: -0.062,
                     y: -(maxRange * 0.07),  // Make it dynamic based on maxRange
                     sizex: 1.23,
-                    sizey: maxRange * 1.1,  // Slightly larger to ensure full coverage
+                    sizey: maxRange * 1.05,  // Slightly larger to ensure full coverage
                     xanchor: 'left',
                     yanchor: 'bottom',  // Change this from 'top' to 'bottom'
                     sizing: 'stretch',
