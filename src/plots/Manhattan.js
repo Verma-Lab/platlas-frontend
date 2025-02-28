@@ -205,8 +205,8 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                     xref: 'x',
                     yref: 'y',
                     x: -0.0623,
-                    y: -(maxRange * 0.05),  // Make it dynamic based on maxRange
-                    sizex: 1.23,
+                    y: -(maxRange * 0.08),  // Make it dynamic based on maxRange
+                    sizex: 1.24,
                     sizey: maxRange * 1.1,  // Slightly larger to ensure full coverage
                     xanchor: 'left',
                     yanchor: 'bottom',  // Change this from 'top' to 'bottom'
