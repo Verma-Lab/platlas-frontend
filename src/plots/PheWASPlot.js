@@ -113,7 +113,7 @@ const PheWASPlot = ({ data, selectedSNP }) => {
         }
       };
     }).filter(Boolean),
-    showlegend: true,
+    showlegend: false,
     legendgrouptitle: {
       text: 'Categories'
     },
@@ -136,8 +136,8 @@ const PheWASPlot = ({ data, selectedSNP }) => {
         layout={layout}
         config={{
           responsive: true,
-          scrollZoom: true,
-          displayModeBar: true,
+          scrollZoom: false,
+          displayModeBar: false,
           modeBarButtonsToRemove: ['lasso2d', 'select2d'],
         }}
         className="w-full h-full"
