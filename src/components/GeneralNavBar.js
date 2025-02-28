@@ -2,7 +2,7 @@ import React from 'react';
 import { Search, Table, Users, FileText, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const NavigationBar = () => {
+const GenerlaBar = () => {
   const navigate = useNavigate();
 
   const scrollToSection = (sectionId) => {
@@ -37,8 +37,8 @@ const NavigationBar = () => {
   };
 
   const handleClick = (text) => {
-    if (text === 'About') {
-      navigate('/about');
+    if (text === 'Home') {
+      navigate('/platlas');
       return;
     }
     if (text === 'HomoSapieus') {
@@ -56,9 +56,9 @@ const NavigationBar = () => {
   };
 
   const navItems = [
-    { icon: Users, text: 'About' },
-    { icon: Table, text: 'Association Results' },
-    { icon: FileText, text: 'Paper' },
+    { icon: Users, text: 'Home' },
+    // { icon: Table, text: 'Association Results' },
+    // { icon: FileText, text: 'Paper' },
     // { icon: FileText, text: 'Summary' },
     { icon: FileText, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
@@ -85,4 +85,4 @@ const NavigationBar = () => {
   );
 };
 
-export default NavigationBar;
+export default GenerlaBar;

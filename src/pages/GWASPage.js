@@ -43,6 +43,8 @@ import {
 import { Database, ChevronRight } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
 import LeadVariantStats from '../components/LeadVariantsStats';
+import NavigationBar from '../components/NavigationBar';
+import GenerlaBar from '../components/GeneralNavBar';
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api'
 
 const AnimatedDNA = () => (
@@ -86,6 +88,7 @@ const AnimatedDNA = () => (
 
 const StatsBar = ({ phenoStats, leadVariants }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSnpExpanded, setIsSnpExpanded] = useState(false);
   
   // Group SNP counts by analysis type
   const groupedSNPs = useMemo(() => {
@@ -100,29 +103,75 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
 
   // Calculate total sample size
   const totalSampleSize = Object.values(phenoStats.samples_by_cohort || {})[0] || 0;
+  
+  // Calculate total SNPs across all cohorts
+  const totalSnps = Object.values(groupedSNPs.gwama).reduce((sum, count) => sum + count, 0) + groupedSNPs.mrmega;
+
+  // Get cohort badge color
+  const getCohortColor = (cohort) => {
+    const colors = {
+      'EUR': 'from-blue-500 to-blue-600',
+      'EAS': 'from-emerald-500 to-emerald-600',
+      'AFR': 'from-amber-500 to-amber-600',
+      'AMR': 'from-rose-500 to-rose-600',
+      'SAS': 'from-purple-500 to-purple-600',
+      'ALL': 'from-indigo-500 to-indigo-600',
+    };
+    return colors[cohort] || 'from-gray-500 to-gray-600';
+  };
 
   return (
     <div className="grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
-      {/* SNPs Size */}
-      <div className="space-y-4">
-        <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
-          <Database className="w-4 h-4" />
-          SNPs Size
-        </h3>
-        <div className="flex flex-col gap-2">
-          {/* GWAMA SNPs */}
-          {Object.entries(groupedSNPs.gwama).map(([cohort, count]) => (
-            <span key={cohort} className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
-              GWAMA {cohort}: {count.toLocaleString()} SNPs
-            </span>
-          ))}
-          {/* MR-MEGA SNPs */}
-          {groupedSNPs.mrmega > 0 && (
-            <span className="px-3 py-1.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium">
-              MR-MEGA: {groupedSNPs.mrmega.toLocaleString()} SNPs
-            </span>
-          )}
+      {/* SNPs Size - Redesigned with collapsible UI */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+            <Database className="w-4 h-4" />
+            SNPs Size
+          </h3>
+          <button 
+            onClick={() => setIsSnpExpanded(!isSnpExpanded)}
+            className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+          >
+            {isSnpExpanded ? 'Collapse' : 'View details'}
+          </button>
         </div>
+        
+        {/* Main SNP counter */}
+        <div className="px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium flex justify-between items-center">
+          <span>Total SNPs</span>
+          <span className="text-lg">{totalSnps.toLocaleString()}</span>
+        </div>
+        
+        {/* Expandable detail section */}
+        {isSnpExpanded && (
+          <div className="mt-2 space-y-1.5 bg-gray-50 p-2 rounded-md max-h-48 overflow-y-auto">
+            {/* GWAMA SNPs by cohort */}
+            {Object.entries(groupedSNPs.gwama).map(([cohort, count]) => (
+              <div 
+                key={cohort} 
+                className="flex justify-between items-center px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-100"
+              >
+                <div className="flex items-center">
+                  <span className={`inline-block w-2 h-2 rounded-full bg-gradient-to-r ${getCohortColor(cohort)} mr-2`}></span>
+                  <span>GWAMA {cohort}</span>
+                </div>
+                <span>{count.toLocaleString()}</span>
+              </div>
+            ))}
+            
+            {/* MR-MEGA SNPs */}
+            {groupedSNPs.mrmega > 0 && (
+              <div className="flex justify-between items-center px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-100">
+                <div className="flex items-center">
+                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 mr-2"></span>
+                  <span>MR-MEGA</span>
+                </div>
+                <span>{groupedSNPs.mrmega.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sample Size */}
@@ -132,13 +181,13 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
           Sample Size
         </h3>
         <div className="flex items-center space-x-2">
-          <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-medium">
-            {totalSampleSize.toLocaleString()} samples
+          <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-lg font-medium">
+            {totalSampleSize.toLocaleString()} <span className='text-sm p-2'>samples</span>
           </span>
         </div>
       </div>
 
-      {/* Lead Variants - No changes needed here */}
+      {/* Lead Variants */}
       <div className="relative">
         <div className="space-y-4">
           <button
@@ -209,7 +258,7 @@ const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, pheno
             <BarChart2 className="mr-4 h-10 w-10 text-white" />
             
             <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
+              <h1 className="text-4xl font-bold text-white mb-2 p-2">
                 GWAS Analysis Page
               </h1>
               <div className="flex items-center space-x-2">
@@ -221,6 +270,11 @@ const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, pheno
                 </div>
               </div>
             </div>
+            <div className='p-5 -mt-10'>
+            <GenerlaBar/>
+
+            </div>
+
           </div>
         </div>
         
@@ -303,7 +357,21 @@ const StudySelector = ({
       {/* Study Type Selection */}
       <div className="flex flex-col space-y-2">
         <span className="text-sm font-medium text-gray-700">Study Type:</span>
+        
         <div className="flex space-x-2">
+        <button
+            onClick={() => handleStudyChange('mrmega')}
+            disabled={!mrmegaAvailable}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedStudy === 'mrmega'
+                ? 'bg-blue-600 text-white'
+                : mrmegaAvailable
+                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            MR-MEGA
+          </button>
           <button
             onClick={() => handleStudyChange('gwama')}
             disabled={!gwamaAvailable}
@@ -317,19 +385,7 @@ const StudySelector = ({
           >
             GWAMA
           </button>
-          <button
-            onClick={() => handleStudyChange('mrmega')}
-            disabled={!mrmegaAvailable}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              selectedStudy === 'mrmega'
-                ? 'bg-blue-600 text-white'
-                : mrmegaAvailable
-                ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            MR-MEGA
-          </button>
+          
         </div>
       </div>
 
@@ -401,7 +457,7 @@ const GWASPage = () => {
   const [gwamaCohorts, setGwamaCohorts] = useState([]);
   const [gwamaAvailable, setGwamaAvailable] = useState(false);
   const [mrmegaAvailable, setMrmegaAvailable] = useState(false);
-
+  const [filterLimit, setFilterLimit] = useState('None'); // Added this line
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const history = useNavigate();
 
@@ -934,6 +990,7 @@ return (
 
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="bg-white rounded-xl shadow p-6">
+        
         <div className="mb-6">
           <StudySelector
             selectedStudy={selectedStudy}
@@ -948,7 +1005,9 @@ return (
             mrmegaAvailable={mrmegaAvailable}
             gwamaAvailable={gwamaAvailable}
           />
+          
         </div>
+        
         <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>
           {/* <Tab eventKey="about" title="About">
             <div className="p-4">
@@ -964,10 +1023,27 @@ return (
               )}
             </div>
           </Tab> */}
-
+          
           <Tab eventKey="man" title="Analysis">
             <div className="space-y-6">
+            <div className="mb-4 flex justify-end space-x-2">
+               
+                <select 
+                    value={filterLimit}
+                    onChange={(e) => setFilterLimit(e.target.value)}
+                    className="border rounded-md"
+                >
+                    <option value="None">
+                    <span className='p-2 text-blue font-semibold border border-black/20'>Filter Lead Variants</span>
+                    </option>
+                    <option value="all">All Variants</option>
+                    <option value="10">Top 10</option>
+                    <option value="20">Top 20</option>
+                    <option value="50">Top 50</option>
+                </select>
+            </div>
               <div className="space-y-6">
+              
                 <div className="bg-white flex justify-center items-center rounded-lg shadow p-4">
                   <div className="overflow-hidden max-h-[600px] flex justify-center w-full">
                   <Manhattan
@@ -980,6 +1056,7 @@ return (
     phenoId={phenoId}
     selectedCohort={selectedCohort}
     selectedStudy={selectedStudy}  // Add this prop
+    filterLimit={filterLimit} // Added this prop
 />
                   </div>
                 </div>

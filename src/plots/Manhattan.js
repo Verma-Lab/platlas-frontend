@@ -14,11 +14,10 @@ const CHROMOSOME_LENGTHS = [
     58617616, 64444167, 46709983, 50818468
 ];
 
-export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort, selectedStudy }) => {
+export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort, selectedStudy, filterLimit }) => {
     const [leadSNPs, setLeadSNPs] = useState([]);
     const [layout, setLayout] = useState({});
     const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
-
     const GAP = 0.008;
     const CHR_COUNT = CHROMOSOME_LENGTHS.length;
     const GAP_COUNT = CHR_COUNT - 1;
@@ -263,9 +262,22 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     
         return regularTraces;
     };
-
     const prepareLeadSNPData = () => {
         if (!leadSNPs.length) return null;
+    
+        console.log('FILTER LIMIT', filterLimit)
+        // If filterLimit is '0', return null to show no lead SNPs
+        if (filterLimit === "None") return null;
+        
+        const sortedSNPs = [...leadSNPs].sort((a, b) => 
+            parseFloat(b.lead_snp.log10p) - parseFloat(a.lead_snp.log10p)
+        );
+        
+        let filteredSNPs = sortedSNPs;
+        if (filterLimit !== 'all') {
+            const limit = parseInt(filterLimit);
+            filteredSNPs = sortedSNPs.slice(0, limit);
+        }
     
         const leadSNPTrace = {
             x: [],
@@ -282,10 +294,10 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             },
             hoverinfo: 'text',
             showlegend: false,
-            name: `Lead SNPs (${selectedCohort})`
+            name: `Lead SNPs (${selectedCohort}) - Top ${filterLimit === 'all' ? 'All' : filterLimit}`
         };
     
-        leadSNPs.forEach(snp => {
+        filteredSNPs.forEach(snp => {
             const chr = parseInt(snp.lead_snp.position.chromosome, 10) - 1;
             const pos = parseInt(snp.lead_snp.position.position, 10);
             const log10p = parseFloat(snp.lead_snp.log10p);
@@ -304,6 +316,46 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     
         return leadSNPTrace;
     };
+    // const prepareLeadSNPData = () => {
+    //     if (!leadSNPs.length) return null;
+    
+    //     const leadSNPTrace = {
+    //         x: [],
+    //         y: [],
+    //         text: [],
+    //         type: 'scattergl',
+    //         mode: 'markers',
+    //         marker: {
+    //             symbol: 'diamond',
+    //             size: 8,
+    //             color: '#000000',
+    //             line: { color: '#FFFFFF', width: 2 },
+    //             opacity: 1
+    //         },
+    //         hoverinfo: 'text',
+    //         showlegend: false,
+    //         name: `Lead SNPs (${selectedCohort})`
+    //     };
+    
+    //     leadSNPs.forEach(snp => {
+    //         const chr = parseInt(snp.lead_snp.position.chromosome, 10) - 1;
+    //         const pos = parseInt(snp.lead_snp.position.position, 10);
+    //         const log10p = parseFloat(snp.lead_snp.log10p);
+            
+    //         const normalizedPos = normalizePosition(chr, pos);
+    //         leadSNPTrace.x.push(normalizedPos);
+    //         leadSNPTrace.y.push(log10p);
+    //         leadSNPTrace.text.push(
+    //             `Lead SNP: ${snp.lead_snp.rsid}<br>` +
+    //             `Chromosome: ${chr + 1}<br>` +
+    //             `Position: ${pos.toLocaleString()}<br>` +
+    //             `Log10P: ${log10p.toFixed(2)}<br>` +
+    //             `Population: ${snp.cohort}`
+    //         );
+    //     });
+    
+    //     return leadSNPTrace;
+    // };
 
     const extractValue = (textParts, key) => {
         const part = textParts.find((p) => p.startsWith(`${key}:`));

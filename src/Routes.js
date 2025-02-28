@@ -11,6 +11,7 @@ import AuthPage from './components/AuthPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import HomoSapieus from './pages/HomoSapieus';
 import LandingPageHomo from './pages/LandingHomoSapieus';
+import DownloadsPage from './pages/Downloads';
 const AppLayout = () => {
   const location = useLocation();
   const isHomoSapieusPage = location.pathname === '/homosapieus' || location.pathname === '/landingPageHomo';
@@ -23,6 +24,8 @@ const AppLayout = () => {
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/homosapieus" element={<HomoSapieus />} />
           <Route path="/landingPageHomo" element={<LandingPageHomo />} />
+          <Route path="/downloads" element={<DownloadsPage />} />
+
 
           {/* Protected Routes */}
           <Route path="/platlas" element={

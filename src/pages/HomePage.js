@@ -827,9 +827,9 @@ export const HomePage = () => {
 </div>
 
           {/* Teams Section */}
-          <div id="summary" className="scroll-mt-16">
+          {/* <div id="summary" className="scroll-mt-16">
   <SummarySection />
-</div>
+</div> */}
 
           {/* Summary Section */}
           <div id="paper" className="scroll-mt-16">

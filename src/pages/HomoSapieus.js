@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Send, ArrowLeft, Menu, X, Stethoscope } from 'lucide-react';
+import { Send, ArrowLeft, Menu, X, Stethoscope, Fish, ChartPieIcon, BracesIcon } from 'lucide-react';
 import { 
     Brain, 
     Users, 
@@ -51,7 +51,14 @@ const modelOptions = [
       modelType: 'patient-reports'
     }
   ];
-  
+  const gradientTextStyle = {
+    fontFamily: 'postnobillscolombo-SemiBold !important',
+    background: 'linear-gradient(to right, #ffffff, #ffffff, #a89e9e)',
+    WebkitBackgroundClip: 'text',
+    backgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    display: 'inline-block',
+  };
   const ModelDocumentationModal = ({ isOpen, onClose }) => {
     if (!isOpen) return null;
     
@@ -60,7 +67,7 @@ const modelOptions = [
         <div className="relative bg-white rounded-lg w-full max-w-4xl my-8">
           {/* Modal Header */}
           <div className="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center rounded-t-lg">
-            <h2 className="text-2xl font-semibold">Model Documentation</h2>
+            <h2 className="text-xl font-semibold">Model Documentation</h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
@@ -73,75 +80,75 @@ const modelOptions = [
             {/* 1. Clinical Decision Support */}
             <section>
               <h3 className="text-xl font-bold">1. Clinical Decision Support</h3>
-              <p className="mt-2 font-medium">What it is:</p>
+              <p className="mt-2 text-sm">What it is:</p>
               <p>A tool that helps doctors make informed decisions by analyzing a patient’s medical notes, genetic data (SNPs), and observed traits (phenotypes).</p>
-              <p className="mt-2 font-medium">How it works:</p>
+              <p className="mt-2 text-sm">How it works:</p>
               <ul className="list-disc list-inside ml-4">
                 <li><strong>Data Analysis:</strong> The system takes in patient history and genetic data.</li>
                 <li><strong>Risk Assessment:</strong> It calculates the risk of developing certain diseases based on patterns in the data.</li>
                 <li><strong>Actionable Insights:</strong> It suggests which additional tests might be needed or which treatment options could be the best fit.</li>
               </ul>
-              <p className="mt-2 font-medium">Example:</p>
+              <p className="mt-2 text-sm">Example:</p>
               <p>A doctor enters a patient’s history along with their genetic profile. The system then flags a high risk for a heart condition based on certain SNPs and recommends a closer cardiac evaluation.</p>
             </section>
             
             {/* 2. Variant Interpretation */}
             <section>
               <h3 className="text-xl font-bold">2. Variant Interpretation</h3>
-              <p className="mt-2 font-medium">What it is:</p>
+              <p className="mt-2 text-sm">What it is:</p>
               <p>A feature that explains what specific genetic variations (SNPs) might mean for a patient’s health.</p>
-              <p className="mt-2 font-medium">How it works:</p>
+              <p className="mt-2 text-sm">How it works:</p>
               <ul className="list-disc list-inside ml-4">
                 <li><strong>Identification:</strong> The system identifies which genetic variants are present.</li>
                 <li><strong>Contextual Explanation:</strong> It provides evidence-based interpretations (e.g., “This SNP is known to increase cholesterol levels, which may lead to heart disease.”)</li>
                 <li><strong>Link to Research:</strong> It connects these interpretations to current research or clinical guidelines.</li>
               </ul>
-              <p className="mt-2 font-medium">Example:</p>
+              <p className="mt-2 text-sm">Example:</p>
               <p>A patient’s SNP data shows a variant associated with a higher risk of diabetes. The system explains the connection, cites supporting studies, and might suggest monitoring blood sugar levels.</p>
             </section>
             
             {/* 3. Population Health Insights */}
             <section>
               <h3 className="text-xl font-bold">3. Population Health Insights</h3>
-              <p className="mt-2 font-medium">What it is:</p>
+              <p className="mt-2 text-sm">What it is:</p>
               <p>A tool designed to compare and analyze diverse cohort data (AFR, AMR, EUR, etc.) for public health trends.</p>
-              <p className="mt-2 font-medium">How it works:</p>
+              <p className="mt-2 text-sm">How it works:</p>
               <ul className="list-disc list-inside ml-4">
                 <li><strong>Data Aggregation:</strong> It compiles data from thousands of patients across various cohorts.</li>
                 <li><strong>Comparative Analysis:</strong> Researchers can compare how genetic variants and traits differ among groups.</li>
                 <li><strong>Discover New Insights:</strong> This can lead to identifying population-specific risk factors or understanding how a disease manifests differently across populations.</li>
               </ul>
-              <p className="mt-2 font-medium">Example:</p>
+              <p className="mt-2 text-sm">Example:</p>
               <p>Researchers studying cardiovascular disease might discover that a particular SNP is more prevalent in the AFR cohort compared to the EUR cohort, suggesting the need for tailored treatments.</p>
             </section>
             
             {/* 4. Research Portal */}
             <section>
               <h3 className="text-xl font-bold">4. Research Portal</h3>
-              <p className="mt-2 font-medium">What it is:</p>
+              <p className="mt-2 text-sm">What it is:</p>
               <p>A platform enabling researchers to explore genotype-phenotype correlations across millions of SNPs for novel discoveries.</p>
-              <p className="mt-2 font-medium">How it works:</p>
+              <p className="mt-2 text-sm">How it works:</p>
               <ul className="list-disc list-inside ml-4">
                 <li><strong>Data Exploration:</strong> In-depth search and exploration across vast SNP data.</li>
                 <li><strong>Hypothesis Generation:</strong> Researchers can identify new candidate genes or variant clusters linked to diseases.</li>
                 <li><strong>Integration with Literature:</strong> It connects to external research articles and databases to support findings.</li>
               </ul>
-              <p className="mt-2 font-medium">Example:</p>
+              <p className="mt-2 text-sm">Example:</p>
               <p>A researcher uses the portal to explore potential links between a set of SNPs and the manifestation of autoimmune diseases, identifying a novel candidate gene for further investigation.</p>
             </section>
             
             {/* 5. Personalized Patient Reports */}
             <section>
               <h3 className="text-xl font-bold">5. Personalized Patient Reports</h3>
-              <p className="mt-2 font-medium">What it is:</p>
+              <p className="mt-2 text-sm">What it is:</p>
               <p>A feature that generates clear, personalized health reports and recommendations for individual patients.</p>
-              <p className="mt-2 font-medium">How it works:</p>
+              <p className="mt-2 text-sm">How it works:</p>
               <ul className="list-disc list-inside ml-4">
                 <li><strong>Simplified Reports:</strong> Translates complex genomic data into easy-to-understand summaries.</li>
                 <li><strong>Actionable Advice:</strong> Provides personalized recommendations, including lifestyle changes and preventive measures.</li>
                 <li><strong>Secure Access:</strong> Patients can view these reports via a secure online portal.</li>
               </ul>
-              <p className="mt-2 font-medium">Example:</p>
+              <p className="mt-2 text-sm">Example:</p>
               <p>A patient logs into the portal and reviews their personalized health report. The report details their genetic predispositions, explains potential health risks in simple terms, and suggests proactive measures such as dietary modifications and regular exercise.</p>
             </section>
             
@@ -171,7 +178,7 @@ const modelOptions = [
         <div className="relative bg-white rounded-lg w-full max-w-3xl my-8">
           {/* Header - Fixed at top */}
           <div className="sticky top-0 bg-white px-6 py-4 border-b flex justify-between items-center rounded-t-lg">
-            <h2 className="text-2xl font-semibold">API Reference</h2>
+            <h2 className="text-xl font-semibold">API Reference</h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500 hover:text-gray-700"
@@ -183,7 +190,7 @@ const modelOptions = [
           <div className="space-y-8 p-4">
             {/* Document Upload Section */}
             <section>
-              <h3 className="text-xl font-medium mb-4">Document Upload</h3>
+              <h3 className="text-xl text-sm mb-4">Document Upload</h3>
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <p className="text-sm text-gray-600">
                   Upload documents to enhance the model's knowledge base. Available only for @platlas.com and @homosapieus.com email domains.
@@ -198,7 +205,7 @@ const modelOptions = [
   
             {/* Data Integration & Standardization Section */}
             <section>
-              <h3 className="text-xl font-medium mb-4">Data Integration & Standardization</h3>
+              <h3 className="text-xl text-sm mb-4">Data Integration & Standardization</h3>
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <p className="text-sm text-gray-600">
                   Our platform ingests and harmonizes multiple data types to ensure consistency and accuracy:
@@ -234,31 +241,31 @@ const modelOptions = [
   
             {/* Chat Models Section */}
             <section>
-              <h3 className="text-xl font-medium mb-4">Available Models</h3>
+              <h3 className="text-xl text-sm mb-4">Available Models</h3>
               <div className="space-y-4">
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-2">PLatlas</h4>
+                  <h4 className="text-sm mb-2">PLatlas</h4>
                   <p className="text-sm text-gray-600">
                     Retrieval-Augmented Generation (RAG) model trained on custom data. Uses uploaded documents for context-aware responses.
                   </p>
                 </div>
   
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-2">HomoSapieus</h4>
+                  <h4 className="text-sm mb-2">HomoSapieus</h4>
                   <p className="text-sm text-gray-600">
                     Pre-trained language model optimized for general conversation and task completion.
                   </p>
                 </div>
   
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-2">Gemini</h4>
+                  <h4 className="text-sm mb-2">Gemini</h4>
                   <p className="text-sm text-gray-600">
                     Google's advanced language model integrated for enhanced capabilities.
                   </p>
                 </div>
   
                 <div className="border rounded-lg p-4">
-                  <h4 className="font-medium mb-2">GPT</h4>
+                  <h4 className="text-sm mb-2">GPT</h4>
                   <p className="text-sm text-gray-600">
                     OpenAI's language model for general-purpose conversation and tasks.
                   </p>
@@ -268,10 +275,10 @@ const modelOptions = [
   
             {/* Chat Features Section */}
             <section>
-              <h3 className="text-xl font-medium mb-4">Chat Features</h3>
+              <h3 className="text-xl text-sm mb-4">Chat Features</h3>
               <div className="space-y-4">
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium mb-2">Conversation Management</h4>
+                  <h4 className="text-sm mb-2">Conversation Management</h4>
                   <ul className="list-disc list-inside text-sm text-gray-600 ml-4">
                     <li>Create new conversations</li>
                     <li>Access conversation history</li>
@@ -281,7 +288,7 @@ const modelOptions = [
                 </div>
                 
                 <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-medium mb-2">Model Selection</h4>
+                  <h4 className="text-sm mb-2">Model Selection</h4>
                   <p className="text-sm text-gray-600">
                     Switch between different models during conversation for optimal results:
                   </p>
@@ -299,6 +306,191 @@ const modelOptions = [
     );
   };
   
+  const ChatMessage = ({ message, role }) => {
+    let displayText = "";
+    let plotData = null;
+    
+    // Parse content
+    let contentObj;
+    try {
+      contentObj = typeof message.content === 'string' 
+        ? JSON.parse(message.content) 
+        : message.content;
+    } catch (e) {
+      contentObj = message.content;
+    }
+  
+    // Handle content parsing
+    if (typeof contentObj === 'string') {
+      displayText = contentObj;
+    } else if (contentObj && typeof contentObj === 'object') {
+      if (contentObj.type === 'plot_request') {
+        plotData = contentObj;
+        displayText = contentObj.information || contentObj.message || '';
+      } else {
+        displayText = contentObj.information || contentObj.message || JSON.stringify(contentObj);
+      }
+    }
+  
+    // Function to render data links section
+    const renderDataLinks = (links) => {
+      if (!links) return null;
+      
+      // If links is a single object, convert it to an array
+      const linksArray = Array.isArray(links) ? links : [links];
+      
+      return (
+        <div className="mt-4 bg-black/20 rounded-lg p-4 text-sm">
+          <h4 className="text-sm mb-2 text-purple-200">Download Data:</h4>
+          <div className="space-y-2">
+            {linksArray.map((link, index) => (
+              <div key={index} className="border-b border-white/10 pb-2 last:border-0">
+                {link.data_file && (
+                  <a 
+                    href={link.data_file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-blue-300 hover:text-blue-200 transition-colors"
+                  >
+                    📥 Download Data File {index + 1}
+                  </a>
+                )}
+                {link.index_file && (
+                  <a 
+                    href={link.index_file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-blue-300 hover:text-blue-200 transition-colors mt-1"
+                  >
+                    📑 Download Index File {index + 1}
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+  
+    return (
+      <div className="mb-6 px-6">
+        <div className={`flex gap-4 max-w-3xl ${role === "user" ? "ml-auto flex-row-reverse" : ""}`}>
+          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${
+            role === "assistant" ? "bg-purple-500/20 text-white" : "bg-white/10 text-white"
+          }`}>
+            {role === "assistant" ? "HS" : "Y"}
+          </div>
+          <div className={`flex-1 ${role === "user" ? "text-right" : ""}`}>
+            <div className={`inline-block space-y-4 whitespace-pre-wrap break-words max-w-full rounded-2xl px-4 py-2 shadow-sm ${
+              role === "assistant" ? "bg-zinc-800/50 backdrop-blur-md text-white border border-white/10" : "bg-purple-500/20 text-white"
+            }`}>
+             
+              {plotData && plotData.status === "success" && plotData.plot_url && (
+                <div className="mt-4 space-y-4">
+                  <div className="border border-white/10 rounded-lg overflow-hidden">
+                    <img
+                      src={plotData.plot_url}
+                      alt={`Plot for ${plotData.details.phenotype_id}`}
+                      className="w-full h-auto"
+                      onError={(e) => {
+                        console.error("Error loading image:", e);
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </div>
+                  <div className="bg-black/20 rounded-lg p-4 text-sm">
+                    <h4 className="text-sm mb-2">Plot Details:</h4>
+                    <ul className="space-y-1">
+                      <li><span className="text-gray-400">Phenotype:</span> {plotData.details.phenotype_id}</li>
+                      <li><span className="text-gray-400">Study Type:</span> {plotData.details.study_type}</li>
+                      <li><span className="text-gray-400">Population:</span> {plotData.details.population}</li>
+                      <li><span className="text-gray-400">P-value Threshold:</span> {plotData.details.pval_threshold}</li>
+                    </ul>
+                  </div>
+                </div>
+              )}
+  
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {displayText}
+              </ReactMarkdown>
+  
+              {/* Render data links for both plot requests and general analysis */}
+              {contentObj && contentObj.data_links && renderDataLinks(contentObj.data_links)}
+  
+              {plotData && plotData.status === "error" && (
+                <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-sm">
+                  <h4 className="text-sm mb-2 text-red-400">Error Details:</h4>
+                  <p className="text-white/80">{plotData.message}</p>
+                  {plotData.details && (
+                    <div className="mt-2">
+                      <ul className="space-y-1">
+                        <li><span className="text-gray-400">Phenotype:</span> {plotData.details.phenotype_id}</li>
+                        <li><span className="text-gray-400">Study Type:</span> {plotData.details.study_type}</li>
+                        <li><span className="text-gray-400">Population:</span> {plotData.details.population}</li>
+                        <li><span className="text-gray-400">P-value Threshold:</span> {plotData.details.pval_threshold}</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+    
+  
+
+const ProgressiveLoadingMessages = () => {
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  
+  const loadingMessages = [
+    "Analyzing your query...",
+    "Fetching relevant data...",
+    "Building context from databases...",
+    "Processing genomic information...",
+    "Consulting research papers...",
+    "Generating comprehensive response..."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentMessageIndex((prevIndex) => 
+        prevIndex < loadingMessages.length - 1 ? prevIndex + 1 : prevIndex
+      );
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="px-6 mb-6">
+      <div className="flex gap-4 max-w-3xl">
+        <div className="w-8 h-8 rounded-full bg-purple-500/20 text-white flex items-center justify-center text-sm">
+          HS
+        </div>
+        <div className="bg-zinc-800/50 backdrop-blur-md rounded-2xl px-4 py-2 shadow-sm flex items-center border border-white/10">
+          <div className="flex flex-col gap-2">
+            {loadingMessages.slice(0, currentMessageIndex + 1).map((message, index) => (
+              <div 
+                key={index} 
+                className="flex items-center gap-2 text-gray-300"
+                style={{
+                  opacity: index === currentMessageIndex ? 1 : 0.5
+                }}
+              >
+                <span className="w-2 h-2 bg-white/40 rounded-full animate-pulse"/>
+                <span>{message}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
   
 const HomoSapieus = () => {
   const navigate = useNavigate();
@@ -309,6 +501,7 @@ const HomoSapieus = () => {
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [selectedOption, setSelectedOption] = useState('HomoSapieus');
+  const [selectUploadOption, setselectUploadOption] = useState('platlas');
   const [isDocsModalOpen, setIsDocsModalOpen] = useState(false);
   const [isDownloadSidebarOpen, setIsDownloadSidebarOpen] = useState(false);
   const [file, setFile] = useState(null);
@@ -322,6 +515,9 @@ const HomoSapieus = () => {
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [currentConversationId, setCurrentConversationId] = useState(null);
+
+  const [selectedDatabase, setSelectedDatabase] = useState(null);
+  const [showProgressiveLoading, setShowProgressiveLoading] = useState(false);
 
   const handleLoginSuccess = (userData) => {
     setUser(userData);
@@ -386,15 +582,15 @@ const HomoSapieus = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('sourceType', selectedOption.toLowerCase());
+    formData.append('database', selectUploadOption.toLowerCase());  // Changed from selectedOption
 
     try {
-    //   const response = await axios.post(`${baseURL}/documents/upload`, formData, {
-    //     headers: {
-    //       Authorization: `Bearer ${localStorage.getItem('token')}`,
-    //       'Content-Type': 'multipart/form-data',
-    //     },
-    //   });
+      // const response = await axios.post(`${baseURL}/documents/upload`, formData, {
+      //   headers: {
+      //     Authorization: `Bearer ${localStorage.getItem('token')}`,
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
     const response = await axios.post(`/api/aiapi/documents/upload`, formData, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -412,175 +608,222 @@ const HomoSapieus = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
-
+  
     // If no current conversation ID, create one
     if (!currentConversationId) {
-        const newConversationId = crypto.randomUUID();
-        setCurrentConversationId(newConversationId);
+      const newConversationId = crypto.randomUUID();
+      setCurrentConversationId(newConversationId);
     }
-
-    // Add the message to the current conversation
+  
+    // Add the user message to the current conversation
     const newMessage = { role: 'user', content: inputValue };
     setMessages(prev => [...prev, newMessage]);
     setInputValue('');
-    setIsTyping(true);
-
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-            setIsLoginModalOpen(true);
-            return;
-        }
-
-        const response = await axios.post(
-            // `${baseURL}/chat/message`,
-            `/api/aiapi/chat/message`,
-            {
-                message: inputValue,
-                sourceType: selectedOption.toLowerCase(),
-                conversationId: currentConversationId,  // Always include the conversation ID
-            },
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-
-        // Add the assistant's response to the current conversation
-        const assistantMessage = { 
-            role: 'assistant', 
-            content: response.data.message 
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-
-        // Update conversations list to include this new message
-        setConversations(prev => {
-            const updatedConversations = [...prev];
-            const currentConversationIndex = updatedConversations.findIndex(
-                conv => conv.id === currentConversationId
-            );
-
-            if (currentConversationIndex === -1) {
-                // This is a new conversation
-                updatedConversations.unshift({
-                    id: currentConversationId,
-                    messages: [newMessage, assistantMessage]
-                });
-            } else {
-                // Update existing conversation
-                updatedConversations[currentConversationIndex].messages.push(
-                    newMessage,
-                    assistantMessage
-                );
-            }
-
-            return updatedConversations;
-        });
-
-    } catch (error) {
-        console.error('Error sending message:', error);
-        // Optionally show error to user
-    } finally {
-        setIsTyping(false);
-    }
-};
+    
+    // Show progressive loading instead of simple typing indicator
+    setShowProgressiveLoading(true);
   
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsLoginModalOpen(true);
+        return;
+      }
+  
+      const response = await axios.post(
+        // `${baseURL}/chat/message`,
+        `/api/chat/message`,
 
-  const options = [
-    { name: 'HomoSapieus', icon: Brain },
-    { name: 'PLatlas', icon: Brain },  // Added PLatlas option
-    { name: 'Gemini', icon: MessagesSquare },
-    { name: 'Web Search', icon: Search },
-    { name: 'GPT', icon: Brain },
-  ];
-
-  const gradientTextStyle = {
-    fontFamily: 'postnobillscolombo-SemiBold !important',
-    background: 'linear-gradient(to right, #000000, #141414, #a89e9e)',
-    WebkitBackgroundClip: 'text',
-    backgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    display: 'inline-block',
+        {
+          message: inputValue,
+          model: selectedOption,
+          database: selectedDatabase,
+          conversationId: currentConversationId,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      // Add the assistant's response to the current conversation
+      const assistantMessage = { 
+        role: 'assistant', 
+        content: response.data.message
+      };
+      setMessages(prev => [...prev, assistantMessage]);
+  
+      // Update conversations list
+      setConversations(prev => {
+        const updatedConversations = [...prev];
+        const currentConversationIndex = updatedConversations.findIndex(
+          conv => conv.id === currentConversationId
+        );
+  
+        if (currentConversationIndex === -1) {
+          updatedConversations.unshift({
+            id: currentConversationId,
+            messages: [newMessage, assistantMessage]
+          });
+        } else {
+          updatedConversations[currentConversationIndex].messages.push(
+            newMessage,
+            assistantMessage
+          );
+        }
+  
+        return updatedConversations;
+      });
+  
+    } catch (error) {
+      console.error('Error sending message:', error);
+      // Optionally add error handling here
+    } finally {
+      setShowProgressiveLoading(false);
+    }
   };
 
-  return (
-    <div className="flex h-screen bg-gray-50">
+  
+
+const options = [
+  { name: 'HomoSapieus', icon: Brain },
+  { name: 'Gemini-Pro', icon: MessagesSquare },
+  { name: 'Deep Seek (R1)', icon: Fish },
+  { name: 'Chat Gpt o3-mini', icon: ChartPieIcon },
+  { name: 'Mistral-AI', icon: BracesIcon },
+  { name: 'Web Search', icon: Search },
+];
+
+// Add new databaseOptions array:
+const databaseOptions = [
+  { name: 'PLatlas', icon: Database },
+  { name: 'GenBank', icon: Database },
+  { name: 'ClinVar', icon: Database },
+  { name: 'dbSNP', icon: Database },
+];
+
+
+
+
+return (
+
+    <div className="flex h-screen bg-black overflow-hidden">
+      {/* Stars Background */}
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          background: 'radial-gradient(ellipse at bottom, #000000 0%, #090A0F 100%)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }}
+      >
+        {[...Array(200)].map((_, index) => (
+          <div
+            key={index}
+            style={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: `${Math.random() * 3}px`,
+              height: `${Math.random() * 3}px`,
+              background: 'white',
+              borderRadius: '50%',
+              opacity: Math.random(),
+              animation: `twinkle ${Math.random() * 5 + 2}s infinite alternate`,
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Add animation keyframes */}
+      <style>
+        {`
+          @keyframes twinkle {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+          }
+        `}
+      </style>
+
       {/* Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+      <div className="fixed top-0 left-0 right-0 bg-zinc-900/50 backdrop-blur-md border-b border-white/10 z-50">
         <div className="w-full px-8">
           <div className="flex justify-between items-center h-16">
             {/* Left side */}
             <div className="flex items-center gap-4">
-        <button
-          onClick={() => navigate('/landingPageHomo')}
-          className="flex items-center gap-2 text-gray-800 hover:text-gray-900 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span className="font-medium">Back</span>
-        </button>
+              <button
+                onClick={() => navigate('/landingPageHomo')}
+                className="flex items-center gap-2 text-white hover:text-gray-300 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span className="text-sm">Back</span>
+              </button>
 
-        {/* Add the model selector dropdown here */}
-        <div className="relative">
-          <button
-            onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <Brain className="w-5 h-5" />
-            <span>{selectedOption}</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
-
-          {/* Dropdown Menu */}
-          {isModelDropdownOpen && (
-            <div className="absolute top-full mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
-              {modelOptions.map((option) => (
+              {/* Model selector dropdown */}
+              <div className="relative">
                 <button
-                  key={option.name}
-                  onClick={() => {
-                    setSelectedOption(option.name);
-                    setIsModelDropdownOpen(false);
-                  }}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-colors"
                 >
-                  <option.icon className="w-10 h-10 text-gray-600" />
-                  <div className="text-left">
-                    <div className="font-medium text-sm">{option.name}</div>
-                    <div className="text-xs text-gray-500">{option.description}</div>
-                  </div>
-                  {selectedOption === option.name && (
-                    <div className="ml-auto">
-                      <Check className="w-4 h-4 text-green-500" />
-                    </div>
-                  )}
+                  <Brain className="w-5 h-5" />
+                  <span>{selectedOption}</span>
+                  <ChevronDown className="w-4 h-4" />
                 </button>
-              ))}
+
+                {isModelDropdownOpen && (
+                  <div className="absolute top-full mt-1 w-72 bg-zinc-900 rounded-lg shadow-lg border border-white/10 overflow-hidden">
+                    {modelOptions.map((option) => (
+                      <button
+                        key={option.name}
+                        onClick={() => {
+                          setSelectedOption(option.name);
+                          setIsModelDropdownOpen(false);
+                        }}
+                        className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/5 transition-colors relative"
+                        disabled
+                      >
+                        <option.icon className="w-5 h-5 text-gray-400" />
+                        <div className="text-left flex-1 pr-20">
+                          <div className="text-sm text-sm text-gray-300">{option.name}</div>
+                          <div className="text-xs text-gray-500">{option.description}</div>
+                        </div>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 bg-purple-500/20 text-purple-200 text-xs px-2 py-1 rounded-full whitespace-nowrap">
+                          Coming Soon
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-      </div>
 
             {/* Right side */}
             <div className="flex items-center space-x-8">
-            <button
+              <button
                 onClick={() => setIsModelDocModalOpen(true)}
-                className="text-gray-700 hover:text-gray-900 font-medium"
+                className="text-white hover:text-gray-300 text-sm"
               >
                 Model Documentation
               </button>
-            <button
+              <button
                 onClick={() => setIsAPIReferenceModalOpen(true)}
-                className="text-gray-700 hover:text-gray-900 font-medium"
+                className="text-white hover:text-gray-300 text-sm"
               >
                 API Reference
               </button>
               <button
                 onClick={() => setIsDownloadSidebarOpen(true)}
-                className="text-gray-700 hover:text-gray-900 font-medium"
+                className="text-white hover:text-gray-300 text-sm"
               >
                 Downloads
               </button>
               <button
                 onClick={() => setIsLoginModalOpen(true)}
-                className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors"
               >
                 {user ? user.email : 'Login'}
               </button>
@@ -590,57 +833,42 @@ const HomoSapieus = () => {
       </div>
 
       {/* Left sidebar */}
-      <div
-        className={`w-80 bg-white border-r border-gray-200 flex flex-col h-full transition-transform duration-300 ease-in-out fixed mt-16 ${
-          'translate-x-0'
-        }`}
-      >
+      <div className={`w-80 bg-zinc-900/50 backdrop-blur-md border-r border-white/10 flex flex-col h-full transition-transform duration-300 ease-in-out fixed mt-16 ${
+        'translate-x-0'
+      }`}>
         {/* Company Title & Menu */}
-        <div className="p-6 border-b border-gray-100">
+        <div className="p-6 border-b border-white/10">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Brain className="w-7 h-7 text-gray-800" />
+              <Brain className="w-7 h-7 text-white" />
               <span className="text-xl font-semibold font-montserrat-alt" style={gradientTextStyle}>
                 HOMOSAPIEUS
               </span>
             </div>
-            {/* <button
-              onClick={() => {}}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <Menu className="w-5 h-5 text-gray-800" />
-            </button> */}
           </div>
-          {/* New Conversation Button */}
+
           <div className="mb-4">
-            <button
-              className="w-full px-3 py-3 flex items-center gap-3 hover:bg-gray-100 rounded-lg transition-all text-left"
-            >
-              <Stethoscope className="w-5 h-5 text-gray-800" />
-              <span className="text-gray-800">HOMOSAPIEUS EHR</span>
+            <button className="w-full px-3 py-3 flex items-center gap-3 bg-white/5 hover:bg-white/10 rounded-lg transition-all text-left text-white">
+              <Stethoscope className="w-5 h-5" />
+              <span>HOMOSAPIEUS EHR</span>
             </button>
-            {/* <button
-              className="w-full px-3 py-3 flex items-center gap-3 hover:bg-gray-100 rounded-lg transition-all text-left"
-            >
-              <Brain className="w-5 h-5 text-gray-800" />
-              <span className="text-gray-800">HOMOSAPIEUS DISEASE</span>
-            </button> */}
           </div>
-          <div className="w-full h-px bg-gray-200 my-4"></div>
+
+          <div className="w-full h-px bg-white/10 my-4"></div>
 
           <button
             onClick={handleNewConversation}
-            className="w-full bg-gray-800 text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 hover:bg-gray-700 transition-all shadow-sm"
+            className="w-full bg-purple-500/20 text-white rounded-lg px-4 py-2.5 flex items-center justify-center gap-2 hover: bg-[#1A1B1E] transition-all"
           >
             <MessagesSquare className="w-4 h-4" />
-            <span className="font-medium">New Conversation</span>
+            <span className="text-sm">New Conversation</span>
           </button>
         </div>
 
         {/* Recent Conversations */}
         <div className="flex-1 overflow-y-auto py-4">
           <div className="px-4 mb-3">
-            <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+            <h3 className="text-xs text-sm text-gray-400 uppercase tracking-wider">
               Recent Conversations
             </h3>
           </div>
@@ -651,11 +879,11 @@ const HomoSapieus = () => {
                   key={conversation.id}
                   onClick={() => handleConversationSelect(conversation)}
                   className={`w-full text-left px-4 py-3 text-sm transition-colors ${
-                    selectedConversation === conversation.id ? 'bg-gray-100' : 'hover:bg-gray-50'
+                    selectedConversation === conversation.id 
+                      ? 'bg-white/10 text-white' 
+                      : 'text-gray-300 hover:bg-white/5'
                   }`}
                 >
-                  {/* Show a snippet of the conversation.
-                      For example, use the beginning of the first user message or a timestamp. */}
                   {conversation.messages && conversation.messages.length > 0
                     ? conversation.messages[0].content.substring(0, 20) + '...'
                     : 'Conversation'}
@@ -668,163 +896,86 @@ const HomoSapieus = () => {
         </div>
       </div>
 
-      {/* Upload Document Button & Modal */}
-      <div>
-        <button onClick={() => setIsDocsModalOpen(true)}>Upload Document</button>
-        {isDocsModalOpen && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"> 
-            <div className="bg-white rounded-lg p-6 relative">
-              <h2 className="text-xl font-semibold mb-4">Upload Document</h2>
-              <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-                   <div className="mt-4">
-         <label
-           htmlFor="sourceType"
-           className="block text-sm font-medium text-gray-700 mb-1"
-         >
-           Select Source Type:
-         </label>
-         <select
-           id="sourceType"
-           value={selectedOption}
-           onChange={(e) => setSelectedOption(e.target.value)}
-           className="w-full rounded-md border-gray-300 shadow-sm"
-         >
-          <option value="homosapieus">HomoSapieus</option>
-          <option value="platlas">PLatlas</option>
-          <option value="gemini">Gemini</option>
-           <option value="websearch">Web Search</option>
-         <option value="gpt">GPT</option>
-        </select>
-
-       </div>
-              <button onClick={handleFileUpload} className="mt-4 bg-black text-white p-2 px-2 rounded">
-                Upload
-              </button>
-              <button
-                onClick={() => setIsDocsModalOpen(false)}
-                className="mt-4 bg-gray-500 text-white p-2 ml-3 rounded"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Download Sidebar */}
-      <div
-        className={`fixed right-0 top-0 h-full w-80 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-          isDownloadSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div className="p-6 mt-16">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-semibold">Downloads</h2>
-            <button
-              onClick={() => setIsDownloadSidebarOpen(false)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <X className="w-5 h-5 text-gray-800" />
-            </button>
-          </div>
-          {user && (user.email.includes('@platlas.com') || user.email.includes('@homosapieus.com')) && (
-
-          <div className="p-4 border border-gray-200 rounded-lg">
-              <h3 className="font-medium mb-2">Upload Data To Models</h3>
-              {/* <p className="text-sm text-gray-600 mb-3">Version 1.0.0</p> */}
-              <button 
-              onClick={() => setIsDocsModalOpen(true)}
-              className="w-full bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors">
-              Upload Document
-              </button>
-            </div>
-              )}
-
-          <div className="space-y-4">
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <h3 className="font-medium mb-2">HomoSapieus Desktop App</h3>
-              <p className="text-sm text-gray-600 mb-3">Version 1.0.0</p>
-              <button className="w-full bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors">
-                Download for Windows
-              </button>
-            </div>
-            <div className="p-4 border border-gray-200 rounded-lg">
-              <h3 className="font-medium mb-2">Mobile App</h3>
-              <p className="text-sm text-gray-600 mb-3">Available on iOS and Android</p>
-              <div className="space-y-2">
-                <button className="w-full bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors">
-                  Download for iOS
-                </button>
-                <button className="w-full bg-gray-800 text-white rounded-lg px-4 py-2 hover:bg-gray-700 transition-colors">
-                  Download for Android
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main chat area */}
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${
-          'ml-80'
-        } mt-16`}
-      >
-        {/* (If you ever collapse the sidebar, you could add a toggle button here) */}
-
+      <div className={`flex-1 flex flex-col transition-all duration-300 relative z-10 ${
+        'ml-80'
+      } mt-16`}>
         {messages.length === 0 ? (
           // Empty state UI
           <div className="flex-1 flex items-center justify-center px-6">
             <div className="flex-1 flex flex-col items-center justify-center">
               <div className="flex flex-col items-center mb-8">
-                <Brain className="w-16 h-16 text-gray-800 mb-4" />
+                <Brain className="w-16 h-16 text-white mb-4" />
                 <h1
                   className="text-4xl font-semibold mb-2 font-montserrat-alt"
                   style={gradientTextStyle}
                 >
                   HI, I'M HOMOSAPIEUS
                 </h1>
-                <p className="text-xl text-gray-800">How can I help you today?</p>
+                <p className="text-xl text-gray-300">How can I help you today?</p>
               </div>
 
+              {/* Chat input for empty state */}
               <div className="w-full max-w-4xl px-6">
                 <form onSubmit={handleSubmit} className="relative">
-                  <div className="rounded-3xl bg-white shadow-sm">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="Message HomoSapieus"
-                      className="w-full px-6 py-4 bg-transparent focus:outline-none rounded-3xl border-0 ring-0 focus:ring-0"
-                    />
+                  <div className="rounded-3xl bg-[#1A1B1E]  backdrop-blur-md shadow-sm border border-white/10">
+                  <input
+  type="text"
+  value={inputValue}
+  onChange={(e) => setInputValue(e.target.value)}
+  placeholder="Message HomoSapieus"
+  className="w-full px-6 py-4 bg-[#1A1B1E] focus:outline-none focus:ring-0 border-0 rounded-3xl text-white placeholder-gray-400"
+/>
+
                     <button
                       type="submit"
                       disabled={!inputValue.trim()}
-                      className={`absolute right-4 top-4 transition-transform hover:scale-105 ${
-                        !inputValue.trim() ? 'opacity-100' : ''
-                      }`}
+                      className="absolute right-4 top-4 transition-transform hover:scale-105"
                     >
-                      <div className="bg-gray-800 rounded-full p-2">
+                      <div className="bg-purple-500/20 hover: bg-[#1A1B1E] rounded-full p-2 transition-colors">
                         <Send className="w-5 h-5 text-white" />
                       </div>
                     </button>
 
-                    <div className="flex items-center gap-3 px-6 pb-4">
-                      {options.map((option) => (
-                        <button
-                          key={option.name}
-                          type="button"
-                          onClick={() => setSelectedOption(option.name)}
-                          className={`flex items-center gap-2 text-sm transition-all rounded-full px-3 py-1 ${
-                            selectedOption === option.name
-                              ? 'bg-gray-800 bg-opacity-20 text-gray-800'
-                              : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                          }`}
-                        >
-                          <option.icon className="w-4 h-4" />
-                          <span>{option.name}</span>
-                        </button>
-                      ))}
+                    {/* Options rows */}
+                    <div className="flex flex-col gap-2 px-6 pb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400">Models:</span>
+                        {options.map((option) => (
+                          <button
+                            key={option.name}
+                            type="button"
+                            onClick={() => setSelectedOption(option.name)}
+                            className={`flex items-center gap-2 text-xs transition-all rounded-full py-1 ${
+                              selectedOption === option.name
+                                ? 'bg-purple-500/20 text-white p-2'
+                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <option.icon className="w-4 h-4" />
+                            <span>{option.name}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400">Databases:</span>
+                        {databaseOptions.map((option) => (
+                          <button
+                            key={option.name}
+                            type="button"
+                            onClick={() => setSelectedDatabase(option.name)}
+                            className={`flex items-center gap-2 text-xs transition-all rounded-full px-3 py-1 ${
+                              selectedDatabase === option.name
+                                ? 'bg-purple-500/20 text-white p-2'
+                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <option.icon className="w-4 h-4" />
+                            <span>{option.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </form>
@@ -832,111 +983,105 @@ const HomoSapieus = () => {
             </div>
           </div>
         ) : (
+          // Chat messages UI
           <>
-            {/* Chat messages UI */}
-            <div className="flex-1 overflow-y-auto">
-              <div className="max-w-4xl mx-auto pt-6">
-                {messages.map((message, index) => (
-                  <div key={index} className="mb-6 px-6">
-                    <div
-                      className={`flex gap-4 max-w-3xl ${
-                        message.role === 'user' ? 'ml-auto flex-row-reverse' : ''
-                      }`}
-                    >
-                      <div
-                        className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${
-                          message.role === 'assistant'
-                            ? 'bg-gray-800 text-white'
-                            : 'bg-gray-200 text-gray-800'
-                        }`}
-                      >
-                        {message.role === 'assistant' ? 'HS' : 'Y'}
-                      </div>
-                      <div className={`flex-1 ${message.role === 'user' ? 'text-right' : ''}`}>
-                        <div
-                          className={`inline-block whitespace-pre-wrap break-words max-w-full rounded-2xl px-4 py-2 shadow-sm ${
-                            message.role === 'assistant'
-                              ? 'bg-white text-gray-800'
-                              : 'bg-gray-800 text-white'
-                          }`}
-                        >
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {isTyping && (
-                  <div className="px-6 mb-6">
-                    <div className="flex gap-4 max-w-3xl">
-                      <div className="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center justify-center text-sm">
-                        HS
-                      </div>
-                      <div className="bg-white rounded-2xl px-4 py-2 shadow-sm flex items-center">
-                        <div className="flex gap-1">
-                          <span
-                            className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
-                            style={{ animationDelay: '0ms' }}
-                          />
-                          <span
-                            className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
-                            style={{ animationDelay: '200ms' }}
-                          />
-                          <span
-                            className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
-                            style={{ animationDelay: '400ms' }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-            </div>
+            {/* In your HomoSapieus.js file */}
+<div className="flex-1 overflow-y-auto">
+<div className="max-w-4xl mx-auto pt-6">
+  {messages.map((message, index) => (
+    <ChatMessage 
+      key={index}
+      message={message}
+      role={message.role}
+    />
+  ))}
+      {showProgressiveLoading && <ProgressiveLoadingMessages />}
+
+  {/* Keep the typing indicator as is */}
+  {/* {isTyping && (
+    <div className="px-6 mb-6">
+      <div className="flex gap-4 max-w-3xl">
+        <div className="w-8 h-8 rounded-full bg-purple-500/20 text-white flex items-center justify-center text-sm">
+          HS
+        </div>
+        <div className="bg-zinc-800/50 backdrop-blur-md rounded-2xl px-4 py-2 shadow-sm flex items-center border border-white/10">
+          <div className="flex gap-1">
+            {[0, 200, 400].map((delay) => (
+              <span
+                key={delay}
+                className="w-2 h-2 bg-white/40 rounded-full animate-bounce"
+                style={{ animationDelay: `${delay}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )} */}
+  <div ref={messagesEndRef} />
+</div>
+</div>
 
             {/* Chat input form */}
             <div className="p-6">
               <div className="max-w-4xl mx-auto">
                 <form onSubmit={handleSubmit} className="relative">
-                  <div className="rounded-3xl bg-white shadow-sm">
+                  <div className="rounded-3xl bg-[#1A1B1E] backdrop-blur-md shadow-sm border border-white/10">
                     <input
                       type="text"
                       value={inputValue}
                       onChange={(e) => setInputValue(e.target.value)}
                       placeholder="Message HomoSapieus"
-                      className="w-full px-6 py-4 bg-transparent focus:outline-none rounded-3xl border-0 ring-0 focus:ring-0"
-                    />
+                      className="w-full px-6 py-4 bg-[#1A1B1E] focus:outline-none focus:ring-0 border-0 rounded-3xl text-white placeholder-gray-400"
+                      />
                     <button
                       type="submit"
                       disabled={!inputValue.trim()}
-                      className={`absolute right-4 top-4 transition-transform hover:scale-105 ${
-                        !inputValue.trim() ? 'opacity-100' : ''
-                      }`}
+                      className="absolute right-4 top-4 transition-transform hover:scale-105"
                     >
-                      <div className="bg-gray-800 rounded-full p-2">
+                      <div className="bg-purple-500/20 hover: bg-[#1A1B1E] rounded-full p-2 transition-colors">
                         <Send className="w-5 h-5 text-white" />
                       </div>
                     </button>
 
-                    <div className="flex items-center gap-3 px-6 pb-4">
-                      {options.map((option) => (
-                        <button
-                          key={option.name}
-                          type="button"
-                          onClick={() => setSelectedOption(option.name)}
-                          className={`flex items-center gap-2 text-sm transition-all rounded-full px-3 py-1 ${
-                            selectedOption === option.name
-                              ? 'bg-gray-800 bg-opacity-20 text-gray-800'
-                              : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-700'
-                          }`}
-                        >
-                          <option.icon className="w-4 h-4" />
-                          <span>{option.name}</span>
-                        </button>
-                      ))}
+                    <div className="flex flex-col gap-2 px-6 pb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400">Models:</span>
+                        {options.map((option) => (
+                          <button
+                            key={option.name}
+                            type="button"
+                            onClick={() => setSelectedOption(option.name)}
+                            className={`flex items-center gap-2 text-sm transition-all rounded-full py-1 ${
+                              selectedOption === option.name
+                                ? 'bg-purple-500/20 text-white p-2' 
+                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <option.icon className="w-4 h-4" />
+                            <span>{option.name}</span>
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-400">Databases:</span>
+                        {databaseOptions.map((option) => (
+                          <button
+                            key={option.name}
+                            type="button"
+                            onClick={() => setSelectedDatabase(option.name)}
+                            className={`flex items-center gap-2 text-xs transition-all rounded-full px-3 py-1 ${
+                              selectedDatabase === option.name
+                                ? 'bg-purple-500/20 text-white p-2'
+                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                            }`}
+                          >
+                            <option.icon className="w-4 h-4" />
+                            <span>{option.name}</span>
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </form>
@@ -946,21 +1091,122 @@ const HomoSapieus = () => {
         )}
       </div>
 
+      {/* Dark theme modals */}
+      {isDocsModalOpen && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]"> 
+      <div className="bg-zinc-900 rounded-lg p-6 relative border border-white/10">
+        <h2 className="text-xl font-semibold mb-4 text-white">Upload Document</h2>
+        <input 
+          type="file" 
+          onChange={(e) => setFile(e.target.files[0])} 
+          className="text-gray-300"
+        />
+        <div className="mt-4">
+          <label
+            htmlFor="database"
+            className="block text-sm text-sm text-gray-300 mb-1"
+          >
+            Select Source Type:
+          </label>
+          <select
+            id="database"
+            value={selectUploadOption}  // Changed from selectedOption
+            onChange={(e) => setselectUploadOption(e.target.value)}  // Changed from setSelectedOption
+            className="w-full rounded-md bg-zinc-800 border-white/10 text-white"
+          >
+            <option value="platlas">PLatlas</option>
+            <option value="homosapieus">HomoSapieus</option>
+          </select>
+        </div>
+        <div className="flex gap-3 mt-4">
+          <button 
+            onClick={handleFileUpload} 
+            className="bg-white hover: bg-[#1A1B1E] text-black p-2 px-4 rounded-lg transition-colors"
+          >
+            Upload
+          </button>
+          <button
+            onClick={() => setIsDocsModalOpen(false)}
+            className="bg-white/10 hover:bg-white/20 text-white p-2 px-4 rounded-lg transition-colors"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+      {/* Download Sidebar - Dark theme */}
+      <div
+        className={`fixed right-0 top-0 h-full w-80 bg-zinc-900/50 backdrop-blur-md shadow-lg z-50 transform transition-transform duration-300 ease-in-out border-l border-white/10 ${
+          isDownloadSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        <div className="p-6 mt-16">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-white">Downloads</h2>
+            <button
+              onClick={() => setIsDownloadSidebarOpen(false)}
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-gray-300"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {user && (user.email.includes('@platlas.com') || user.email.includes('@homosapieus.com')) && (
+            <div className="p-4 border border-white/10 rounded-lg bg-white/5">
+              <h3 className="text-sm mb-2 text-white">Upload Data To Models</h3>
+              <button 
+                onClick={() => setIsDocsModalOpen(true)}
+                className="w-full bg-white text-black rounded-lg px-4 py-2 hover: bg-[#1A1B1E] transition-colors"
+              >
+                Upload Document
+              </button>
+            </div>
+          )}
+
+          <div className="space-y-4 mt-4">
+            <div className="p-4 border border-white/10 rounded-lg bg-white/5">
+              <h3 className="text-sm mb-2 text-white">HomoSapieus Desktop App</h3>
+              <p className="text-sm text-white mb-3">Version 1.0.0</p>
+              <button className="w-full bg-white text-black rounded-lg px-4 py-2 hover: bg-[#1A1B1E] transition-colors">
+                Download for Windows
+              </button>
+            </div>
+
+            <div className="p-4 border border-white/10 rounded-lg bg-white/5">
+              <h3 className="text-sm mb-2 text-white">Mobile App</h3>
+              <p className="text-sm text-white mb-3">Available on iOS and Android</p>
+              <div className="space-y-2">
+                <button className="w-full bg-white text-black rounded-lg px-4 py-2 hover: bg-[#1A1B1E] transition-colors">
+                  Download for iOS
+                </button>
+                <button className="w-full bg-white text-black rounded-lg px-4 py-2 hover: bg-[#1A1B1E] transition-colors">
+                  Download for Android
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
       />
       <APIReferenceModal 
-  isOpen={isAPIReferenceModalOpen}
-  onClose={() => setIsAPIReferenceModalOpen(false)}
-/>
-<ModelDocumentationModal
+        isOpen={isAPIReferenceModalOpen}
+        onClose={() => setIsAPIReferenceModalOpen(false)}
+      />
+      <ModelDocumentationModal
         isOpen={isModelDocModalOpen}
         onClose={() => setIsModelDocModalOpen(false)}
       />
     </div>
-  );
+
+    
+);
 };
 
 export default HomoSapieus;
