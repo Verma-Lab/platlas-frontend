@@ -39,7 +39,8 @@ import {
   BarChart2,
   Network,
   ChevronDown, ChevronUp,
-  ArrowBigDown
+  ArrowBigDown,
+  Download
 } from 'lucide-react';
 import { Database, ChevronRight } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
@@ -87,9 +88,154 @@ const AnimatedDNA = () => (
   </div>
 );
 
-const StatsBar = ({ phenoStats, leadVariants }) => {
+// const StatsBar = ({ phenoStats, leadVariants }) => {
+//   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+//   const [isSnpExpanded, setIsSnpExpanded] = useState(false);
+  
+//   // Group SNP counts by analysis type
+//   const groupedSNPs = useMemo(() => {
+//     const snps = phenoStats.snps_by_cohort || {};
+//     return {
+//       gwama: Object.entries(snps)
+//         .filter(([cohort]) => cohort !== 'ALL')
+//         .reduce((acc, [cohort, count]) => ({...acc, [cohort]: count}), {}),
+//       mrmega: snps['ALL'] || 0
+//     };
+//   }, [phenoStats.snps_by_cohort]);
+
+//   // Calculate total sample size
+//   const totalSampleSize = Object.values(phenoStats.samples_by_cohort || {})[0] || 0;
+  
+//   // Calculate total SNPs across all cohorts
+//   const totalSnps = Object.values(groupedSNPs.gwama).reduce((sum, count) => sum + count, 0) + groupedSNPs.mrmega;
+
+//   // Get cohort badge color
+//   const getCohortColor = (cohort) => {
+//     const colors = {
+//       'EUR': 'from-blue-500 to-blue-600',
+//       'EAS': 'from-emerald-500 to-emerald-600',
+//       'AFR': 'from-amber-500 to-amber-600',
+//       'AMR': 'from-rose-500 to-rose-600',
+//       'SAS': 'from-purple-500 to-purple-600',
+//       'ALL': 'from-indigo-500 to-indigo-600',
+//     };
+//     return colors[cohort] || 'from-gray-500 to-gray-600';
+//   };
+
+//   return (
+//     <div className="grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
+//       {/* SNPs Size - Redesigned with collapsible UI */}
+//       <div className="space-y-2">
+//         <div className="flex items-center justify-between">
+//           <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+//             <Database className="w-4 h-4" />
+//             SNPs Size
+//           </h3>
+//           <button 
+//             onClick={() => setIsSnpExpanded(!isSnpExpanded)}
+//             className="text-blue-600 hover:text-blue-800 text-xs font-medium"
+//           >
+//             {isSnpExpanded ? 'Collapse' : 'View details'}
+//           </button>
+//         </div>
+        
+//         {/* Main SNP counter */}
+//         <div className="px-3 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium flex justify-between items-center">
+//           <span>Total SNPs</span>
+//           <ArrowBigDown/>
+//           {/* <span className="text-lg">{totalSnps.toLocaleString()}</span> */}
+//         </div>
+        
+//         {/* Expandable detail section */}
+//         {isSnpExpanded && (
+//           <div className="mt-2 space-y-1.5 bg-gray-50 p-2 rounded-md max-h-48 overflow-y-auto">
+//             {/* GWAMA SNPs by cohort */}
+//             {Object.entries(groupedSNPs.gwama).map(([cohort, count]) => (
+//               <div 
+//                 key={cohort} 
+//                 className="flex justify-between items-center px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-100"
+//               >
+//                 <div className="flex items-center">
+//                   <span className={`inline-block w-2 h-2 rounded-full bg-gradient-to-r ${getCohortColor(cohort)} mr-2`}></span>
+//                   <span>GWAMA {cohort}</span>
+//                 </div>
+//                 <span>{count.toLocaleString()}</span>
+//               </div>
+//             ))}
+            
+//             {/* MR-MEGA SNPs */}
+//             {groupedSNPs.mrmega > 0 && (
+//               <div className="flex justify-between items-center px-3 py-1.5 rounded-md text-xs font-medium bg-white border border-gray-100">
+//                 <div className="flex items-center">
+//                   <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-600 mr-2"></span>
+//                   <span>MR-MEGA</span>
+//                 </div>
+//                 <span>{groupedSNPs.mrmega.toLocaleString()}</span>
+//               </div>
+//             )}
+//           </div>
+//         )}
+//       </div>
+
+//       {/* Sample Size */}
+//       <div className="space-y-4">
+//         <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+//           <Users className="w-4 h-4" />
+//           Sample Size
+//         </h3>
+//         <div className="flex items-center space-x-2">
+//           <span className="px-3 py-1.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-lg font-medium">
+//             {totalSampleSize.toLocaleString()} <span className='text-sm p-2'>samples</span>
+//           </span>
+//         </div>
+//       </div>
+
+//       {/* Lead Variants */}
+//       <div className="relative">
+//         <div className="space-y-4">
+//           <button
+//             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+//             className="w-full flex items-center justify-between text-sm font-semibold text-gray-600 hover:text-gray-800"
+//           >
+//             <div className="flex items-center gap-2">
+//               <Target className="w-4 h-4" />
+//               Lead Variants ({leadVariants?.length || 0})
+//             </div>
+//             {isDropdownOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+//           </button>
+
+//           {isDropdownOpen && (
+//             <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-lg border border-gray-100 p-4 z-50 max-h-64 overflow-y-auto">
+//               <div className="space-y-3">
+//                 {leadVariants?.map((variant, index) => (
+//                   <div key={index} className="border-b border-gray-100 last:border-0 pb-2 last:pb-0">
+//                     <div className="flex items-center gap-2 mb-1">
+//                       <span className="px-2 py-1 rounded-md text-xs font-medium bg-gray-200">
+//                         {variant.cohort}
+//                       </span>
+//                       <span className="text-sm font-medium text-gray-700">
+//                         {variant.rsid}
+//                       </span>
+//                     </div>
+//                     <div className="text-xs text-gray-500 pl-2 flex items-center gap-4">
+//                       <span>-log10(p): {variant.log10p.toFixed(2)}</span>
+//                       <span>• {variant.n_study} studies</span>
+//                     </div>
+//                   </div>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+const StatsBar = ({ phenoStats, leadVariants, phenoId, selectedCohort, selectedStudy }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isSnpExpanded, setIsSnpExpanded] = useState(false);
+  const [showDownloadModal, setShowDownloadModal] = useState(false);
   
   // Group SNP counts by analysis type
   const groupedSNPs = useMemo(() => {
@@ -108,6 +254,23 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
   // Calculate total SNPs across all cohorts
   const totalSnps = Object.values(groupedSNPs.gwama).reduce((sum, count) => sum + count, 0) + groupedSNPs.mrmega;
 
+  // Generate download links based on current phenotype, cohort, and study
+  const generateDownloadLinks = () => {
+    const population = selectedCohort || 'ALL';
+    const studyType = selectedStudy || 'gwama';
+    
+    // Base URL pattern from DownloadsPage
+    const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats/${population}/${phenoId}.${population}.${studyType}.sumstats.txt`;
+    
+    return {
+      gz: `${baseUrl}.gz`,
+      tbi: `${baseUrl}.gz.tbi`
+    };
+  };
+
+  // Get download links
+  const downloadLinks = generateDownloadLinks();
+
   // Get cohort badge color
   const getCohortColor = (cohort) => {
     const colors = {
@@ -121,8 +284,66 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
     return colors[cohort] || 'from-gray-500 to-gray-600';
   };
 
+  // Download Modal component
+  const DownloadModal = () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Download Summary Statistics</h3>
+          <button onClick={() => setShowDownloadModal(false)} className="text-gray-500 hover:text-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="mb-4">
+          <p className="text-gray-600">
+            Download summary statistics for:
+          </p>
+          <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+            <div className="font-medium">{phenoId}</div>
+            <div className="flex space-x-2 mt-1">
+              <span className="px-2 py-0.5 bg-gray-200 rounded text-xs">
+                {selectedCohort} Population
+              </span>
+              <span className="px-2 py-0.5 bg-gray-200 rounded text-xs">
+                {selectedStudy.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 gap-3 mt-6">
+          <a
+            href={downloadLinks.gz}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download .gz File
+          </a>
+          <a
+            href={downloadLinks.tbi}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition-colors flex items-center justify-center"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download .gz.tbi File
+          </a>
+        </div>
+        
+        <div className="text-xs text-gray-500 mt-4">
+          *These files contain complete summary statistics for the selected phenotype and population.
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-3 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
+    <div className="grid grid-cols-4 gap-8 p-6 bg-white rounded-lg shadow-lg -mt-10 mx-4 relative z-10">
       {/* SNPs Size - Redesigned with collapsible UI */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -227,10 +448,112 @@ const StatsBar = ({ phenoStats, leadVariants }) => {
           )}
         </div>
       </div>
+
+      {/* Download Section - New */}
+      <div className="space-y-4">
+        <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+          <Download className="w-4 h-4" />
+          Download Data
+        </h3>
+        <div>
+          <button
+            onClick={() => setShowDownloadModal(true)}
+            className="w-full px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg text-sm font-medium hover:from-purple-600 hover:to-indigo-700 transition-colors flex items-center justify-center"
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Summary Statistics
+          </button>
+        </div>
+      </div>
+
+      {/* Download Modal */}
+      {showDownloadModal && <DownloadModal />}
     </div>
   );
 };
 
+// const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, phenoStats, onOpenSidebar, leadVariants, selectedStudy }) => {
+//   return (
+//     <div className="relative w-full">
+//       <div 
+//         className="w-full relative overflow-hidden"
+//         style={{
+//           background: 'linear-gradient(135deg, #4F46E5 0%, #2563EB 100%)',
+//           borderRadius: '0 0 2rem 2rem'
+//         }}
+//       >
+//         <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+//           {/* Title and Icon Row with Sidebar Toggle */}
+//           <div className="flex items-center mb-6">
+//             {/* Add sidebar toggle button */}
+//             <button
+//               onClick={onOpenSidebar}
+//               className="mr-6 p-2 rounded-lg bg-white/20 hover:bg-white/30 transition-colors group"
+//               title="View related phenotypes"
+//             >
+//               <div className="space-y-1.5">
+//                 <div className="w-6 h-0.5 bg-white group-hover:scale-x-90 transition-transform origin-left"></div>
+//                 <div className="w-6 h-0.5 bg-white"></div>
+//                 <div className="w-6 h-0.5 bg-white group-hover:scale-x-90 transition-transform origin-left"></div>
+//               </div>
+//             </button>
+
+//             <BarChart2 className="mr-4 h-10 w-10 text-white" />
+            
+//             <div>
+//               <h1 className="text-4xl font-bold text-white mb-2 p-2">
+//                 GWAS Analysis Page
+//               </h1>
+//               <div className="flex items-center space-x-2">
+//                 <span className="text-blue-100 text-lg">Phenotype: </span>
+//                 <div className="flex items-center bg-white/20 rounded-lg overflow-hidden">
+//                   <span className="px-4 py-2 text-white font-semibold text-lg">
+//                     {phenoId}
+//                   </span>
+//                 </div>
+//               </div>
+//             </div>
+//             <div className='p-5 -mt-10'>
+//             <GenerlaBar/>
+
+//             </div>
+
+//           </div>
+//         </div>
+        
+//         <AnimatedDNA />
+        
+//         <Network 
+//           className="absolute left-[10%] top-[20%] opacity-20"
+//           size={30}
+//           color="white"
+//           style={{
+//             animation: 'float 6s ease-in-out infinite'
+//           }}
+//         />
+//         <Share2 
+//           className="absolute right-[15%] bottom-[30%] opacity-20"
+//           size={24}
+//           color="white"
+//           style={{
+//             animation: 'float 6s ease-in-out infinite 1s'
+//           }}
+//         />
+//       </div>
+
+//       <div className="max-w-7xl mx-auto">
+//         <StatsBar phenoStats={phenoStats} leadVariants={leadVariants} />
+//       </div>
+
+//       <style jsx>{`
+//         @keyframes float {
+//           0%, 100% { transform: translateY(0); }
+//           50% { transform: translateY(-20px); }
+//         }
+//       `}</style>
+//     </div>
+//   );
+// };
 const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, phenoStats, onOpenSidebar, leadVariants, selectedStudy }) => {
   return (
     <div className="relative w-full">
@@ -301,7 +624,13 @@ const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, pheno
       </div>
 
       <div className="max-w-7xl mx-auto">
-        <StatsBar phenoStats={phenoStats} leadVariants={leadVariants} />
+        <StatsBar 
+          phenoStats={phenoStats} 
+          leadVariants={leadVariants} 
+          phenoId={phenoId}
+          selectedCohort={selectedCohort}
+          selectedStudy={selectedStudy}
+        />
       </div>
 
       <style jsx>{`
@@ -419,7 +748,7 @@ const StudySelector = ({
 const GWASPage = () => {
   const { phenoId } = useParams();
   const [selectedPval, setSelectedPval] = useState('1e-05'); // Default pval threshold
-  const [selectedStudy, setSelectedStudy] = useState('gwama');
+  const [selectedStudy, setSelectedStudy] = useState('mrmegs');
   const [selectedCohort, setSelectedCohort] = useState(null); // Initialize as null
   const [selectedSNP, setSelectedSNP] = useState(null);
   const [statData, setStatData] = useState([]);
@@ -1089,7 +1418,7 @@ return (
           <Tab eventKey="hudson" title="Compare Ancestries">
             <div className="p-4">
               <div className="bg-gray-100 rounded-lg shadow p-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-800">Ancestry Comparison</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Ancestry Comparison (Significant Analyzed SNPs)</h3>
                 <Hudson
                   dynTop={dynTop}
                   statTop={statTop}

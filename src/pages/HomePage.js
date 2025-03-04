@@ -89,7 +89,7 @@ const StatCard = ({ icon: Icon, label, mainValue, subValues, isVisible }) => {
                 </span>
                 <span className="text-2xl font-bold text-gray-900">
                   {isVisible && subValues.gwama > 0 ? (
-                    <AnimatedCounter end={subValues.gwama} />
+                    <AnimatedCounter end={60297399} />
                   ) : (
                     subValues.gwama.toLocaleString()
                   )}
@@ -707,8 +707,8 @@ export const HomePage = () => {
       try {
         // const response = await fetch(`${baseURL}/getGWASMetadata`);
         const response = await fetch(`/api/getGWASMetadata`);
-
-        console.log(response)
+        console.log('FETCHED META', response)
+        // console.log(response.json())
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();
         
@@ -723,7 +723,7 @@ export const HomePage = () => {
             cohorts: phenoMetadata.map(item => item.cohort)
           };
         });
-        
+        console.log("PROJECT DATA")
         setProjects(projectsData);
         setMetadata(data);
       } catch (err) {
