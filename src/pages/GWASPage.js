@@ -785,9 +785,18 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
         return;
       }
       
-      // Convert -log10(p) to p-values (invert the relationship)
-      max = Math.pow(10, -logMin); // Min -log10(p) gives max p-value
-      min = Math.pow(10, -logMax); // Max -log10(p) gives min p-value
+      // For very large -log10(p) values, use string representation instead
+      if (logMax > 308) { // JavaScript's limit is around 1e-308
+        min = `1e-${logMax}`; // Use string representation for extremely small values
+      } else {
+        min = Math.pow(10, -logMax);
+      }
+      
+      if (logMin > 308) {
+        max = `1e-${logMin}`;
+      } else {
+        max = Math.pow(10, -logMin);
+      }
     } else {
       // Direct p-value entry
       min = parseFloat(minInput);
@@ -800,7 +809,11 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
     }
     
     console.log(`Applying filter with p-value range: ${min} to ${max}`);
-    console.log(`This corresponds to -log10(p) range: ${-Math.log10(max)} to ${-Math.log10(min)}`);
+    console.log(`This corresponds to -log10(p) range: ${
+      typeof max === 'string' ? max.replace('1e-', '') : -Math.log10(max)
+    } to ${
+      typeof min === 'string' ? min.replace('1e-', '') : -Math.log10(min)
+    }`);
     
     onFilterChange({ minPValue: min, maxPValue: max });
   };
