@@ -748,11 +748,10 @@ const StudySelector = ({
 const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [maxInput, setMaxInput] = useState('');
   const [minInput, setMinInput] = useState('');
-
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
-      setMaxInput(maxPValue.toString()); // Raw number, no exponential bullshit
-      setMinInput(minPValue.toString());
+      setMaxInput(maxPValue.toString());
+      setMinInput(minPValue >= 0 ? minPValue.toString() : "0"); // Clamp negative to 0
     }
   }, [maxPValue, minPValue]);
 
@@ -1215,7 +1214,7 @@ const loadMetadata = async () => {
       }
   
       // Set initial range from backend if provided
-      if (data.pValueRange) {
+      if (data.pValueRange && filterMinPValue === null && filterMaxPValue === null) {
         setMaxPValue(data.pValueRange.maxPValue);
         setMinPValue(data.pValueRange.minPValue);
         setFilterMaxPValue(data.pValueRange.maxPValue);
@@ -1400,14 +1399,6 @@ const loadMetadata = async () => {
 
 // Modify the processGWASData function to set the max p-value:
 const processGWASData = (data) => {
-  const maxPVal = determineMaxPValue(data);
-  setMaxPValue(maxPVal);
-
-  // Remove these lines:
-  // if (!currentPValue) {
-  //   setCurrentPValue(maxPVal.toExponential(8));
-  // }
-
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
     snps.map((snp) => ({
       chrom: parseInt(chrom),
@@ -1417,7 +1408,6 @@ const processGWASData = (data) => {
       SNP_ID: snp.id
     }))
   );
-
   generateQQData(df);
   const { dyn, stat, ticks } = generatePlotData(df);
   setDynData(dyn);
