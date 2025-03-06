@@ -1254,6 +1254,7 @@ const loadMetadata = async () => {
       
       console.log(`Fetching GWAS data with: ${queryParams}`);
       const response = await fetch(`/api/queryGWASData?${queryParams}`);
+      console.log('GWAS RESPONSE')
       console.log(response)
       if (response.status === 404) {
         console.log('No data found for the specified range');
