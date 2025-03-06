@@ -1053,6 +1053,53 @@ const loadMetadata = async () => {
   }, [phenoId]);
 
   // Fetch GWAS data based on the selected cohort and p-value
+  // const fetchGWASData = async (cohortId, pval) => {
+  //   const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
+    
+  //   if (cachedData.cohortData[cacheKey]) {
+  //     processGWASData(cachedData.cohortData[cacheKey]);
+  //     return;
+  //   }
+
+  //   try {
+  //     setLoading(true);
+  //     // const response = await fetch(
+  //     //   `${baseURL}/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+  //     // );
+  //     const response = await fetch(
+  //       `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+  //     );
+  //     if (response.status === 404) {
+  //       handleShowModal();
+  //       setDynData([]);
+  //       setStatData([]);
+  //       setTicks([]);
+  //       setQQ(null);
+  //       return;
+  //     }
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+
+  //     const data = await response.json();
+  //     console.log(data)
+  //     setCachedData((prevData) => ({
+  //       ...prevData,
+  //       cohortData: {
+  //         ...prevData.cohortData,
+  //         [cacheKey]: data,
+  //       },
+  //     }));
+
+  //     processGWASData(data);
+  //   } catch (error) {
+  //     console.error('Error fetching data:', error);
+  //     handleShowModal();
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchGWASData = async (cohortId, pval) => {
     const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
     
@@ -1060,15 +1107,13 @@ const loadMetadata = async () => {
       processGWASData(cachedData.cohortData[cacheKey]);
       return;
     }
-
+  
     try {
       setLoading(true);
-      // const response = await fetch(
-      //   `${baseURL}/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
-      // );
       const response = await fetch(
         `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
       );
+  
       if (response.status === 404) {
         handleShowModal();
         setDynData([]);
@@ -1077,30 +1122,56 @@ const loadMetadata = async () => {
         setQQ(null);
         return;
       }
-
+  
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-
-      const data = await response.json();
-      console.log(data)
+  
+      // Process streamed response
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder('utf-8');
+      let result = '';
+      let data = {};
+  
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+  
+        result += decoder.decode(value, { stream: true });
+        try {
+          data = JSON.parse(result);
+        } catch (e) {
+          // Incomplete JSON, continue reading
+          continue;
+        }
+      }
+  
+      // Ensure we have the full data object
+      if (!data.data) {
+        throw new Error('Incomplete or malformed streamed data');
+      }
+  
+      console.log('Received GWAS data:', data);
       setCachedData((prevData) => ({
         ...prevData,
         cohortData: {
           ...prevData.cohortData,
-          [cacheKey]: data,
+          [cacheKey]: data.data, // Store only the 'data' portion
         },
       }));
-
-      processGWASData(data);
+  
+      processGWASData(data.data);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching GWAS data:', error);
       handleShowModal();
+      setDynData([]);
+      setStatData([]);
+      setTicks([]);
+      setQQ(null);
     } finally {
       setLoading(false);
     }
   };
-
   // Fetch top results with caching
   const fetchTopResults = async (cohortId) => {
     const cacheKey = `${cohortId}_topResults_${selectedStudy}`;
@@ -1167,24 +1238,42 @@ const loadMetadata = async () => {
     }
   };
 
-  const processGWASData = (data) => {
-    const df = Object.entries(data).flatMap(([chrom, snps]) =>
-        snps.map((snp) => ({
-            chrom: parseInt(chrom),
-            pos: snp.pos,
-            log_p: -Math.log10(snp.p),
-            pval: snp.p,
-            SNP_ID: snp.id
-        }))
-    );
+  // const processGWASData = (data) => {
+  //   const df = Object.entries(data).flatMap(([chrom, snps]) =>
+  //       snps.map((snp) => ({
+  //           chrom: parseInt(chrom),
+  //           pos: snp.pos,
+  //           log_p: -Math.log10(snp.p),
+  //           pval: snp.p,
+  //           SNP_ID: snp.id
+  //       }))
+  //   );
 
+  //   generateQQData(df);
+  //   const { dyn, stat, ticks } = generatePlotData(df);
+  //   setDynData(dyn);
+  //   setStatData(stat);
+  //   setTicks(ticks);
+  // };
+  const processGWASData = (data) => {
+    console.log('Processing GWAS data:', data); // Debug log
+  
+    const df = Object.entries(data).flatMap(([chrom, snps]) =>
+      snps.map((snp) => ({
+        chrom: parseInt(chrom),
+        pos: snp.pos,
+        log_p: -Math.log10(snp.p),
+        pval: snp.p,
+        SNP_ID: snp.id
+      }))
+    );
+  
     generateQQData(df);
     const { dyn, stat, ticks } = generatePlotData(df);
     setDynData(dyn);
     setStatData(stat);
     setTicks(ticks);
   };
-
   const generateQQData = (df) => {
     console.log(df)
     const n = df.length;
@@ -1254,12 +1343,23 @@ const loadMetadata = async () => {
     return { dyn: dyn_out, stat: stat_out, ticks };
 };
 
+// useEffect(() => {
+//   if (tab === 'man' && selectedStudy && 
+//       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
+//        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
+//     fetchGWASData(selectedCohort, selectedPval);
+//     fetchTopResults(selectedCohort);
+//   }
+// }, [selectedCohort, selectedStudy, tab, selectedPval]);
 useEffect(() => {
   if (tab === 'man' && selectedStudy && 
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
-    fetchGWASData(selectedCohort, selectedPval);
-    fetchTopResults(selectedCohort);
+    const loadData = async () => {
+      await fetchGWASData(selectedCohort, selectedPval);
+      await fetchTopResults(selectedCohort);
+    };
+    loadData();
   }
 }, [selectedCohort, selectedStudy, tab, selectedPval]);
 
