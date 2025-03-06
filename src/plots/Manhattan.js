@@ -224,7 +224,6 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             }
         };
     }, [stat, dyn, threshold, leadSNPs, phenoId, selectedCohort, selectedStudy]);
-
     const prepareRegularData = () => {
         const regularTraces = [];
         
@@ -236,8 +235,11 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                 const yValues = [];
                 
                 chrData.forEach(d => {
-                    xValues.push(...d.x);
-                    yValues.push(...d.y);
+                    // Safely push each element without spreading
+                    for (let i = 0; i < d.x.length; i++) {
+                        xValues.push(d.x[i]);
+                        yValues.push(d.y[i]);
+                    }
                 });
                 
                 regularTraces.push({
@@ -258,6 +260,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         
         return regularTraces;
     };
+    
     // const prepareRegularData = () => {
     //     const regularTraces = [];
         
