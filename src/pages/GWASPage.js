@@ -1228,93 +1228,70 @@ const loadMetadata = async () => {
 
   const fetchGWASData = async (cohortId) => {
     try {
-      setLoading(true);
-      
-      // Build the cache key
-      const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
-      
-      // Check cache first
-      if (cachedData.cohortData[cacheKey]) {
-        console.log(`Using cached data for range: ${filterMinPValue} to ${filterMaxPValue}`);
-        processGWASData(cachedData.cohortData[cacheKey]);
-        return;
-      }
-  
-      // Build query parameters
-      let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
-      
-      // Only include p-value parameters if they're explicitly set
-      if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
-        queryParams += `&minPval=${filterMinPValue}`;
-      }
-      
-      if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
-        queryParams += `&maxPval=${filterMaxPValue}`;
-      }
-      
-      console.log(`Fetching GWAS data with: ${queryParams}`);
-      const response = await fetch(`/api/queryGWASData?${queryParams}`);
-      console.log('GWAS RESPONSE')
-      console.log(response)
-      if (response.status === 404) {
-        console.log('No data found for the specified range');
+        setLoading(true);
+        const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
+        if (cachedData.cohortData[cacheKey]) {
+            console.log(`Using cached data for range: ${filterMinPValue} to ${filterMaxPValue}`);
+            processGWASData(cachedData.cohortData[cacheKey]);
+            return;
+        }
+
+        let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+        if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
+            queryParams += `&minPval=${filterMinPValue}`;
+        }
+        if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+            queryParams += `&maxPval=${filterMaxPValue}`;
+        }
+
+        const response = await fetch(`/api/queryGWASData?${queryParams}`);
+        if (response.status === 404) {
+            setDynData([]);
+            setStatData([]);
+            setTicks([]);
+            setQQ(null);
+            handleShowModal();
+            return;
+        }
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (!data.data) {
+            throw new Error('Response missing data property');
+        }
+
+        if (data.pValueRange) {
+            setMaxPValue(data.pValueRange.maxPValue);
+            setMinPValue(data.pValueRange.minPValue);
+            if (filterMinPValue === null || filterMaxPValue === null) {
+                setFilterMinPValue(data.pValueRange.minPValue);
+                setFilterMaxPValue(data.pValueRange.maxPValue);
+            }
+        }
+
+        setCachedData(prev => ({
+            ...prev,
+            cohortData: {
+                ...prev.cohortData,
+                [cacheKey]: data.data
+            }
+        }));
+
+        processGWASData(data.data); // Process with updated function
+    } catch (error) {
+        console.error('Error fetching GWAS data:', error);
         setDynData([]);
         setStatData([]);
         setTicks([]);
         setQQ(null);
         handleShowModal();
-        return;
-      }
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      // Parse the response
-      const data = await response.json();
-      console.log(data)
-      if (!data.data) {
-        throw new Error('Response missing data property');
-      }
-  
-      // Update state with the p-value range received from backend
-      if (data.pValueRange) {
-        console.log(`Server returned p-value range: ${data.pValueRange.minPValue} to ${data.pValueRange.maxPValue}`);
-        console.log(`This corresponds to -log10(p) range: ${-Math.log10(data.pValueRange.maxPValue)} to ${-Math.log10(data.pValueRange.minPValue)}`);
-        
-        // Update the UI ranges
-        setMaxPValue(data.pValueRange.maxPValue);
-        setMinPValue(data.pValueRange.minPValue);
-        
-        // Only update the filter values if they weren't explicitly set by the user
-        if (filterMinPValue === null || filterMaxPValue === null) {
-          setFilterMinPValue(data.pValueRange.minPValue);
-          setFilterMaxPValue(data.pValueRange.maxPValue);
-        }
-      }
-  
-      // Process and store the data
-      setCachedData(prev => ({
-        ...prev,
-        cohortData: {
-          ...prev.cohortData,
-          [cacheKey]: data.data
-        }
-      }));
-  
-      processGWASData(data.data);
-      
-    } catch (error) {
-      console.error('Error fetching GWAS data:', error);
-      setDynData([]);
-      setStatData([]);
-      setTicks([]);
-      setQQ(null);
-      handleShowModal();
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
   // Handle p-value changes:
 
   // const fetchGWASData = async (cohortId, pval) => {
@@ -1493,17 +1470,41 @@ const loadMetadata = async () => {
 //   setTicks(ticks);
 // };
 const processGWASData = (data) => {
+  // Custom function to compute -log10(p) from string p-values
+  const parsePValueLog = (pStr) => {
+      if (typeof pStr !== 'string') {
+          const p = parseFloat(pStr);
+          return p > 0 && isFinite(p) ? -Math.log10(p) : Infinity;
+      }
+      const match = pStr.match(/(\d+\.?\d*)e-(\d+)/i); // e.g., "1e-500"
+      if (match) {
+          const [, mantissa, exponent] = match;
+          const mantissaNum = parseFloat(mantissa);
+          return mantissaNum > 0 ? -Math.log10(mantissaNum) + parseInt(exponent) : parseInt(exponent);
+      }
+      const p = parseFloat(pStr);
+      return p > 0 && isFinite(p) ? -Math.log10(p) : Infinity;
+  };
+
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
-    snps
-      .filter(snp => snp.p > 0 && isFinite(-Math.log10(snp.p))) // Reject invalid p-values
-      .map((snp) => ({
-        chrom: parseInt(chrom),
-        pos: snp.pos,
-        log_p: -Math.log10(snp.p),
-        pval: snp.p,
-        SNP_ID: snp.id
-      }))
+      snps
+          .filter(snp => {
+              const logP = parsePValueLog(snp.p);
+              return snp.p > 0 && isFinite(logP); // Ensure valid p-values
+          })
+          .map((snp) => ({
+              chrom: parseInt(chrom),
+              pos: snp.pos,
+              log_p: parsePValueLog(snp.p), // Compute -log10(p) from string
+              pval: snp.p, // Keep original string for reference if needed
+              SNP_ID: snp.id
+          }))
   );
+
+  // Log the maximum -log10(p) for debugging
+  const maxLogP = Math.max(...df.map(row => row.log_p));
+  console.log(`Maximum -log10(p) in processed data: ${maxLogP}`);
+
   generateQQData(df);
   const { dyn, stat, ticks } = generatePlotData(df);
   setDynData(dyn);
