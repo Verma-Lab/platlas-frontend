@@ -745,6 +745,67 @@ const StudySelector = ({
   );
 };
 
+const DynamicPValueFilter = ({ maxPValue, currentPValue, onChange }) => {
+  // Default to maxPValue if not provided
+  const effectiveMaxPValue = maxPValue || 0.05;
+  
+  // Convert to log scale for slider
+  const maxLogPValue = -Math.log10(effectiveMaxPValue);
+  const currentLogPValue = currentPValue ? -Math.log10(parseFloat(currentPValue)) : maxLogPValue;
+  
+  // Generate marks for the slider based on the max p-value
+  const generateMarks = () => {
+    const marks = {};
+    const step = maxLogPValue / 5;
+    
+    for (let i = 0; i <= 5; i++) {
+      const logValue = i * step;
+      const pValue = Math.pow(10, -logValue);
+      marks[logValue] = pValue.toExponential(1);
+    }
+    
+    return marks;
+  };
+  
+  const handleSliderChange = (newLogValue) => {
+    // Convert back from log scale to actual p-value
+    const newPValue = Math.pow(10, -newLogValue);
+    onChange(newPValue.toExponential(8));
+  };
+  
+  return (
+    <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-medium text-gray-700">P-value Filter</h3>
+        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+          Current: {parseFloat(currentPValue).toExponential(1)}
+        </span>
+      </div>
+      
+      <div className="px-2 py-4">
+        <input
+          type="range"
+          min="0"
+          max={maxLogPValue}
+          step={maxLogPValue / 100}
+          value={currentLogPValue}
+          onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
+          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+        />
+        
+        <div className="flex justify-between mt-1 text-xs text-gray-500">
+          {Object.entries(generateMarks()).map(([logValue, label]) => (
+            <span key={logValue}>{label}</span>
+          ))}
+        </div>
+      </div>
+      
+      <p className="text-xs text-gray-500 mt-2">
+        Adjust to filter points by significance level. More stringent thresholds (to the right) show fewer points and improve performance.
+      </p>
+    </div>
+  );
+};
 const GWASPage = () => {
   const { phenoId } = useParams();
   const [selectedPval, setSelectedPval] = useState('1e-05'); // Default pval threshold
@@ -791,6 +852,31 @@ const GWASPage = () => {
   const [filterLimit, setFilterLimit] = useState('None'); // Added this line
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const history = useNavigate();
+
+  // Modify these variables in your GWASPage component state:
+const [maxPValue, setMaxPValue] = useState(null); // Store the maximum p-value
+const [currentPValue, setCurrentPValue] = useState(null); // Current filter value
+// Add this function to the GWASPage component:
+const determineMaxPValue = (data) => {
+  // Extract the minimum p-value (which will become the maximum -log10(p))
+  let minPValue = 1;
+  
+  Object.values(data).forEach(chrSnps => {
+    chrSnps.forEach(snp => {
+      const pVal = parseFloat(snp.p);
+      if (pVal > 0 && pVal < minPValue) {
+        minPValue = pVal;
+      }
+    });
+  });
+  
+  // Add a buffer to ensure we capture everything meaningful
+  // but default to 1e-5 if no smaller p-values are found
+  const effectiveMaxLogP = Math.max(-Math.log10(minPValue), 5);
+  const effectiveMaxPValue = Math.pow(10, -effectiveMaxLogP);
+  
+  return effectiveMaxPValue;
+};
 
   const fetchHudsonTopData = async (ancestry) => {
     try {
@@ -1100,7 +1186,9 @@ const loadMetadata = async () => {
   //     setLoading(false);
   //   }
   // };
-  const fetchGWASData = async (cohortId, pval) => {
+
+
+  const fetchGWASData = async (cohortId, pval = currentPValue) => {
     const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
     
     if (cachedData.cohortData[cacheKey]) {
@@ -1151,12 +1239,11 @@ const loadMetadata = async () => {
         throw new Error('Incomplete or malformed streamed data');
       }
   
-      console.log('Received GWAS data:', data);
       setCachedData((prevData) => ({
         ...prevData,
         cohortData: {
           ...prevData.cohortData,
-          [cacheKey]: data.data, // Store only the 'data' portion
+          [cacheKey]: data.data,
         },
       }));
   
@@ -1172,6 +1259,83 @@ const loadMetadata = async () => {
       setLoading(false);
     }
   };
+  // Handle p-value changes:
+const handlePValueChange = (newPValue) => {
+  setCurrentPValue(newPValue);
+  fetchGWASData(selectedCohort, newPValue);
+};
+  // const fetchGWASData = async (cohortId, pval) => {
+  //   const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
+    
+  //   if (cachedData.cohortData[cacheKey]) {
+  //     processGWASData(cachedData.cohortData[cacheKey]);
+  //     return;
+  //   }
+  
+  //   try {
+  //     setLoading(true);
+  //     const response = await fetch(
+  //       `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+  //     );
+  
+  //     if (response.status === 404) {
+  //       handleShowModal();
+  //       setDynData([]);
+  //       setStatData([]);
+  //       setTicks([]);
+  //       setQQ(null);
+  //       return;
+  //     }
+  
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  
+  //     // Process streamed response
+  //     const reader = response.body.getReader();
+  //     const decoder = new TextDecoder('utf-8');
+  //     let result = '';
+  //     let data = {};
+  
+  //     while (true) {
+  //       const { done, value } = await reader.read();
+  //       if (done) break;
+  
+  //       result += decoder.decode(value, { stream: true });
+  //       try {
+  //         data = JSON.parse(result);
+  //       } catch (e) {
+  //         // Incomplete JSON, continue reading
+  //         continue;
+  //       }
+  //     }
+  
+  //     // Ensure we have the full data object
+  //     if (!data.data) {
+  //       throw new Error('Incomplete or malformed streamed data');
+  //     }
+  
+  //     console.log('Received GWAS data:', data);
+  //     setCachedData((prevData) => ({
+  //       ...prevData,
+  //       cohortData: {
+  //         ...prevData.cohortData,
+  //         [cacheKey]: data.data, // Store only the 'data' portion
+  //       },
+  //     }));
+  
+  //     processGWASData(data.data);
+  //   } catch (error) {
+  //     console.error('Error fetching GWAS data:', error);
+  //     handleShowModal();
+  //     setDynData([]);
+  //     setStatData([]);
+  //     setTicks([]);
+  //     setQQ(null);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   // Fetch top results with caching
   const fetchTopResults = async (cohortId) => {
     const cacheKey = `${cohortId}_topResults_${selectedStudy}`;
@@ -1255,25 +1419,57 @@ const loadMetadata = async () => {
   //   setStatData(stat);
   //   setTicks(ticks);
   // };
-  const processGWASData = (data) => {
-    console.log('Processing GWAS data:', data); // Debug log
+
+
+
+// Modify the processGWASData function to set the max p-value:
+const processGWASData = (data) => {
+  // Determine and set the maximum p-value from the data
+  const maxPVal = determineMaxPValue(data);
+  setMaxPValue(maxPVal);
   
-    const df = Object.entries(data).flatMap(([chrom, snps]) =>
-      snps.map((snp) => ({
-        chrom: parseInt(chrom),
-        pos: snp.pos,
-        log_p: -Math.log10(snp.p),
-        pval: snp.p,
-        SNP_ID: snp.id
-      }))
-    );
+  // If this is the first load and we don't have a current p-value set,
+  // use the max p-value as the default starting point
+  if (!currentPValue) {
+    setCurrentPValue(maxPVal.toExponential(8));
+  }
   
-    generateQQData(df);
-    const { dyn, stat, ticks } = generatePlotData(df);
-    setDynData(dyn);
-    setStatData(stat);
-    setTicks(ticks);
-  };
+  // Process the data as you were doing before
+  const df = Object.entries(data).flatMap(([chrom, snps]) =>
+    snps.map((snp) => ({
+      chrom: parseInt(chrom),
+      pos: snp.pos,
+      log_p: -Math.log10(snp.p),
+      pval: snp.p,
+      SNP_ID: snp.id
+    }))
+  );
+
+  generateQQData(df);
+  const { dyn, stat, ticks } = generatePlotData(df);
+  setDynData(dyn);
+  setStatData(stat);
+  setTicks(ticks);
+};
+  // const processGWASData = (data) => {
+  //   console.log('Processing GWAS data:', data); // Debug log
+  
+  //   const df = Object.entries(data).flatMap(([chrom, snps]) =>
+  //     snps.map((snp) => ({
+  //       chrom: parseInt(chrom),
+  //       pos: snp.pos,
+  //       log_p: -Math.log10(snp.p),
+  //       pval: snp.p,
+  //       SNP_ID: snp.id
+  //     }))
+  //   );
+  
+  //   generateQQData(df);
+  //   const { dyn, stat, ticks } = generatePlotData(df);
+  //   setDynData(dyn);
+  //   setStatData(stat);
+  //   setTicks(ticks);
+  // };
   const generateQQData = (df) => {
     console.log(df)
     const n = df.length;
@@ -1282,65 +1478,89 @@ const loadMetadata = async () => {
     setQQ({ x: theoretical, y: observed });
   };
 
-  const generatePlotData = (df) => {
-    const pvalThreshold = parseFloat(selectedPval);
-    const numChromosomes = 22;
-    const dyn_out = [];
-    const stat_out = [];
-    const ticks = [];
+// Modify your generatePlotData function in GWASPage.js to handle the dynamic p-value filtering
 
-    const chromLengths = [
-        248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
-        159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
-        114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
-        58617616, 64444167, 46709983, 50818468
-    ];
-    const cumulativeSums = chromLengths.reduce((acc, val, i) => {
-        acc[i + 1] = (acc[i] || 0) + val;
-        return acc;
-    }, {});
+const generatePlotData = (df) => {
+  const pvalThreshold = currentPValue ? parseFloat(currentPValue) : parseFloat(selectedPval);
+  console.log(`Filtering with p-value threshold: ${pvalThreshold}`);
+  
+  const numChromosomes = 22;
+  const dyn_out = [];
+  const stat_out = [];
+  const ticks = [];
 
-    const totalLength = cumulativeSums[numChromosomes];
+  const chromLengths = [
+      248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
+      159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
+      114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
+      58617616, 64444167, 46709983, 50818468
+  ];
+  
+  const cumulativeSums = chromLengths.reduce((acc, val, i) => {
+      acc[i + 1] = (acc[i] || 0) + val;
+      return acc;
+  }, {});
 
-    for (let chrom = 1; chrom <= numChromosomes; chrom++) {
-        const df_chr = df.filter((row) => row.chrom === chrom);
+  const totalLength = cumulativeSums[numChromosomes];
 
-        if (df_chr.length > 0) {
-            const startPos = chrom === 1 ? 0 : cumulativeSums[chrom - 1] / totalLength;
-            const endPos = cumulativeSums[chrom] / totalLength;
-            ticks.push((startPos + endPos) / 2);
+  // Process each chromosome
+  for (let chrom = 1; chrom <= numChromosomes; chrom++) {
+      const df_chr = df.filter((row) => row.chrom === chrom);
 
-            const normalizePos = (pos) => {
-                const chromStart = chrom === 1 ? 0 : cumulativeSums[chrom - 1];
-                return (chromStart + pos) / totalLength;
-            };
+      if (df_chr.length > 0) {
+          const startPos = chrom === 1 ? 0 : cumulativeSums[chrom - 1] / totalLength;
+          const endPos = cumulativeSums[chrom] / totalLength;
+          ticks.push((startPos + endPos) / 2);
 
-            const dyn_chr = df_chr.filter((row) => row.pval <= pvalThreshold);
-            const stat_chr = df_chr.filter((row) => row.pval > pvalThreshold);
+          const normalizePos = (pos) => {
+              const chromStart = chrom === 1 ? 0 : cumulativeSums[chrom - 1];
+              return (chromStart + pos) / totalLength;
+          };
 
-            if (dyn_chr.length > 0) {
-                dyn_out.push({
-                    x: dyn_chr.map((row) => normalizePos(row.pos)),
-                    y: dyn_chr.map((row) => row.log_p),
-                    chr: chrom,
-                    SNP_ID: dyn_chr.map((row) => row.SNP_ID),
-                    pos: dyn_chr.map((row) => row.pos)
-                });
-            }
+          // Split data by p-value threshold
+          const dyn_chr = df_chr.filter((row) => row.pval <= pvalThreshold);
+          const stat_chr = df_chr.filter((row) => row.pval > pvalThreshold);
 
-            if (stat_chr.length > 0) {
-                stat_out.push({
-                    x: stat_chr.map((row) => normalizePos(row.pos)),
-                    y: stat_chr.map((row) => row.log_p),
-                    chr: chrom,
-                    SNP_ID: stat_chr.map((row) => row.SNP_ID),
-                    pos: stat_chr.map((row) => row.pos)
-                });
-            }
-        }
-    }
+          // Progressive filtering: as the p-value threshold gets more permissive, limit the total points
+          const maxPointsPerChromosome = 5000; // Adjust based on performance testing
+          
+          if (dyn_chr.length > 0) {
+              // Always include highly significant points
+              dyn_out.push({
+                  x: dyn_chr.map((row) => normalizePos(row.pos)),
+                  y: dyn_chr.map((row) => row.log_p),
+                  chr: chrom,
+                  SNP_ID: dyn_chr.map((row) => row.SNP_ID),
+                  pos: dyn_chr.map((row) => row.pos)
+              });
+          }
 
-    return { dyn: dyn_out, stat: stat_out, ticks };
+          if (stat_chr.length > 0) {
+              // Sample less significant points if there are too many
+              let stat_chr_filtered = stat_chr;
+              
+              if (stat_chr.length > maxPointsPerChromosome) {
+                  // Sort by p-value (most significant first)
+                  stat_chr_filtered = [...stat_chr].sort((a, b) => a.pval - b.pval);
+                  
+                  // Take the top N most significant points
+                  stat_chr_filtered = stat_chr_filtered.slice(0, maxPointsPerChromosome);
+                  
+                  console.log(`Chromosome ${chrom}: Filtered from ${stat_chr.length} to ${maxPointsPerChromosome} points`);
+              }
+              
+              stat_out.push({
+                  x: stat_chr_filtered.map((row) => normalizePos(row.pos)),
+                  y: stat_chr_filtered.map((row) => row.log_p),
+                  chr: chrom,
+                  SNP_ID: stat_chr_filtered.map((row) => row.SNP_ID),
+                  pos: stat_chr_filtered.map((row) => row.pos)
+              });
+          }
+      }
+  }
+
+  return { dyn: dyn_out, stat: stat_out, ticks };
 };
 
 // useEffect(() => {
@@ -1458,7 +1678,16 @@ return (
           <Tab eventKey="man" title="Analysis">
             <div className="space-y-6">
             <div className="mb-4 flex justify-end space-x-2">
-               
+            <div className="w-1/4">
+        {/* Add the new dynamic p-value filter component */}
+        {maxPValue && currentPValue && (
+          <DynamicPValueFilter
+            maxPValue={maxPValue}
+            currentPValue={currentPValue}
+            onChange={handlePValueChange}
+          />
+        )}
+      </div>
                 <select 
                     value={filterLimit}
                     onChange={(e) => setFilterLimit(e.target.value)}
