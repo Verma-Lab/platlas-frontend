@@ -227,39 +227,66 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     const prepareRegularData = () => {
         const regularTraces = [];
         
+        // Process one chromosome at a time to avoid memory issues
         for (let chrIndex = 0; chrIndex < CHR_COUNT; chrIndex++) {
-            const chrData = [...stat, ...dyn].filter(d => d.chr === (chrIndex + 1));
+          // Find data for this chromosome
+          const chrData = [];
+          for (let i = 0; i < stat.length; i++) {
+            if (stat[i].chr === (chrIndex + 1)) chrData.push(stat[i]);
+          }
+          for (let i = 0; i < dyn.length; i++) {
+            if (dyn[i].chr === (chrIndex + 1)) chrData.push(dyn[i]);
+          }
+          
+          if (chrData.length > 0) {
+            // Use array literals instead of pushing to avoid call stack issues
+            let xValues = [];
+            let yValues = [];
             
-            if (chrData.length > 0) {
-                const xValues = [];
-                const yValues = [];
-                
-                chrData.forEach(d => {
-                    // Safely push each element without spreading
-                    for (let i = 0; i < d.x.length; i++) {
-                        xValues.push(d.x[i]);
-                        yValues.push(d.y[i]);
-                    }
-                });
-                
-                regularTraces.push({
-                    x: xValues,
-                    y: yValues,
-                    type: 'scattergl',
-                    mode: 'markers',
-                    marker: { 
-                        color: ALTERNATING_COLORS[chrIndex % 2],
-                        size: 3,
-                        opacity: 1
-                    },
-                    hoverinfo: 'none',
-                    showlegend: false
-                });
+            // Process chunks to avoid stack overflow
+            const processDataChunk = (d) => {
+              // If arrays are very large, we'll downsample
+              if (d.x.length > 10000) {
+                // Implement simple downsampling - take every nth point
+                const samplingRate = Math.ceil(d.x.length / 10000);
+                for (let i = 0; i < d.x.length; i += samplingRate) {
+                  xValues.push(d.x[i]);
+                  yValues.push(d.y[i]);
+                }
+              } else {
+                // For smaller arrays, use efficient array concatenation
+                for (let i = 0; i < d.x.length; i++) {
+                  xValues.push(d.x[i]);
+                  yValues.push(d.y[i]);
+                }
+              }
+            };
+            
+            // Process each dataset
+            for (let i = 0; i < chrData.length; i++) {
+              processDataChunk(chrData[i]);
             }
+            
+            // Add trace for this chromosome
+            regularTraces.push({
+              x: xValues,
+              y: yValues,
+              type: 'scattergl',
+              mode: 'markers',
+              marker: { 
+                color: ALTERNATING_COLORS[chrIndex % 2],
+                size: 3,
+                opacity: 1
+              },
+              hoverinfo: 'none',
+              showlegend: false
+            });
+          }
         }
         
         return regularTraces;
-    };
+      };
+      
     
     // const prepareRegularData = () => {
     //     const regularTraces = [];
