@@ -117,6 +117,8 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     };
 
     useEffect(() => {
+        console.log('POINTS')
+        console.log(stat, dyn)
         const allYValues = [...stat, ...dyn].flatMap(d => d.y);
         const maxYValue = Math.ceil(Math.max(...allYValues, threshold || 0));
         const maxLeadSNPLog10p = leadSNPs.reduce((max, snp) => 
