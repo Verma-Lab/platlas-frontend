@@ -748,20 +748,38 @@ const StudySelector = ({
 const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [maxInput, setMaxInput] = useState('');
   const [minInput, setMinInput] = useState('');
+  
+  // Update input fields when props change
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
-      setMaxInput(maxPValue.toString());
-      setMinInput(minPValue >= 0 ? minPValue.toString() : "0"); // Clamp negative to 0
+      // Format the values to be more readable
+      setMaxInput(formatPValue(maxPValue));
+      setMinInput(formatPValue(minPValue));
     }
   }, [maxPValue, minPValue]);
+
+  // Helper function to format p-values in scientific notation if very small
+  const formatPValue = (value) => {
+    if (value === null || value === undefined) return '';
+    
+    // Use scientific notation for very small numbers
+    if (value < 0.0001) {
+      return value.toExponential(6);
+    }
+    
+    // Otherwise use standard decimal format with appropriate precision
+    return value.toString();
+  };
 
   const handleApplyFilter = () => {
     const max = parseFloat(maxInput);
     const min = parseFloat(minInput);
+    
     if (!isNaN(max) && !isNaN(min) && min < max && min >= 0 && max <= 1) {
       onFilterChange({ minPValue: min, maxPValue: max });
     } else {
-      console.error('Invalid p-value range: Min must be less than Max and within 0 to 1');
+      // Show error message in the UI
+      alert('Invalid p-value range: Min must be less than Max and within 0 to 1');
     }
   };
 
@@ -1176,9 +1194,20 @@ const loadMetadata = async () => {
   
     try {
       setLoading(true);
-      const response = await fetch(
-        `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&minPval=${filterMinPValue}&maxPval=${filterMaxPValue}&study=${selectedStudy}`
-      );
+      
+      // Build the query string, only including parameters that are set
+      let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+      
+      // Only add the p-value parameters if they are set
+      if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
+        queryParams += `&minPval=${filterMinPValue}`;
+      }
+      
+      if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+        queryParams += `&maxPval=${filterMaxPValue}`;
+      }
+      
+      const response = await fetch(`/api/queryGWASData?${queryParams}`);
   
       if (response.status === 404) {
         handleShowModal();
@@ -1198,29 +1227,39 @@ const loadMetadata = async () => {
       let result = '';
       let data = {};
   
+      // Process the stream
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         result += decoder.decode(value, { stream: true });
+        
+        // Try to parse the accumulated JSON
         try {
           data = JSON.parse(result);
         } catch (e) {
+          // Incomplete JSON, continue reading
           continue;
         }
       }
   
+      // Validate the data structure
       if (!data.data) {
         throw new Error('Incomplete or malformed streamed data');
       }
   
-      // Set initial range from backend if provided
-      if (data.pValueRange && filterMinPValue === null && filterMaxPValue === null) {
+      // Update p-value range from the response
+      if (data.pValueRange) {
         setMaxPValue(data.pValueRange.maxPValue);
         setMinPValue(data.pValueRange.minPValue);
-        setFilterMaxPValue(data.pValueRange.maxPValue);
-        setFilterMinPValue(data.pValueRange.minPValue);
+        
+        // Only update the filter values if they weren't explicitly set
+        if (filterMinPValue === null || filterMaxPValue === null) {
+          setFilterMaxPValue(data.pValueRange.maxPValue);
+          setFilterMinPValue(data.pValueRange.minPValue);
+        }
       }
   
+      // Cache the data
       setCachedData((prevData) => ({
         ...prevData,
         cohortData: {
@@ -1229,7 +1268,9 @@ const loadMetadata = async () => {
         },
       }));
   
+      // Process the data
       processGWASData(data.data);
+      
     } catch (error) {
       console.error('Error fetching GWAS data:', error);
       handleShowModal();
