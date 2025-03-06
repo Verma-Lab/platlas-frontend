@@ -224,107 +224,44 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             }
         };
     }, [stat, dyn, threshold, leadSNPs, phenoId, selectedCohort, selectedStudy]);
+
     const prepareRegularData = () => {
         const regularTraces = [];
         
-        // Process one chromosome at a time to avoid memory issues
         for (let chrIndex = 0; chrIndex < CHR_COUNT; chrIndex++) {
-          // Find data for this chromosome
-          const chrData = [];
-          for (let i = 0; i < stat.length; i++) {
-            if (stat[i].chr === (chrIndex + 1)) chrData.push(stat[i]);
-          }
-          for (let i = 0; i < dyn.length; i++) {
-            if (dyn[i].chr === (chrIndex + 1)) chrData.push(dyn[i]);
-          }
-          
-          if (chrData.length > 0) {
-            // Use array literals instead of pushing to avoid call stack issues
-            let xValues = [];
-            let yValues = [];
+            const chrData = [...stat, ...dyn].filter(d => d.chr === (chrIndex + 1));
             
-            // Process chunks to avoid stack overflow
-            const processDataChunk = (d) => {
-              // If arrays are very large, we'll downsample
-              if (d.x.length > 10000) {
-                // Implement simple downsampling - take every nth point
-                const samplingRate = Math.ceil(d.x.length / 10000);
-                for (let i = 0; i < d.x.length; i += samplingRate) {
-                  xValues.push(d.x[i]);
-                  yValues.push(d.y[i]);
-                }
-              } else {
-                // For smaller arrays, use efficient array concatenation
-                for (let i = 0; i < d.x.length; i++) {
-                  xValues.push(d.x[i]);
-                  yValues.push(d.y[i]);
-                }
-              }
-            };
-            
-            // Process each dataset
-            for (let i = 0; i < chrData.length; i++) {
-              processDataChunk(chrData[i]);
-            }
-            
-            // Add trace for this chromosome
-            regularTraces.push({
-              x: xValues,
-              y: yValues,
-              type: 'scattergl',
-              mode: 'markers',
-              marker: { 
-                color: ALTERNATING_COLORS[chrIndex % 2],
-                size: 3,
-                opacity: 1
-              },
-              hoverinfo: 'none',
-              showlegend: false
+            chrData.forEach(d => {
+                regularTraces.push({
+                    x: d.pos.map(p => normalizePosition(chrIndex, p)),
+                    y: d.y,
+                    type: 'scattergl',
+                    mode: 'markers',
+                    marker: { 
+                        color: ALTERNATING_COLORS[chrIndex % 2],
+                        size: 3,
+                        opacity: 1
+                    },
+                    hoverinfo: 'text',
+                    text: d.x.map((xVal, i) => {
+                        const snpID = d.SNP_ID && d.SNP_ID[i] ? d.SNP_ID[i] : 'N/A';
+                        const posVal = d.pos && d.pos[i] ? d.pos[i] : 'N/A';
+                        const originalY = d.y[i];
+                        return (
+                            `SNP_ID: ${snpID}<br>` +
+                            `Chromosome: ${chrIndex + 1}<br>` +
+                            `Position: ${posVal.toLocaleString()}<br>` +
+                            `-log10 p-value: ${originalY.toFixed(2)}<br>` +
+                            `P-value: ${Math.pow(10, -originalY).toExponential(2)}`
+                        );
+                    }),
+                    showlegend: false
+                });
             });
-          }
         }
-        
+    
         return regularTraces;
-      };
-      
-    
-    // const prepareRegularData = () => {
-    //     const regularTraces = [];
-        
-    //     for (let chrIndex = 0; chrIndex < CHR_COUNT; chrIndex++) {
-    //         const chrData = [...stat, ...dyn].filter(d => d.chr === (chrIndex + 1));
-            
-    //         chrData.forEach(d => {
-    //             regularTraces.push({
-    //                 x: d.pos.map(p => normalizePosition(chrIndex, p)),
-    //                 y: d.y,
-    //                 type: 'scattergl',
-    //                 mode: 'markers',
-    //                 marker: { 
-    //                     color: ALTERNATING_COLORS[chrIndex % 2],
-    //                     size: 3,
-    //                     opacity: 1
-    //                 },
-    //                 hoverinfo: 'text',
-    //                 text: d.x.map((xVal, i) => {
-    //                     const snpID = d.SNP_ID && d.SNP_ID[i] ? d.SNP_ID[i] : 'N/A';
-    //                     const posVal = d.pos && d.pos[i] ? d.pos[i] : 'N/A';
-    //                     const originalY = d.y[i];
-    //                     return (
-    //                         `SNP_ID: ${snpID}<br>` +
-    //                         `Chromosome: ${chrIndex + 1}<br>` +
-    //                         `Position: ${posVal.toLocaleString()}<br>` +
-    //                         `-log10 p-value: ${originalY.toFixed(2)}<br>` +
-    //                         `P-value: ${Math.pow(10, -originalY).toExponential(2)}`
-    //                     );
-    //                 }),
-    //                 showlegend: false
-    //             });
-    //         });
-    //     }
-    
-    //     return regularTraces;
-    // };
+    };
     const prepareLeadSNPData = () => {
         if (!leadSNPs.length) return null;
     

@@ -1193,186 +1193,66 @@ const loadMetadata = async () => {
     setQQ({ x: theoretical, y: observed });
   };
 
-  // Optimized generatePlotData function to handle large datasets
-const generatePlotData = (df) => {
-  const pvalThreshold = parseFloat(selectedPval);
-  const numChromosomes = 22;
-  const dyn_out = [];
-  const stat_out = [];
-  const ticks = [];
+  const generatePlotData = (df) => {
+    const pvalThreshold = parseFloat(selectedPval);
+    const numChromosomes = 22;
+    const dyn_out = [];
+    const stat_out = [];
+    const ticks = [];
 
-  const chromLengths = [
-      248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
-      159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
-      114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
-      58617616, 64444167, 46709983, 50818468
-  ];
-  
-  // Calculate cumulative sums without using reduce (more efficient)
-  const cumulativeSums = { 1: chromLengths[0] };
-  for (let i = 2; i <= numChromosomes; i++) {
-      cumulativeSums[i] = cumulativeSums[i-1] + chromLengths[i-1];
-  }
+    const chromLengths = [
+        248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
+        159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
+        114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
+        58617616, 64444167, 46709983, 50818468
+    ];
+    const cumulativeSums = chromLengths.reduce((acc, val, i) => {
+        acc[i + 1] = (acc[i] || 0) + val;
+        return acc;
+    }, {});
 
-  const totalLength = cumulativeSums[numChromosomes];
+    const totalLength = cumulativeSums[numChromosomes];
 
-  // Process each chromosome individually
-  for (let chrom = 1; chrom <= numChromosomes; chrom++) {
-      // Filter data for this chromosome without creating a new array
-      const startPos = chrom === 1 ? 0 : cumulativeSums[chrom - 1] / totalLength;
-      const endPos = cumulativeSums[chrom] / totalLength;
-      ticks.push((startPos + endPos) / 2);
-      
-      // Normalize position function
-      const normalizePos = (pos) => {
-          const chromStart = chrom === 1 ? 0 : cumulativeSums[chrom - 1];
-          return (chromStart + pos) / totalLength;
-      };
-      
-      // Process data for this chromosome
-      let dyn_x = [];
-      let dyn_y = [];
-      let dyn_SNP_ID = [];
-      let dyn_pos = [];
-      
-      let stat_x = [];
-      let stat_y = [];
-      let stat_SNP_ID = [];
-      let stat_pos = [];
-      
-      let hasDynData = false;
-      let hasStatData = false;
-      
-      // Implement sampling for very large datasets
-      const MAX_POINTS_PER_CHROM = 15000; // Adjust as needed
-      
-      // Count points for this chromosome
-      let chromPointCount = 0;
-      for (let i = 0; i < df.length; i++) {
-          if (df[i].chrom === chrom) {
-              chromPointCount++;
-          }
-      }
-      
-      // Determine sampling rate if needed
-      const samplingRate = chromPointCount > MAX_POINTS_PER_CHROM ? 
-          Math.ceil(chromPointCount / MAX_POINTS_PER_CHROM) : 1;
-      
-      let pointCounter = 0;
-      
-      // Process data
-      for (let i = 0; i < df.length; i++) {
-          const row = df[i];
-          if (row.chrom === chrom) {
-              pointCounter++;
-              
-              // Apply sampling if needed
-              if (samplingRate > 1 && pointCounter % samplingRate !== 0) {
-                  continue;
-              }
-              
-              const normalizedPos = normalizePos(row.pos);
-              
-              if (row.pval <= pvalThreshold) {
-                  dyn_x.push(normalizedPos);
-                  dyn_y.push(row.log_p);
-                  dyn_SNP_ID.push(row.SNP_ID);
-                  dyn_pos.push(row.pos);
-                  hasDynData = true;
-              } else {
-                  stat_x.push(normalizedPos);
-                  stat_y.push(row.log_p);
-                  stat_SNP_ID.push(row.SNP_ID);
-                  stat_pos.push(row.pos);
-                  hasStatData = true;
-              }
-          }
-      }
-      
-      // Add data for this chromosome
-      if (hasDynData) {
-          dyn_out.push({
-              x: dyn_x,
-              y: dyn_y,
-              chr: chrom,
-              SNP_ID: dyn_SNP_ID,
-              pos: dyn_pos
-          });
-      }
-      
-      if (hasStatData) {
-          stat_out.push({
-              x: stat_x,
-              y: stat_y,
-              chr: chrom,
-              SNP_ID: stat_SNP_ID,
-              pos: stat_pos
-          });
-      }
-  }
+    for (let chrom = 1; chrom <= numChromosomes; chrom++) {
+        const df_chr = df.filter((row) => row.chrom === chrom);
 
-  return { dyn: dyn_out, stat: stat_out, ticks };
+        if (df_chr.length > 0) {
+            const startPos = chrom === 1 ? 0 : cumulativeSums[chrom - 1] / totalLength;
+            const endPos = cumulativeSums[chrom] / totalLength;
+            ticks.push((startPos + endPos) / 2);
+
+            const normalizePos = (pos) => {
+                const chromStart = chrom === 1 ? 0 : cumulativeSums[chrom - 1];
+                return (chromStart + pos) / totalLength;
+            };
+
+            const dyn_chr = df_chr.filter((row) => row.pval <= pvalThreshold);
+            const stat_chr = df_chr.filter((row) => row.pval > pvalThreshold);
+
+            if (dyn_chr.length > 0) {
+                dyn_out.push({
+                    x: dyn_chr.map((row) => normalizePos(row.pos)),
+                    y: dyn_chr.map((row) => row.log_p),
+                    chr: chrom,
+                    SNP_ID: dyn_chr.map((row) => row.SNP_ID),
+                    pos: dyn_chr.map((row) => row.pos)
+                });
+            }
+
+            if (stat_chr.length > 0) {
+                stat_out.push({
+                    x: stat_chr.map((row) => normalizePos(row.pos)),
+                    y: stat_chr.map((row) => row.log_p),
+                    chr: chrom,
+                    SNP_ID: stat_chr.map((row) => row.SNP_ID),
+                    pos: stat_chr.map((row) => row.pos)
+                });
+            }
+        }
+    }
+
+    return { dyn: dyn_out, stat: stat_out, ticks };
 };
-//   const generatePlotData = (df) => {
-//     const pvalThreshold = parseFloat(selectedPval);
-//     const numChromosomes = 22;
-//     const dyn_out = [];
-//     const stat_out = [];
-//     const ticks = [];
-
-//     const chromLengths = [
-//         248956422, 242193529, 198295559, 190214555, 181538259, 170805979,
-//         159345973, 145138636, 138394717, 133797422, 135086622, 133275309,
-//         114364328, 107043718, 101991189, 90338345, 83257441, 80373285,
-//         58617616, 64444167, 46709983, 50818468
-//     ];
-//     const cumulativeSums = chromLengths.reduce((acc, val, i) => {
-//         acc[i + 1] = (acc[i] || 0) + val;
-//         return acc;
-//     }, {});
-
-//     const totalLength = cumulativeSums[numChromosomes];
-
-//     for (let chrom = 1; chrom <= numChromosomes; chrom++) {
-//         const df_chr = df.filter((row) => row.chrom === chrom);
-
-//         if (df_chr.length > 0) {
-//             const startPos = chrom === 1 ? 0 : cumulativeSums[chrom - 1] / totalLength;
-//             const endPos = cumulativeSums[chrom] / totalLength;
-//             ticks.push((startPos + endPos) / 2);
-
-//             const normalizePos = (pos) => {
-//                 const chromStart = chrom === 1 ? 0 : cumulativeSums[chrom - 1];
-//                 return (chromStart + pos) / totalLength;
-//             };
-
-//             const dyn_chr = df_chr.filter((row) => row.pval <= pvalThreshold);
-//             const stat_chr = df_chr.filter((row) => row.pval > pvalThreshold);
-
-//             if (dyn_chr.length > 0) {
-//                 dyn_out.push({
-//                     x: dyn_chr.map((row) => normalizePos(row.pos)),
-//                     y: dyn_chr.map((row) => row.log_p),
-//                     chr: chrom,
-//                     SNP_ID: dyn_chr.map((row) => row.SNP_ID),
-//                     pos: dyn_chr.map((row) => row.pos)
-//                 });
-//             }
-
-//             if (stat_chr.length > 0) {
-//                 stat_out.push({
-//                     x: stat_chr.map((row) => normalizePos(row.pos)),
-//                     y: stat_chr.map((row) => row.log_p),
-//                     chr: chrom,
-//                     SNP_ID: stat_chr.map((row) => row.SNP_ID),
-//                     pos: stat_chr.map((row) => row.pos)
-//                 });
-//             }
-//         }
-//     }
-
-//     return { dyn: dyn_out, stat: stat_out, ticks };
-// };
 
 useEffect(() => {
   if (tab === 'man' && selectedStudy && 
