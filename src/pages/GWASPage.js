@@ -1260,10 +1260,7 @@ const loadMetadata = async () => {
     }
   };
   // Handle p-value changes:
-const handlePValueChange = (newPValue) => {
-  setCurrentPValue(newPValue);
-  fetchGWASData(selectedCohort, newPValue);
-};
+
   // const fetchGWASData = async (cohortId, pval) => {
   //   const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
     
@@ -1424,17 +1421,14 @@ const handlePValueChange = (newPValue) => {
 
 // Modify the processGWASData function to set the max p-value:
 const processGWASData = (data) => {
-  // Determine and set the maximum p-value from the data
   const maxPVal = determineMaxPValue(data);
   setMaxPValue(maxPVal);
-  
-  // If this is the first load and we don't have a current p-value set,
-  // use the max p-value as the default starting point
-  if (!currentPValue) {
-    setCurrentPValue(maxPVal.toExponential(8));
-  }
-  
-  // Process the data as you were doing before
+
+  // Remove these lines:
+  // if (!currentPValue) {
+  //   setCurrentPValue(maxPVal.toExponential(8));
+  // }
+
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
     snps.map((snp) => ({
       chrom: parseInt(chrom),
@@ -1481,7 +1475,8 @@ const processGWASData = (data) => {
 // Modify your generatePlotData function in GWASPage.js to handle the dynamic p-value filtering
 
 const generatePlotData = (df) => {
-  const pvalThreshold = currentPValue ? parseFloat(currentPValue) : parseFloat(selectedPval);
+  const pvalThreshold = filterMaxPValue ? parseFloat(filterMaxPValue) : parseFloat(selectedPval);
+  
   console.log(`Filtering with p-value threshold: ${pvalThreshold}`);
   
   const numChromosomes = 22;
