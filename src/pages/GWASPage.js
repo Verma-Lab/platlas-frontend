@@ -1272,7 +1272,7 @@ const loadMetadata = async () => {
   
       // Parse the response
       const data = await response.json();
-      
+      console.log(data)
       if (!data.data) {
         throw new Error('Response missing data property');
       }
