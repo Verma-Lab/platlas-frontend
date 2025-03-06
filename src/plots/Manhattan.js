@@ -104,10 +104,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             maxRange = Math.ceil(maxValue / 20) * 20;
         }
     
-        const ticks = [];
-        for (let i = 0; i <= maxRange; i += tickInterval) {
-            ticks.push(i);
-        }
+        const ticks = Array.from({ length: Math.floor(maxRange / tickInterval) + 1 }, (_, i) => i * tickInterval);
     
         return {
             ticks,
@@ -117,7 +114,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
     };
 
     useEffect(() => {
-        const allYValues = [...stat, ...dyn].flatMap(d => d.y);
+        const allYValues = [...stat, ...dyn].flatMap(d => d.y || []);
         const maxYValue = Math.ceil(Math.max(...allYValues, threshold || 0));
         const maxLeadSNPLog10p = leadSNPs.reduce((max, snp) => 
             Math.max(max, snp.lead_snp?.log10p || 0), 0
@@ -227,37 +224,42 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
 
     const prepareRegularData = () => {
         const regularTraces = [];
-        
+    
         for (let chrIndex = 0; chrIndex < CHR_COUNT; chrIndex++) {
             const chrData = [...stat, ...dyn].filter(d => d.chr === (chrIndex + 1));
-            
+            if (chrData.length === 0) continue;
+    
+            const x = [];
+            const y = [];
+            const text = [];
+    
             chrData.forEach(d => {
-                regularTraces.push({
-                    x: d.pos.map(p => normalizePosition(chrIndex, p)),
-                    y: d.y,
-                    type: 'scattergl',
-                    mode: 'markers',
-                    marker: { 
-                        color: ALTERNATING_COLORS[chrIndex % 2],
-                        size: 3,
-                        opacity: 1
-                    },
-                    hoverinfo: 'text',
-                    text: d.x.map((xVal, i) => {
-                        const snpID = d.SNP_ID && d.SNP_ID[i] ? d.SNP_ID[i] : 'N/A';
-                        const posVal = d.pos && d.pos[i] ? d.pos[i] : 'N/A';
-                        const originalY = d.y[i];
-                        return (
-                            `SNP_ID: ${snpID}<br>` +
-                            `Chromosome: ${chrIndex + 1}<br>` +
-                            `Position: ${posVal.toLocaleString()}<br>` +
-                            `-log10 p-value: ${originalY.toFixed(2)}<br>` +
-                            `P-value: ${Math.pow(10, -originalY).toExponential(2)}`
-                        );
-                    }),
-                    showlegend: false
+                if (!Array.isArray(d.pos) || !Array.isArray(d.y) || !Array.isArray(d.SNP_ID) ||
+                    d.pos.length !== d.y.length || d.pos.length !== d.SNP_ID.length) {
+                    console.error(`Invalid data for chr ${chrIndex + 1}:`, d);
+                    return;
+                }
+    
+                d.pos.forEach((pos, i) => {
+                    x.push(normalizePosition(chrIndex, pos));
+                    y.push(d.y[i]);
+                    text.push(
+                        `SNP_ID: ${d.SNP_ID[i] || 'N/A'}<br>` +
+                        `Chromosome: ${chrIndex + 1}<br>` +
+                        `Position: ${pos.toLocaleString()}<br>` +
+                        `-log10 p-value: ${d.y[i].toFixed(2)}<br>` +
+                        `P-value: ${Math.pow(10, -d.y[i]).toExponential(2)}`
+                    );
                 });
             });
+    
+            if (x.length > 0) {
+                regularTraces.push({
+                    x, y, type: 'scattergl', mode: 'markers',
+                    marker: { color: ALTERNATING_COLORS[chrIndex % 2], size: 3, opacity: 1 },
+                    hoverinfo: 'text', text, showlegend: false
+                });
+            }
         }
     
         return regularTraces;
