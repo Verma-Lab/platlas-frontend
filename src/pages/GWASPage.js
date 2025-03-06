@@ -750,19 +750,19 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [minInput, setMinInput] = useState('');
 
   useEffect(() => {
-    if (maxPValue) {
-      setMaxInput(maxPValue.toExponential(2));
-      // Set min as one order of magnitude less than max
-      const minVal = maxPValue * 10; // Since we're in p-value space (smaller is more significant)
-      setMinInput(minVal < 1 ? minVal.toExponential(2) : '1.0e-0');
+    if (maxPValue !== null && minPValue !== null) {
+      setMaxInput(maxPValue.toString()); // Raw number, no exponential bullshit
+      setMinInput(minPValue.toString());
     }
-  }, [maxPValue]);
+  }, [maxPValue, minPValue]);
 
   const handleApplyFilter = () => {
     const max = parseFloat(maxInput);
     const min = parseFloat(minInput);
-    if (!isNaN(max) && !isNaN(min) && min < max) {
+    if (!isNaN(max) && !isNaN(min) && min < max && min >= 0 && max <= 1) {
       onFilterChange({ minPValue: min, maxPValue: max });
+    } else {
+      console.error('Invalid p-value range: Min must be less than Max and within 0 to 1');
     }
   };
 
@@ -777,7 +777,7 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
             value={minInput}
             onChange={(e) => setMinInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder="e.g., 1e-8"
+            placeholder="e.g., 0.00001"
           />
         </div>
         <div className="flex-1">
@@ -787,7 +787,7 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
             value={maxInput}
             onChange={(e) => setMaxInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder="e.g., 1e-5"
+            placeholder="e.g., 0.0001"
           />
         </div>
       </div>
@@ -798,7 +798,7 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
         Apply Filter
       </button>
       <p className="text-xs text-gray-500 mt-2">
-        Enter p-values in scientific notation (e.g., 1e-8). Min must be less than Max.
+        Enter p-values (e.g., 0.0001). Min must be less than Max and within 0 to 1.
       </p>
     </div>
   );
@@ -856,26 +856,7 @@ const GWASPage = () => {
   const [filterMaxPValue, setFilterMaxPValue] = useState(null);
   const [filterMinPValue, setFilterMinPValue] = useState(null);
 // Add this function to the GWASPage component:
-const determineMaxPValue = (data) => {
-  // Extract the minimum p-value (which will become the maximum -log10(p))
-  let minPValue = 1;
-  
-  Object.values(data).forEach(chrSnps => {
-    chrSnps.forEach(snp => {
-      const pVal = parseFloat(snp.p);
-      if (pVal > 0 && pVal < minPValue) {
-        minPValue = pVal;
-      }
-    });
-  });
-  
-  // Add a buffer to ensure we capture everything meaningful
-  // but default to 1e-5 if no smaller p-values are found
-  const effectiveMaxLogP = Math.max(-Math.log10(minPValue), 5);
-  const effectiveMaxPValue = Math.pow(10, -effectiveMaxLogP);
-  
-  return effectiveMaxPValue;
-};
+
 
   const fetchHudsonTopData = async (ancestry) => {
     try {
@@ -1186,10 +1167,9 @@ const loadMetadata = async () => {
   //   }
   // };
 
-
   const fetchGWASData = async (cohortId) => {
     const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
-    
+  
     if (cachedData.cohortData[cacheKey]) {
       processGWASData(cachedData.cohortData[cacheKey]);
       return;
@@ -1234,13 +1214,12 @@ const loadMetadata = async () => {
         throw new Error('Incomplete or malformed streamed data');
       }
   
-      // Set max and min p-values from full dataset if not set
-      if (!maxPValue) {
-        const determinedMax = determineMaxPValue(data.data);
-        setMaxPValue(determinedMax);
-        setMinPValue(determinedMax * 10); // One order of magnitude less significant
-        setFilterMaxPValue(determinedMax);
-        setFilterMinPValue(determinedMax * 10);
+      // Set initial range from backend if provided
+      if (data.pValueRange) {
+        setMaxPValue(data.pValueRange.maxPValue);
+        setMinPValue(data.pValueRange.minPValue);
+        setFilterMaxPValue(data.pValueRange.maxPValue);
+        setFilterMinPValue(data.pValueRange.minPValue);
       }
   
       setCachedData((prevData) => ({
@@ -1571,13 +1550,12 @@ useEffect(() => {
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
     const loadData = async () => {
-      await fetchGWASData(selectedCohort, selectedPval);
+      await fetchGWASData(selectedCohort);
       await fetchTopResults(selectedCohort);
     };
     loadData();
   }
-}, [selectedCohort, selectedStudy, tab, selectedPval]);
-
+}, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
 return (
   <div className="min-h-screen bg-gray-50">
     <RelatedPhenotypesSidebar
