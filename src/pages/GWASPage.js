@@ -1227,20 +1227,23 @@ const loadMetadata = async () => {
   // };
 
   const fetchGWASData = async (cohortId) => {
-    const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
-  
-    if (cachedData.cohortData[cacheKey]) {
-      processGWASData(cachedData.cohortData[cacheKey]);
-      return;
-    }
-  
     try {
       setLoading(true);
       
-      // Build the query string, only including parameters that are set
+      // Build the cache key
+      const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
+      
+      // Check cache first
+      if (cachedData.cohortData[cacheKey]) {
+        console.log(`Using cached data for range: ${filterMinPValue} to ${filterMaxPValue}`);
+        processGWASData(cachedData.cohortData[cacheKey]);
+        return;
+      }
+  
+      // Build query parameters
       let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
       
-      // Only add the p-value parameters if they are set
+      // Only include p-value parameters if they're explicitly set
       if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
         queryParams += `&minPval=${filterMinPValue}`;
       }
@@ -1249,14 +1252,16 @@ const loadMetadata = async () => {
         queryParams += `&maxPval=${filterMaxPValue}`;
       }
       
+      console.log(`Fetching GWAS data with: ${queryParams}`);
       const response = await fetch(`/api/queryGWASData?${queryParams}`);
-  
+      console.log(response)
       if (response.status === 404) {
-        handleShowModal();
+        console.log('No data found for the specified range');
         setDynData([]);
         setStatData([]);
         setTicks([]);
         setQQ(null);
+        handleShowModal();
         return;
       }
   
@@ -1264,57 +1269,46 @@ const loadMetadata = async () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
   
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let result = '';
-      let data = {};
-  
-      // Process the stream
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        result += decoder.decode(value, { stream: true });
-        
-        // Try to parse the accumulated JSON
-        try {
-          data = JSON.parse(result);
-        } catch (e) {
-          // Incomplete JSON, continue reading
-          continue;
-        }
-      }
-  
-      // Validate the data structure
+      // Parse the response
+      const data = await response.json();
+      
       if (!data.data) {
-        throw new Error('Incomplete or malformed streamed data');
+        throw new Error('Response missing data property');
       }
   
-      // Update p-value range from the response
+      // Update state with the p-value range received from backend
       if (data.pValueRange) {
+        console.log(`Server returned p-value range: ${data.pValueRange.minPValue} to ${data.pValueRange.maxPValue}`);
+        console.log(`This corresponds to -log10(p) range: ${-Math.log10(data.pValueRange.maxPValue)} to ${-Math.log10(data.pValueRange.minPValue)}`);
+        
+        // Update the UI ranges
         setMaxPValue(data.pValueRange.maxPValue);
         setMinPValue(data.pValueRange.minPValue);
         
-        // Only update the filter values if they weren't explicitly set
+        // Only update the filter values if they weren't explicitly set by the user
         if (filterMinPValue === null || filterMaxPValue === null) {
-          setFilterMaxPValue(data.pValueRange.maxPValue);
           setFilterMinPValue(data.pValueRange.minPValue);
+          setFilterMaxPValue(data.pValueRange.maxPValue);
         }
       }
   
-      // Cache the data
-      setCachedData((prevData) => ({
-        ...prevData,
+      // Process and store the data
+      setCachedData(prev => ({
+        ...prev,
         cohortData: {
-          ...prevData.cohortData,
-          [cacheKey]: data.data,
-        },
+          ...prev.cohortData,
+          [cacheKey]: data.data
+        }
       }));
   
-      // Process the data
       processGWASData(data.data);
       
     } catch (error) {
       console.error('Error fetching GWAS data:', error);
+      setDynData([]);
+      setStatData([]);
+      setTicks([]);
+      setQQ(null);
       handleShowModal();
     } finally {
       setLoading(false);
