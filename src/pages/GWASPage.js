@@ -745,63 +745,60 @@ const StudySelector = ({
   );
 };
 
-const DynamicPValueFilter = ({ maxPValue, currentPValue, onChange }) => {
-  // Default to maxPValue if not provided
-  const effectiveMaxPValue = maxPValue || 0.05;
-  
-  // Convert to log scale for slider
-  const maxLogPValue = -Math.log10(effectiveMaxPValue);
-  const currentLogPValue = currentPValue ? -Math.log10(parseFloat(currentPValue)) : maxLogPValue;
-  
-  // Generate marks for the slider based on the max p-value
-  const generateMarks = () => {
-    const marks = {};
-    const step = maxLogPValue / 5;
-    
-    for (let i = 0; i <= 5; i++) {
-      const logValue = i * step;
-      const pValue = Math.pow(10, -logValue);
-      marks[logValue] = pValue.toExponential(1);
+const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
+  const [maxInput, setMaxInput] = useState('');
+  const [minInput, setMinInput] = useState('');
+
+  useEffect(() => {
+    if (maxPValue) {
+      setMaxInput(maxPValue.toExponential(2));
+      // Set min as one order of magnitude less than max
+      const minVal = maxPValue * 10; // Since we're in p-value space (smaller is more significant)
+      setMinInput(minVal < 1 ? minVal.toExponential(2) : '1.0e-0');
     }
-    
-    return marks;
+  }, [maxPValue]);
+
+  const handleApplyFilter = () => {
+    const max = parseFloat(maxInput);
+    const min = parseFloat(minInput);
+    if (!isNaN(max) && !isNaN(min) && min < max) {
+      onFilterChange({ minPValue: min, maxPValue: max });
+    }
   };
-  
-  const handleSliderChange = (newLogValue) => {
-    // Convert back from log scale to actual p-value
-    const newPValue = Math.pow(10, -newLogValue);
-    onChange(newPValue.toExponential(8));
-  };
-  
+
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-medium text-gray-700">P-value Filter</h3>
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
-          Current: {parseFloat(currentPValue).toExponential(1)}
-        </span>
-      </div>
-      
-      <div className="px-2 py-4">
-        <input
-          type="range"
-          min="0"
-          max={maxLogPValue}
-          step={maxLogPValue / 100}
-          value={currentLogPValue}
-          onChange={(e) => handleSliderChange(parseFloat(e.target.value))}
-          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-        />
-        
-        <div className="flex justify-between mt-1 text-xs text-gray-500">
-          {Object.entries(generateMarks()).map(([logValue, label]) => (
-            <span key={logValue}>{label}</span>
-          ))}
+      <h3 className="text-sm font-medium text-gray-700 mb-2">P-value Range Filter</h3>
+      <div className="flex space-x-4 mb-4">
+        <div className="flex-1">
+          <label className="text-xs text-gray-600">Min P-value</label>
+          <input
+            type="text"
+            value={minInput}
+            onChange={(e) => setMinInput(e.target.value)}
+            className="w-full p-2 border rounded"
+            placeholder="e.g., 1e-8"
+          />
+        </div>
+        <div className="flex-1">
+          <label className="text-xs text-gray-600">Max P-value</label>
+          <input
+            type="text"
+            value={maxInput}
+            onChange={(e) => setMaxInput(e.target.value)}
+            className="w-full p-2 border rounded"
+            placeholder="e.g., 1e-5"
+          />
         </div>
       </div>
-      
+      <button
+        onClick={handleApplyFilter}
+        className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+      >
+        Apply Filter
+      </button>
       <p className="text-xs text-gray-500 mt-2">
-        Adjust to filter points by significance level. More stringent thresholds (to the right) show fewer points and improve performance.
+        Enter p-values in scientific notation (e.g., 1e-8). Min must be less than Max.
       </p>
     </div>
   );
@@ -854,8 +851,10 @@ const GWASPage = () => {
   const history = useNavigate();
 
   // Modify these variables in your GWASPage component state:
-const [maxPValue, setMaxPValue] = useState(null); // Store the maximum p-value
-const [currentPValue, setCurrentPValue] = useState(null); // Current filter value
+  const [maxPValue, setMaxPValue] = useState(null);
+  const [minPValue, setMinPValue] = useState(null);
+  const [filterMaxPValue, setFilterMaxPValue] = useState(null);
+  const [filterMinPValue, setFilterMinPValue] = useState(null);
 // Add this function to the GWASPage component:
 const determineMaxPValue = (data) => {
   // Extract the minimum p-value (which will become the maximum -log10(p))
@@ -1188,8 +1187,8 @@ const loadMetadata = async () => {
   // };
 
 
-  const fetchGWASData = async (cohortId, pval = currentPValue) => {
-    const cacheKey = `${cohortId}_${pval}_${selectedStudy}`;
+  const fetchGWASData = async (cohortId) => {
+    const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
     
     if (cachedData.cohortData[cacheKey]) {
       processGWASData(cachedData.cohortData[cacheKey]);
@@ -1199,7 +1198,7 @@ const loadMetadata = async () => {
     try {
       setLoading(true);
       const response = await fetch(
-        `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&pval=${pval}&study=${selectedStudy}`
+        `/api/queryGWASData?cohortId=${cohortId}&phenoId=${phenoId}&minPval=${filterMinPValue}&maxPval=${filterMaxPValue}&study=${selectedStudy}`
       );
   
       if (response.status === 404) {
@@ -1215,7 +1214,6 @@ const loadMetadata = async () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
   
-      // Process streamed response
       const reader = response.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let result = '';
@@ -1224,19 +1222,25 @@ const loadMetadata = async () => {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-  
         result += decoder.decode(value, { stream: true });
         try {
           data = JSON.parse(result);
         } catch (e) {
-          // Incomplete JSON, continue reading
           continue;
         }
       }
   
-      // Ensure we have the full data object
       if (!data.data) {
         throw new Error('Incomplete or malformed streamed data');
+      }
+  
+      // Set max and min p-values from full dataset if not set
+      if (!maxPValue) {
+        const determinedMax = determineMaxPValue(data.data);
+        setMaxPValue(determinedMax);
+        setMinPValue(determinedMax * 10); // One order of magnitude less significant
+        setFilterMaxPValue(determinedMax);
+        setFilterMinPValue(determinedMax * 10);
       }
   
       setCachedData((prevData) => ({
@@ -1251,10 +1255,6 @@ const loadMetadata = async () => {
     } catch (error) {
       console.error('Error fetching GWAS data:', error);
       handleShowModal();
-      setDynData([]);
-      setStatData([]);
-      setTicks([]);
-      setQQ(null);
     } finally {
       setLoading(false);
     }
@@ -1679,14 +1679,16 @@ return (
             <div className="space-y-6">
             <div className="mb-4 flex justify-end space-x-2">
             <div className="w-1/4">
-        {/* Add the new dynamic p-value filter component */}
-        {maxPValue && currentPValue && (
-          <DynamicPValueFilter
-            maxPValue={maxPValue}
-            currentPValue={currentPValue}
-            onChange={handlePValueChange}
-          />
-        )}
+            <PValueRangeFilter
+          maxPValue={maxPValue}
+          minPValue={minPValue}
+          onFilterChange={({ minPValue, maxPValue }) => {
+            setFilterMinPValue(minPValue);
+            setFilterMaxPValue(maxPValue);
+            fetchGWASData(selectedCohort);
+          }}
+        />
+      
       </div>
                 <select 
                     value={filterLimit}
