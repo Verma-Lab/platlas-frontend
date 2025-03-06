@@ -748,74 +748,116 @@ const StudySelector = ({
 const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [maxInput, setMaxInput] = useState('');
   const [minInput, setMinInput] = useState('');
+  const [showLogScale, setShowLogScale] = useState(true);
   
   // Update input fields when props change
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
-      // Format the values to be more readable
-      setMaxInput(formatPValue(maxPValue));
-      setMinInput(formatPValue(minPValue));
+      if (showLogScale) {
+        // Display as -log10(p) values (higher = more significant)
+        setMaxInput((-Math.log10(minPValue)).toFixed(2)); // Min p-value gives max -log10(p)
+        setMinInput((-Math.log10(maxPValue)).toFixed(2)); // Max p-value gives min -log10(p)
+      } else {
+        // Display as raw p-values in scientific notation
+        setMaxInput(formatPValue(maxPValue));
+        setMinInput(formatPValue(minPValue));
+      }
     }
-  }, [maxPValue, minPValue]);
+  }, [maxPValue, minPValue, showLogScale]);
 
-  // Helper function to format p-values in scientific notation if very small
+  // Helper function to format p-values in scientific notation
   const formatPValue = (value) => {
     if (value === null || value === undefined) return '';
-    
-    // Use scientific notation for very small numbers
-    if (value < 0.0001) {
-      return value.toExponential(6);
-    }
-    
-    // Otherwise use standard decimal format with appropriate precision
-    return value.toString();
+    // Always use scientific notation for GWAS p-values
+    return value.toExponential(6);
   };
 
   const handleApplyFilter = () => {
-    const max = parseFloat(maxInput);
-    const min = parseFloat(minInput);
+    let min, max;
     
-    if (!isNaN(max) && !isNaN(min) && min < max && min >= 0 && max <= 1) {
-      onFilterChange({ minPValue: min, maxPValue: max });
+    if (showLogScale) {
+      // Convert from -log10(p) back to p-values
+      const logMin = parseFloat(minInput);
+      const logMax = parseFloat(maxInput);
+      
+      if (isNaN(logMin) || isNaN(logMax) || logMin > logMax) {
+        alert('Invalid -log10(p) range: Min must be less than Max');
+        return;
+      }
+      
+      // Convert -log10(p) to p-values (invert the relationship)
+      max = Math.pow(10, -logMin); // Min -log10(p) gives max p-value
+      min = Math.pow(10, -logMax); // Max -log10(p) gives min p-value
     } else {
-      // Show error message in the UI
-      alert('Invalid p-value range: Min must be less than Max and within 0 to 1');
+      // Direct p-value entry
+      min = parseFloat(minInput);
+      max = parseFloat(maxInput);
+      
+      if (isNaN(min) || isNaN(max) || min > max || min < 0 || max > 1) {
+        alert('Invalid p-value range: Min must be less than Max and within 0 to 1');
+        return;
+      }
     }
+    
+    console.log(`Applying filter with p-value range: ${min} to ${max}`);
+    console.log(`This corresponds to -log10(p) range: ${-Math.log10(max)} to ${-Math.log10(min)}`);
+    
+    onFilterChange({ minPValue: min, maxPValue: max });
   };
 
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <h3 className="text-sm font-medium text-gray-700 mb-2">P-value Range Filter</h3>
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-medium text-gray-700">P-value Range Filter</h3>
+        <div className="flex items-center">
+          <label className="text-xs text-gray-600 mr-2">Show as -log10(p)</label>
+          <input
+            type="checkbox"
+            checked={showLogScale}
+            onChange={() => setShowLogScale(!showLogScale)}
+            className="form-checkbox h-4 w-4 text-blue-600"
+          />
+        </div>
+      </div>
+      
       <div className="flex space-x-4 mb-4">
         <div className="flex-1">
-          <label className="text-xs text-gray-600">Min P-value</label>
+          <label className="text-xs text-gray-600">
+            {showLogScale ? "Min -log10(p)" : "Min P-value"}
+          </label>
           <input
             type="text"
             value={minInput}
             onChange={(e) => setMinInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder="e.g., 0.00001"
+            placeholder={showLogScale ? "e.g., 5" : "e.g., 1e-5"}
           />
         </div>
         <div className="flex-1">
-          <label className="text-xs text-gray-600">Max P-value</label>
+          <label className="text-xs text-gray-600">
+            {showLogScale ? "Max -log10(p)" : "Max P-value"}
+          </label>
           <input
             type="text"
             value={maxInput}
             onChange={(e) => setMaxInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder="e.g., 0.0001"
+            placeholder={showLogScale ? "e.g., 8" : "e.g., 1e-8"}
           />
         </div>
       </div>
+      
       <button
         onClick={handleApplyFilter}
         className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
       >
         Apply Filter
       </button>
+      
       <p className="text-xs text-gray-500 mt-2">
-        Enter p-values (e.g., 0.0001). Min must be less than Max and within 0 to 1.
+        {showLogScale 
+          ? "Higher -log10(p) values = more significant SNPs (e.g., 8 = p-value of 10^-8)"
+          : "Enter p-values using scientific notation (e.g., 1e-8)"}
       </p>
     </div>
   );
