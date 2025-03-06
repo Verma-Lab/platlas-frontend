@@ -1476,15 +1476,33 @@ const loadMetadata = async () => {
 
 
 // Modify the processGWASData function to set the max p-value:
+// const processGWASData = (data) => {
+//   const df = Object.entries(data).flatMap(([chrom, snps]) =>
+//     snps.map((snp) => ({
+//       chrom: parseInt(chrom),
+//       pos: snp.pos,
+//       log_p: -Math.log10(snp.p),
+//       pval: snp.p,
+//       SNP_ID: snp.id
+//     }))
+//   );
+//   generateQQData(df);
+//   const { dyn, stat, ticks } = generatePlotData(df);
+//   setDynData(dyn);
+//   setStatData(stat);
+//   setTicks(ticks);
+// };
 const processGWASData = (data) => {
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
-    snps.map((snp) => ({
-      chrom: parseInt(chrom),
-      pos: snp.pos,
-      log_p: -Math.log10(snp.p),
-      pval: snp.p,
-      SNP_ID: snp.id
-    }))
+    snps
+      .filter(snp => snp.p > 0 && isFinite(-Math.log10(snp.p))) // Reject invalid p-values
+      .map((snp) => ({
+        chrom: parseInt(chrom),
+        pos: snp.pos,
+        log_p: -Math.log10(snp.p),
+        pval: snp.p,
+        SNP_ID: snp.id
+      }))
   );
   generateQQData(df);
   const { dyn, stat, ticks } = generatePlotData(df);
