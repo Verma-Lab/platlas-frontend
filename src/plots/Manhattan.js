@@ -231,10 +231,18 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         for (let chrIndex = 0; chrIndex < CHR_COUNT; chrIndex++) {
             const chrData = [...stat, ...dyn].filter(d => d.chr === (chrIndex + 1));
             
-            chrData.forEach(d => {
+            if (chrData.length > 0) {
+                const xValues = [];
+                const yValues = [];
+                
+                chrData.forEach(d => {
+                    xValues.push(...d.x);
+                    yValues.push(...d.y);
+                });
+                
                 regularTraces.push({
-                    x: d.x, // Use pre-normalized d.x instead of mapping d.pos
-                    y: d.y,
+                    x: xValues,
+                    y: yValues,
                     type: 'scattergl',
                     mode: 'markers',
                     marker: { 
@@ -242,11 +250,10 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                         size: 3,
                         opacity: 1
                     },
-                    hoverinfo: 'none', // Disable hover text for regular traces
-                    // Remove the text property entirely
+                    hoverinfo: 'none',
                     showlegend: false
                 });
-            });
+            }
         }
         
         return regularTraces;
