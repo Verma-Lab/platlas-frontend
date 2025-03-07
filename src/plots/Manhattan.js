@@ -214,52 +214,18 @@ shapes.push({
     }
 });
 
-        // Inside your useEffect where you set the layout:
-
 (async () => {
     const imageUrl = await getImagePath();
     
     // Convert min p-value to -log10 scale if it exists
     const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
     
-    // Create the striped pattern for filtered area
-    const filterShade = [{
-        type: 'rect',
-        xref: 'paper',
-        yref: 'y',
-        x0: 0,
-        x1: 1,
-        y0: 0,
-        y1: minLogPThreshold,
-        fillcolor: 'rgba(200, 200, 200, 0.5)',
-        line: { width: 0 },
-        layer: 'above',  // This is key - put it ABOVE the image
-        opacity: 0.7
-    }];
+    // Create shapes array
+    const shapes = [];
     
-    // Add diagonal stripes using additional shapes
-    const stripeCount = 40;
-    for (let i = 0; i < stripeCount; i++) {
-        filterShade.push({
-            type: 'line',
-            xref: 'paper',
-            yref: 'y',
-            x0: 0,
-            x1: 1,
-            y0: (i / stripeCount) * minLogPThreshold,
-            y1: 0,
-            line: {
-                color: 'rgba(150, 150, 150, 0.4)',
-                width: 1
-            },
-            layer: 'above'
-        });
-    }
-    
-    // Combine with threshold line if it exists
-    const allShapes = threshold ? [
-        ...filterShade,
-        {
+    // Add threshold line if provided
+    if (threshold) {
+        shapes.push({
             type: 'line',
             xref: 'paper',
             yref: 'y',
@@ -271,10 +237,28 @@ shapes.push({
                 color: 'rgb(255, 0, 0)',
                 width: 2,
                 dash: 'dash'
-            },
-            layer: 'above'
-        }
-    ] : filterShade;
+            }
+        });
+    }
+    
+    // Add diagonal stripes for filtered area
+    // Use fewer lines for a cleaner look
+    const stripeCount = 20;
+    for (let i = 0; i < stripeCount; i++) {
+        shapes.push({
+            type: 'line',
+            xref: 'paper',
+            yref: 'y',
+            x0: 0,
+            x1: 1,
+            y0: (i / stripeCount) * minLogPThreshold,
+            y1: 0,
+            line: {
+                color: 'rgba(100, 100, 100, 0.3)',
+                width: 1
+            }
+        });
+    }
     
     setLayout({
         autosize: true,
@@ -309,7 +293,7 @@ shapes.push({
             fixedrange: true
         },
         margin: { l: 60, r: 40, t: 20, b: 40 },
-        shapes: allShapes,
+        shapes: shapes,
         images: [{
             source: imageUrl,
             xref: 'x',
@@ -321,8 +305,8 @@ shapes.push({
             xanchor: 'left',
             yanchor: 'bottom',
             sizing: 'stretch',
-            opacity: 0.2,
-            layer: 'below'  // Keep the image below
+            opacity: 1, // Keep full opacity for the image
+            layer: 'below'
         }]
     });
 })();
