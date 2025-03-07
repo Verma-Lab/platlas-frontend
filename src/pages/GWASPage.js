@@ -1483,34 +1483,16 @@ const loadMetadata = async () => {
 //   setTicks(ticks);
 // };
 const processGWASData = (data) => {
-  const parsePValueLog = (pStr) => {
-      if (typeof pStr !== 'string') {
-          const p = parseFloat(pStr);
-          return p > 0 && isFinite(p) ? -Math.log10(p) : Infinity;
-      }
-      const match = pStr.match(/(\d+\.?\d*)e-(\d+)/i);
-      if (match) {
-          const [, mantissa, exponent] = match;
-          const mantissaNum = parseFloat(mantissa);
-          return mantissaNum > 0 ? -Math.log10(mantissaNum) + parseInt(exponent) : parseInt(exponent);
-      }
-      const p = parseFloat(pStr);
-      return p > 0 && isFinite(p) ? -Math.log10(p) : Infinity;
-  };
-
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
-      snps
-          .filter(snp => {
-              const logP = parsePValueLog(snp.p);
-              return snp.p > 0 && isFinite(logP);
-          })
-          .map((snp) => ({
-              chrom: parseInt(chrom),
-              pos: snp.pos,
-              log_p: parsePValueLog(snp.p),
-              pval: snp.p,
-              SNP_ID: snp.id
-          }))
+    snps
+      .filter(snp => snp.log10p !== undefined && !isNaN(snp.log10p) && snp.p > 0) // Ensure valid log10p and p
+      .map((snp) => ({
+        chrom: parseInt(chrom),
+        pos: snp.pos,
+        log_p: parseFloat(snp.log10p), // Use backend-provided log10p directly
+        pval: snp.p, // Keep p as-is for filtering
+        SNP_ID: snp.id
+      }))
   );
 
   const maxLogP = Math.max(...df.map(row => row.log_p));
