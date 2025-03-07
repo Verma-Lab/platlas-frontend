@@ -1483,13 +1483,12 @@ const loadMetadata = async () => {
 //   setTicks(ticks);
 // };
 const processGWASData = (data) => {
-  // Custom function to compute -log10(p) from string p-values
   const parsePValueLog = (pStr) => {
       if (typeof pStr !== 'string') {
           const p = parseFloat(pStr);
           return p > 0 && isFinite(p) ? -Math.log10(p) : Infinity;
       }
-      const match = pStr.match(/(\d+\.?\d*)e-(\d+)/i); // e.g., "1e-500"
+      const match = pStr.match(/(\d+\.?\d*)e-(\d+)/i);
       if (match) {
           const [, mantissa, exponent] = match;
           const mantissaNum = parseFloat(mantissa);
@@ -1503,18 +1502,17 @@ const processGWASData = (data) => {
       snps
           .filter(snp => {
               const logP = parsePValueLog(snp.p);
-              return snp.p > 0 && isFinite(logP); // Ensure valid p-values
+              return snp.p > 0 && isFinite(logP);
           })
           .map((snp) => ({
               chrom: parseInt(chrom),
               pos: snp.pos,
-              log_p: parsePValueLog(snp.p), // Compute -log10(p) from string
-              pval: snp.p, // Keep original string for reference if needed
+              log_p: parsePValueLog(snp.p),
+              pval: snp.p,
               SNP_ID: snp.id
           }))
   );
 
-  // Log the maximum -log10(p) for debugging
   const maxLogP = Math.max(...df.map(row => row.log_p));
   console.log(`Maximum -log10(p) in processed data: ${maxLogP}`);
 
