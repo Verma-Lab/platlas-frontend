@@ -120,7 +120,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         console.log('POINTS')
         console.log(stat, dyn)
         const allYValues = [...stat, ...dyn].flatMap(d => d.y);
-        const maxYValue = Math.ceil(Math.max(...allYValues, threshold || 0));
+        const maxYValue = Math.ceil(Math.max(...allYValues, threshold || 0, minLogPThreshold));
         const maxLeadSNPLog10p = leadSNPs.reduce((max, snp) => 
             Math.max(max, snp.lead_snp?.log10p || 0), 0
         );
@@ -155,8 +155,6 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
 const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
 
 const shapes = [];
-
-// Add the significance threshold line if provided
 if (threshold) {
     shapes.push({
         type: 'line',
@@ -173,46 +171,20 @@ if (threshold) {
         }
     });
 }
-
-// Add a semi-transparent rectangle to simulate the blur effect
-shapes.push({
-    type: 'rect',
-    xref: 'paper',
-    yref: 'y',
-    x0: 0,
-    x1: 1,
-    y0: 0,
-    y1: minLogPThreshold,
-    fillcolor: 'rgba(200, 200, 200, 0.3)', // Semi-transparent gray to mimic blur
-    line: {
-        width: 0
-    },
-    layer: 'below'
-});
-
-// Optionally, add a striped pattern on top to match the original image
-shapes.push({
-    type: 'rect',
-    xref: 'paper',
-    yref: 'y',
-    x0: 0,
-    x1: 1,
-    y0: 0,
-    y1: minLogPThreshold,
-    fillcolor: 'rgba(0, 0, 0, 0)', // Transparent fill for the pattern
-    line: {
-        width: 0
-    },
-    layer: 'below',
-    pattern: {
-        shape: '/', // Diagonal stripes
-        fillmode: 'overlay',
-        size: 10,
-        solidity: 0.3, // Adjust solidity to make the stripes less prominent
-        fgcolor: 'rgba(120, 120, 120, 0.5)', // Gray stripes
-        bgcolor: 'rgba(0, 0, 0, 0)' // Transparent background
-    }
-});
+if (minLogPThreshold > 0) {
+    shapes.push({
+        type: 'rect',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        x1: 1,
+        y0: 0,
+        y1: minLogPThreshold,
+        fillcolor: 'rgba(128, 128, 128, 0.4)',
+        line: { width: 0 },
+        layer: 'below'
+    });
+}
 
         (async () => {
             const imageUrl = await getImagePath();
@@ -274,7 +246,7 @@ shapes.push({
                 URL.revokeObjectURL(currentLayout);
             }
         };
-    }, [stat, dyn, threshold, leadSNPs, phenoId, selectedCohort, selectedStudy]);
+    }, [stat, dyn, threshold, leadSNPs, phenoId, selectedCohort, selectedStudy, filterMinPValue]);
 
     const prepareRegularData = () => {
         const regularTraces = [];
@@ -291,7 +263,7 @@ shapes.push({
                     marker: { 
                         color: ALTERNATING_COLORS[chrIndex % 2],
                         size: 3.5,
-                        opacity: 1
+                        opacity: d.y.map(y => y < minLogPThreshold ? 0.3 : 1)
                     },
                     hoverinfo: 'text',
                     text: d.x.map((xVal, i) => {
@@ -341,7 +313,7 @@ shapes.push({
                 size: 8,
                 color: '#000000',
                 line: { color: '#FFFFFF', width: 2 },
-                opacity: 1
+                opacity: []  // Will be filled dynamically
             },
             hoverinfo: 'text',
             showlegend: false,
@@ -356,6 +328,7 @@ shapes.push({
             const normalizedPos = normalizePosition(chr, pos);
             leadSNPTrace.x.push(normalizedPos);
             leadSNPTrace.y.push(log10p);
+            leadSNPTrace.marker.opacity.push(log10p < minLogPThreshold ? 0.3 : 1);
             leadSNPTrace.text.push(
                 `Lead SNP: ${snp.lead_snp.rsid}<br>` +
                 `Chromosome: ${chr + 1}<br>` +
