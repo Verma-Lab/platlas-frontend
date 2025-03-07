@@ -115,7 +115,8 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             tickInterval
         };
     };
-
+    const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
+    
     useEffect(() => {
         console.log('POINTS')
         console.log(stat, dyn)
@@ -152,7 +153,6 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
 
         // Convert minimum p-value to -log10 scale if it exists
 // Convert minimum p-value to -log10 scale if it exists
-const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
 
 const shapes = [];
 if (threshold) {
