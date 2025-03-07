@@ -151,6 +151,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
         };
 
         // Convert minimum p-value to -log10 scale if it exists
+// Convert minimum p-value to -log10 scale if it exists
 const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
 
 const shapes = [];
@@ -173,7 +174,7 @@ if (threshold) {
     });
 }
 
-// Add the striped filter area at the bottom
+// Add a semi-transparent rectangle to simulate the blur effect
 shapes.push({
     type: 'rect',
     xref: 'paper',
@@ -182,18 +183,34 @@ shapes.push({
     x1: 1,
     y0: 0,
     y1: minLogPThreshold,
-    fillcolor: 'rgba(0, 0, 0, 0)',
+    fillcolor: 'rgba(200, 200, 200, 0.3)', // Semi-transparent gray to mimic blur
+    line: {
+        width: 0
+    },
+    layer: 'below'
+});
+
+// Optionally, add a striped pattern on top to match the original image
+shapes.push({
+    type: 'rect',
+    xref: 'paper',
+    yref: 'y',
+    x0: 0,
+    x1: 1,
+    y0: 0,
+    y1: minLogPThreshold,
+    fillcolor: 'rgba(0, 0, 0, 0)', // Transparent fill for the pattern
     line: {
         width: 0
     },
     layer: 'below',
     pattern: {
-        shape: '/',
+        shape: '/', // Diagonal stripes
         fillmode: 'overlay',
         size: 10,
-        solidity: 0.5,
-        fgcolor: 'rgba(120, 120, 120, 0.5)',
-        bgcolor: 'rgba(0, 0, 0, 0)'
+        solidity: 0.3, // Adjust solidity to make the stripes less prominent
+        fgcolor: 'rgba(120, 120, 120, 0.5)', // Gray stripes
+        bgcolor: 'rgba(0, 0, 0, 0)' // Transparent background
     }
 });
 
@@ -238,14 +255,14 @@ shapes.push({
                     source: imageUrl,
                     xref: 'x',
                     yref: 'y',
-                    x: -0.061,
+                    x: -0.0625,
                     y: -(maxRange * 0.07),  // Make it dynamic based on maxRange
                     sizex: 1.23,
                     sizey: maxRange * 1.05,  // Slightly larger to ensure full coverage
                     xanchor: 'left',
                     yanchor: 'bottom',  // Change this from 'top' to 'bottom'
                     sizing: 'stretch',
-                    opacity: 1,
+                    opacity: 0.5,
                     layer: 'below'
                 }]
             });

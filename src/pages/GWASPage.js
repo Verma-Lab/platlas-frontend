@@ -1731,26 +1731,7 @@ return (
           />
           
         </div>
-        
-        <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>
-          {/* <Tab eventKey="about" title="About">
-            <div className="p-4">
-              {Array.isArray(about) && about.length > 0 ? (
-                about.map((d, index) => (
-                  <div key={index} className="mb-4 border-b pb-2">
-                    <h3 className="text-lg font-bold text-gray-800">{d.Info}</h3>
-                    <p className="text-gray-600">{d.Description}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-600">No data available for the selected cohort.</p>
-              )}
-            </div>
-          </Tab> */}
-          
-          <Tab eventKey="man" title="Analysis">
-            <div className="space-y-6">
-            <div className="mb-4 flex justify-end space-x-2">
+        <div className="mb-4 flex justify-end space-x-2">
             <div className="w-1/4">
             <PValueRangeFilter
           maxPValue={maxPValue}
@@ -1777,6 +1758,25 @@ return (
                     <option value="50">Top 50</option>
                 </select>
             </div>
+        <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>
+          {/* <Tab eventKey="about" title="About">
+            <div className="p-4">
+              {Array.isArray(about) && about.length > 0 ? (
+                about.map((d, index) => (
+                  <div key={index} className="mb-4 border-b pb-2">
+                    <h3 className="text-lg font-bold text-gray-800">{d.Info}</h3>
+                    <p className="text-gray-600">{d.Description}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-600">No data available for the selected cohort.</p>
+              )}
+            </div>
+          </Tab> */}
+          
+          <Tab eventKey="man" title="Analysis">
+            <div className="space-y-6">
+
               <div className="space-y-6">
               
                 <div className="bg-white flex justify-center items-center rounded-lg shadow p-4">
