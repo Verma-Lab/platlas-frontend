@@ -14,7 +14,7 @@ const CHROMOSOME_LENGTHS = [
     58617616, 64444167, 46709983, 50818468
 ];
 
-export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort, selectedStudy, filterLimit }) => {
+export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedCohort, selectedStudy, filterLimit, filterMinPValue }) => {
     const [leadSNPs, setLeadSNPs] = useState([]);
     const [layout, setLayout] = useState({});
     const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
@@ -150,20 +150,52 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
             }
         };
 
-        const shapes = threshold ? [{
-            type: 'line',
-            xref: 'paper',
-            yref: 'y',
-            x0: 0,
-            x1: 1,
-            y0: threshold,
-            y1: threshold,
-            line: {
-                color: 'rgb(255, 0, 0)',
-                width: 2,
-                dash: 'dash'
-            }
-        }] : [];
+        // Convert minimum p-value to -log10 scale if it exists
+const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
+
+const shapes = [];
+
+// Add the significance threshold line if provided
+if (threshold) {
+    shapes.push({
+        type: 'line',
+        xref: 'paper',
+        yref: 'y',
+        x0: 0,
+        x1: 1,
+        y0: threshold,
+        y1: threshold,
+        line: {
+            color: 'rgb(255, 0, 0)',
+            width: 2,
+            dash: 'dash'
+        }
+    });
+}
+
+// Add the striped filter area at the bottom
+shapes.push({
+    type: 'rect',
+    xref: 'paper',
+    yref: 'y',
+    x0: 0,
+    x1: 1,
+    y0: 0,
+    y1: minLogPThreshold,
+    fillcolor: 'rgba(0, 0, 0, 0)',
+    line: {
+        width: 0
+    },
+    layer: 'below',
+    pattern: {
+        shape: '/',
+        fillmode: 'overlay',
+        size: 10,
+        solidity: 0.5,
+        fgcolor: 'rgba(120, 120, 120, 0.5)',
+        bgcolor: 'rgba(0, 0, 0, 0)'
+    }
+});
 
         (async () => {
             const imageUrl = await getImagePath();
@@ -206,7 +238,7 @@ export const Manhattan = ({ dyn, stat, threshold, onSNPClick, phenoId, selectedC
                     source: imageUrl,
                     xref: 'x',
                     yref: 'y',
-                    x: -0.062,
+                    x: -0.061,
                     y: -(maxRange * 0.07),  // Make it dynamic based on maxRange
                     sizex: 1.23,
                     sizey: maxRange * 1.05,  // Slightly larger to ensure full coverage

@@ -1792,6 +1792,7 @@ return (
     selectedCohort={selectedCohort}
     selectedStudy={selectedStudy}  // Add this prop
     filterLimit={filterLimit} // Added this prop
+    filterMinPValue={filterMinPValue}
 />
                   </div>
                 </div>
