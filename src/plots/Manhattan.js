@@ -262,7 +262,7 @@ shapes.push({
                     xanchor: 'left',
                     yanchor: 'bottom',  // Change this from 'top' to 'bottom'
                     sizing: 'stretch',
-                    opacity: 0.5,
+                    opacity: 1,
                     layer: 'below'
                 }]
             });

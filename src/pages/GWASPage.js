@@ -1715,94 +1715,81 @@ return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="bg-white rounded-xl shadow p-6">
         
+        {/* Study Selector */}
         <div className="mb-6">
           <StudySelector
             selectedStudy={selectedStudy}
             selectedCohort={selectedCohort}
             onChange={setSelectedStudy}
             setSelectedCohort={setSelectedCohort}
-            setSelectedTopAncestry={setSelectedTopAncestry}       // Add this
-            setSelectedBottomAncestry={setSelectedBottomAncestry} // Add this
+            setSelectedTopAncestry={setSelectedTopAncestry}
+            setSelectedBottomAncestry={setSelectedBottomAncestry}
             phenoId={phenoId}
             availableStudies={availableStudies}
             gwamaCohorts={gwamaCohorts}
             mrmegaAvailable={mrmegaAvailable}
             gwamaAvailable={gwamaAvailable}
           />
-          
         </div>
-        <div className="mb-4 flex justify-end space-x-2">
-            <div className="w-1/4">
+        
+        {/* Filters Row - Grid Layout */}
+        <div className="mb-6 grid grid-cols-4 gap-4">
+          {/* P-value Filter - Takes 3 columns */}
+          <div className="col-span-3">
             <PValueRangeFilter
-          maxPValue={maxPValue}
-          minPValue={minPValue}
-          onFilterChange={({ minPValue, maxPValue }) => {
-            setFilterMinPValue(minPValue);
-            setFilterMaxPValue(maxPValue);
-            fetchGWASData(selectedCohort);
-          }}
-        />
-      
-      </div>
-                <select 
-                    value={filterLimit}
-                    onChange={(e) => setFilterLimit(e.target.value)}
-                    className="border rounded-md"
-                >
-                    <option value="None">
-                    <span className='p-2 text-blue font-semibold border border-black/20'>Filter Lead Variants</span>
-                    </option>
-                    <option value="all">All Variants</option>
-                    <option value="10">Top 10</option>
-                    <option value="20">Top 20</option>
-                    <option value="50">Top 50</option>
-                </select>
-            </div>
-        <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>
-          {/* <Tab eventKey="about" title="About">
-            <div className="p-4">
-              {Array.isArray(about) && about.length > 0 ? (
-                about.map((d, index) => (
-                  <div key={index} className="mb-4 border-b pb-2">
-                    <h3 className="text-lg font-bold text-gray-800">{d.Info}</h3>
-                    <p className="text-gray-600">{d.Description}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-600">No data available for the selected cohort.</p>
-              )}
-            </div>
-          </Tab> */}
+              maxPValue={maxPValue}
+              minPValue={minPValue}
+              onFilterChange={({ minPValue, maxPValue }) => {
+                setFilterMinPValue(minPValue);
+                setFilterMaxPValue(maxPValue);
+                fetchGWASData(selectedCohort);
+              }}
+            />
+          </div>
           
+          {/* Variant Filter - Takes 1 column */}
+          <div className="col-span-1">
+            <div className="h-full p-4 bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Lead Variants Filter</h3>
+              <select 
+                value={filterLimit}
+                onChange={(e) => setFilterLimit(e.target.value)}
+                className="w-full p-2 border rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="None">No filtering</option>
+                <option value="all">All Variants</option>
+                <option value="10">Top 10</option>
+                <option value="20">Top 20</option>
+                <option value="50">Top 50</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-2">
+                Filter to show specific lead variants
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <Tabs activeKey={tab} onSelect={(e) => setTab(e)} variant="pills" justify>          
           <Tab eventKey="man" title="Analysis">
             <div className="space-y-6">
-
               <div className="space-y-6">
-              
                 <div className="bg-white flex justify-center items-center rounded-lg shadow p-4">
                   <div className="overflow-hidden max-h-[600px] flex justify-center w-full">
-                  <Manhattan
-    stat={statData}
-    dyn={dynData}
-    ticks={ticks}
-    threshold={logPval}
-    onSNPClick={handleSNPClick}
-    history={history}
-    phenoId={phenoId}
-    selectedCohort={selectedCohort}
-    selectedStudy={selectedStudy}  // Add this prop
-    filterLimit={filterLimit} // Added this prop
-    filterMinPValue={filterMinPValue}
-/>
+                    <Manhattan
+                      stat={statData}
+                      dyn={dynData}
+                      ticks={ticks}
+                      threshold={logPval}
+                      onSNPClick={handleSNPClick}
+                      history={history}
+                      phenoId={phenoId}
+                      selectedCohort={selectedCohort}
+                      selectedStudy={selectedStudy}
+                      filterLimit={filterLimit}
+                      filterMinPValue={filterMinPValue}
+                    />
                   </div>
                 </div>
-
-                {/* <div className="bg-gray-100 rounded-lg shadow p-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Q-Q Plot</h3>
-                  <div className="overflow-hidden max-h-[500px]">
-                    <QQ data={qq} />
-                  </div>
-                </div> */}
               </div>
 
               <div className="bg-gray-100 rounded-lg shadow p-4">
@@ -1811,15 +1798,17 @@ return (
               </div>
             </div>
           </Tab>
+          
           <Tab eventKey="qq" title="QQ Plot">
-         <div className="p-4">
-         <QQPlotView
-                 phenoId={phenoId}
-                 selectedCohort={selectedCohort}
+            <div className="p-4">
+              <QQPlotView
+                phenoId={phenoId}
+                selectedCohort={selectedCohort}
                 selectedStudy={selectedStudy}
-                />
-         </div>
-        </Tab>  
+              />
+            </div>
+          </Tab>  
+          
           <Tab eventKey="hudson" title="Compare Ancestries">
             <div className="p-4">
               <div className="bg-gray-100 rounded-lg shadow p-4 mt-4">
@@ -1837,7 +1826,6 @@ return (
                   onBottomAncestryChange={setSelectedBottomAncestry}
                   loadingTop={loadingTop}
                   loadingBottom={loadingBottom}
-                  // Use the same cohorts fetched by /findfiles (either gwamaCohorts if gwama, or ['ALL'] if mrmega)
                   availableCohorts={selectedStudy === 'gwama' ? gwamaCohorts : ['ALL']}
                 />
               </div>
@@ -1848,7 +1836,6 @@ return (
     </div>
   </div>
 );
-
-};
+}
 
 export default GWASPage;
