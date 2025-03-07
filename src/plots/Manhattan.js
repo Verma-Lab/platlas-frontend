@@ -214,102 +214,59 @@ shapes.push({
     }
 });
 
-(async () => {
-    const imageUrl = await getImagePath();
-    
-    // Convert min p-value to -log10 scale if it exists
-    const minLogPThreshold = filterMinPValue ? -Math.log10(parseFloat(filterMinPValue)) : 0;
-    
-    // Create shapes array
-    const shapes = [];
-    
-    // Add threshold line if provided
-    if (threshold) {
-        shapes.push({
-            type: 'line',
-            xref: 'paper',
-            yref: 'y',
-            x0: 0,
-            x1: 1,
-            y0: threshold,
-            y1: threshold,
-            line: {
-                color: 'rgb(255, 0, 0)',
-                width: 2,
-                dash: 'dash'
-            }
-        });
-    }
-    
-    // Add diagonal stripes for filtered area
-    // Use fewer lines for a cleaner look
-    const stripeCount = 20;
-    for (let i = 0; i < stripeCount; i++) {
-        shapes.push({
-            type: 'line',
-            xref: 'paper',
-            yref: 'y',
-            x0: 0,
-            x1: 1,
-            y0: (i / stripeCount) * minLogPThreshold,
-            y1: 0,
-            line: {
-                color: 'rgba(100, 100, 100, 0.3)',
-                width: 1
-            }
-        });
-    }
-    
-    setLayout({
-        autosize: true,
-        height: 600,
-        paper_bgcolor: 'white',
-        plot_bgcolor: 'white',
-        showlegend: true,
-        xaxis: {
-            title: 'Chromosome',
-            titlefont: { size: 14 },
-            tickmode: 'array',
-            tickvals: xAxisTicks,
-            ticktext: xAxisLabels,
-            showgrid: false,
-            zeroline: false,
-            showline: true,
-            linewidth: 1,
-            range: [-0.01, 1.05],
-            fixedrange: true
-        },
-        yaxis: {
-            title: '-log₁₀(p)',
-            titlefont: { size: 14 },
-            showgrid: false,
-            zeroline: false,
-            showline: true,
-            linewidth: 1,
-            tickmode: 'array',
-            tickvals: ticks,
-            ticktext: ticks.map(String),
-            range: [0, maxRange * 1.05],
-            fixedrange: true
-        },
-        margin: { l: 60, r: 40, t: 20, b: 40 },
-        shapes: shapes,
-        images: [{
-            source: imageUrl,
-            xref: 'x',
-            yref: 'y',
-            x: -0.0625,
-            y: -(maxRange * 0.07),
-            sizex: 1.22,
-            sizey: maxRange * 1.05,
-            xanchor: 'left',
-            yanchor: 'bottom',
-            sizing: 'stretch',
-            opacity: 1, // Keep full opacity for the image
-            layer: 'below'
-        }]
-    });
-})();
+        (async () => {
+            const imageUrl = await getImagePath();
+            
+            setLayout({
+                autosize: true,
+                height: 600,
+                paper_bgcolor: 'white',
+                plot_bgcolor: 'white',
+                showlegend: true,
+                xaxis: {
+                    title: 'Chromosome',
+                    titlefont: { size: 14 },
+                    tickmode: 'array',
+                    tickvals: xAxisTicks,
+                    ticktext: xAxisLabels,
+                    showgrid: false,
+                    zeroline: false,
+                    showline: true,
+                    linewidth: 1,
+                    range: [-0.01, 1.05],
+                    fixedrange: true
+                },
+                yaxis: {
+                    title: '-log₁₀(p)',
+                    titlefont: { size: 14 },
+                    showgrid: false,
+                    zeroline: false,
+                    showline: true,
+                    linewidth: 1,
+                    tickmode: 'array',
+                    tickvals: ticks,
+                    ticktext: ticks.map(String),
+                    range: [0, maxRange * 1.05],
+                    fixedrange: true
+                },
+                margin: { l: 60, r: 40, t: 20, b: 40 },
+                shapes,
+                images: [{
+                    source: imageUrl,
+                    xref: 'x',
+                    yref: 'y',
+                    x: -0.0625,
+                    y: -(maxRange * 0.07),  // Make it dynamic based on maxRange
+                    sizex: 1.225,
+                    sizey: maxRange * 1.05,  // Slightly larger to ensure full coverage
+                    xanchor: 'left',
+                    yanchor: 'bottom',  // Change this from 'top' to 'bottom'
+                    sizing: 'stretch',
+                    opacity: 0.5,
+                    layer: 'below'
+                }]
+            });
+        })();
 
         return () => {
             const currentLayout = layout?.images?.[0]?.source;
@@ -333,7 +290,7 @@ shapes.push({
                     mode: 'markers',
                     marker: { 
                         color: ALTERNATING_COLORS[chrIndex % 2],
-                        size: 5,
+                        size: 3.5,
                         opacity: 1
                     },
                     hoverinfo: 'text',
