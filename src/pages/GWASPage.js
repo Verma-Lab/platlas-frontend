@@ -1484,19 +1484,14 @@ const loadMetadata = async () => {
 // };
 const processGWASData = (data) => {
   const df = Object.entries(data).flatMap(([chrom, snps]) =>
-    snps
-      .filter(snp => snp.log10p !== undefined && !isNaN(snp.log10p) && snp.p > 0) // Ensure valid log10p and p
-      .map((snp) => ({
-        chrom: parseInt(chrom),
-        pos: snp.pos,
-        log_p: parseFloat(snp.log10p), // Use backend-provided log10p directly
-        pval: snp.p, // Keep p as-is for filtering
-        SNP_ID: snp.id
-      }))
+    snps.map((snp) => ({
+      chrom: parseInt(chrom),
+      pos: snp.pos,
+      log_p: parseFloat(snp.log10p), // Use backend-provided log10p instead of calculating
+      pval: snp.p,
+      SNP_ID: snp.id
+    }))
   );
-
-  const maxLogP = Math.max(...df.map(row => row.log_p));
-  console.log(`Maximum -log10(p) in processed data: ${maxLogP}`);
 
   generateQQData(df);
   const { dyn, stat, ticks } = generatePlotData(df);
