@@ -1217,15 +1217,20 @@ const loadMetadata = async () => {
             return;
         }
 
+        // Build query with the correct parameter names (minPval/maxPval not minLog10p)
         let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
+        
+        // The backend is expecting minPval and maxPval parameter names even though they represent -log10(p) values
         if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
-          queryParams += `&minLog10p=${filterMinPValue}`;
-      }
-      if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
-          queryParams += `&maxLog10p=${filterMaxPValue}`;
-      }
+            queryParams += `&minPval=${filterMinPValue}`;
+        }
+        if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+            queryParams += `&maxPval=${filterMaxPValue}`;
+        }
 
+        console.log(`Fetching data with -log10(p) range: ${filterMinPValue} to ${filterMaxPValue}`);
         const response = await fetch(`/api/queryGWASData?${queryParams}`);
+        
         if (response.status === 404) {
             setDynData([]);
             setStatData([]);
@@ -1245,13 +1250,13 @@ const loadMetadata = async () => {
         }
 
         if (data.pValueRange) {
-          setMaxPValue(data.pValueRange.maxLog10P);  // Changed from maxPValue
-          setMinPValue(data.pValueRange.minLog10P);  // Changed from minPValue
-          if (filterMinPValue === null || filterMaxPValue === null) {
-              setFilterMinPValue(data.pValueRange.minLog10P);  // Changed from minPValue
-              setFilterMaxPValue(data.pValueRange.maxLog10P);  // Changed from maxPValue
-          }
-      }
+            setMaxPValue(data.pValueRange.maxLog10P);
+            setMinPValue(data.pValueRange.minLog10P);
+            if (filterMinPValue === null || filterMaxPValue === null) {
+                setFilterMinPValue(data.pValueRange.minLog10P);
+                setFilterMaxPValue(data.pValueRange.maxLog10P);
+            }
+        }
 
         setCachedData(prev => ({
             ...prev,
@@ -1261,7 +1266,7 @@ const loadMetadata = async () => {
             }
         }));
 
-        processGWASData(data.data); // Process with updated function
+        processGWASData(data.data);
     } catch (error) {
         console.error('Error fetching GWAS data:', error);
         setDynData([]);
