@@ -813,7 +813,7 @@ export const HomePage = () => {
           
           {/* Table Section */}
           {/* Table Section */}
-<div id="table" className="scroll-mt-16">
+<div id="Association Results" className="scroll-mt-16">
   <div className="container mx-auto p-4">
     <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
       <div className="p-6">
