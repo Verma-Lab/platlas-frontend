@@ -748,19 +748,20 @@ const StudySelector = ({
 const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [maxInput, setMaxInput] = useState('');
   const [minInput, setMinInput] = useState('');
+  // Always work with -log10(p) values as that's what the backend expects
   const [showLogScale, setShowLogScale] = useState(true);
   
   // Update input fields when props change
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
       if (showLogScale) {
-        // Display as -log10(p) values (higher = more significant)
-        setMaxInput((-Math.log10(minPValue)).toFixed(2)); // Min p-value gives max -log10(p)
-        setMinInput((-Math.log10(maxPValue)).toFixed(2)); // Max p-value gives min -log10(p)
+        // If values are already in -log10(p) format, use them directly
+        setMaxInput(minPValue.toString());
+        setMinInput(maxPValue.toString());
       } else {
-        // Display as raw p-values in scientific notation
-        setMaxInput(formatPValue(maxPValue));
-        setMinInput(formatPValue(minPValue));
+        // Convert from -log10(p) to p-values for display only
+        setMaxInput(formatPValue(Math.pow(10, -minPValue)));
+        setMinInput(formatPValue(Math.pow(10, -maxPValue)));
       }
     }
   }, [maxPValue, minPValue, showLogScale]);
@@ -773,49 +774,36 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   };
 
   const handleApplyFilter = () => {
-    let min, max;
+    let minLog10p, maxLog10p;
     
     if (showLogScale) {
-      // Convert from -log10(p) back to p-values
-      const logMin = parseFloat(minInput);
-      const logMax = parseFloat(maxInput);
+      // Already in -log10(p) format
+      minLog10p = parseFloat(minInput);
+      maxLog10p = parseFloat(maxInput);
       
-      if (isNaN(logMin) || isNaN(logMax) || logMin > logMax) {
+      if (isNaN(minLog10p) || isNaN(maxLog10p) || minLog10p > maxLog10p) {
         alert('Invalid -log10(p) range: Min must be less than Max');
         return;
       }
-      
-      // For very large -log10(p) values, use string representation instead
-      if (logMax > 308) { // JavaScript's limit is around 1e-308
-        min = `1e-${logMax}`; // Use string representation for extremely small values
-      } else {
-        min = Math.pow(10, -logMax);
-      }
-      
-      if (logMin > 308) {
-        max = `1e-${logMin}`;
-      } else {
-        max = Math.pow(10, -logMin);
-      }
     } else {
-      // Direct p-value entry
-      min = parseFloat(minInput);
-      max = parseFloat(maxInput);
+      // Convert from p-values to -log10(p)
+      const min = parseFloat(minInput);
+      const max = parseFloat(maxInput);
       
-      if (isNaN(min) || isNaN(max) || min > max || min < 0 || max > 1) {
+      if (isNaN(min) || isNaN(max) || min > max || min <= 0 || max > 1) {
         alert('Invalid p-value range: Min must be less than Max and within 0 to 1');
         return;
       }
+      
+      // Convert to -log10(p) format
+      minLog10p = -Math.log10(max); // Smaller p-value = higher -log10(p)
+      maxLog10p = -Math.log10(min); // Larger p-value = lower -log10(p)
     }
     
-    console.log(`Applying filter with p-value range: ${min} to ${max}`);
-    console.log(`This corresponds to -log10(p) range: ${
-      typeof max === 'string' ? max.replace('1e-', '') : -Math.log10(max)
-    } to ${
-      typeof min === 'string' ? min.replace('1e-', '') : -Math.log10(min)
-    }`);
+    console.log(`Applying filter with -log10(p) range: ${minLog10p} to ${maxLog10p}`);
     
-    onFilterChange({ minPValue: min, maxPValue: max });
+    // Send the -log10(p) values directly to the backend
+    onFilterChange({ minPValue: minLog10p, maxPValue: maxLog10p });
   };
 
   return (
@@ -870,7 +858,7 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
       <p className="text-xs text-gray-500 mt-2">
         {showLogScale 
           ? "Higher -log10(p) values = more significant SNPs (e.g., 8 = p-value of 10^-8)"
-          : "Enter p-values using scientific notation (e.g., 1e-8)"}
+          : "Enter p-values using scientific notation (e.g., 1e-8) - will be converted to -log10(p) format"}
       </p>
     </div>
   );
