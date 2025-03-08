@@ -144,6 +144,7 @@ const AboutPage = () => {
   const teamData = {
     penn: {
       name: "Penn",
+      logo: "/images/pennlogo.png", // Update with your actual logo path
       investigators: [
         { name: "Anurag Verma" },
         { name: "Scott Damrauer" },
@@ -160,6 +161,7 @@ const AboutPage = () => {
     },
     argonne: {
       name: "Argonne National Lab",
+      logo: "/images/argonelogo.png", // Update with your actual logo path
       investigators: [
         { name: "Ravi Madduri" }
       ],
@@ -172,8 +174,9 @@ const AboutPage = () => {
     },
     mgh: {
       name: "Mass General Hospital",
+      logo: "/images/masslogo.png", // Update with your actual logo path
       investigators: [
-        { name: "Pradeep Natarajan", title: "Mass General Hospital" }
+        { name: "Pradeep Natarajan"}
       ],
       dataAnalysts: [
         { name: "Satoshi Koyama" },
@@ -305,7 +308,18 @@ const AboutPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Penn */}
           <div className="border rounded-lg p-6 bg-white shadow-md">
-            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Penn Logo</h3>
+            <div className="flex justify-center mb-6 pb-3 border-b">
+              <img 
+                src={teamData.penn.logo} 
+                alt="University of Pennsylvania Logo" 
+                className="h-30 object-contain"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/api/placeholder/200/80";
+                  e.target.alt = "Penn Logo (placeholder)";
+                }}
+              />
+            </div>
             
             {(activeTab === 'all' || activeTab === 'investigators') && (
               <div className="mb-6">
@@ -343,7 +357,18 @@ const AboutPage = () => {
           
           {/* Argonne National Lab */}
           <div className="border rounded-lg p-6 bg-white shadow-md">
-            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Argonne National Lab Logo</h3>
+            <div className="flex justify-center mb-6 pb-3 border-b">
+              <img 
+                src={teamData.argonne.logo} 
+                alt="Argonne National Laboratory Logo" 
+                className="h-30 object-contain"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/api/placeholder/200/80";
+                  e.target.alt = "Argonne National Lab Logo (placeholder)";
+                }}
+              />
+            </div>
             
             {(activeTab === 'all' || activeTab === 'investigators') && (
               <div className="mb-6">
@@ -381,7 +406,18 @@ const AboutPage = () => {
           
           {/* Mass General Hospital */}
           <div className="border rounded-lg p-6 bg-white shadow-md">
-            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Mass General Hospital Logo</h3>
+            <div className="flex justify-center mb-6 pb-3 border-b">
+              <img 
+                src={teamData.mgh.logo} 
+                alt="Massachusetts General Hospital Logo" 
+                className="h-30 object-contain"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/api/placeholder/200/80";
+                  e.target.alt = "Mass General Hospital Logo (placeholder)";
+                }}
+              />
+            </div>
             
             {(activeTab === 'all' || activeTab === 'investigators') && (
               <div className="mb-6">

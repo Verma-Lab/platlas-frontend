@@ -6,34 +6,41 @@ const NavigationBar = () => {
   const navigate = useNavigate();
 
   const scrollToSection = (sectionId) => {
-    let attempts = 0;
-    const maxAttempts = 50;
-    const attemptScroll = () => {
-      const element = document.getElementById(sectionId);
-      console.log('Attempt', attempts + 1, 'to find', sectionId, element); // Debug log
-      
-      if (element) {
-        const yOffset = -100;
-        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        
-        window.scrollTo({
-          top: y,
-          behavior: 'smooth'
-        });
-        return true;
-      }
-      
-      if (attempts < maxAttempts) {
-        attempts++;
-        setTimeout(attemptScroll, 100); // Try again after 100ms
-        return false;
-      }
-      
-      console.error('Failed to find element after', maxAttempts, 'attempts');
-      return false;
-    };
+    console.log('Attempting to scroll to:', sectionId);
     
-    attemptScroll();
+    // First attempt with exact ID
+    let element = document.getElementById(sectionId);
+    
+    // If not found, try with spaces removed (for IDs like "Association Results")
+    if (!element) {
+      element = document.getElementById(sectionId.replace(/\s/g, ''));
+      console.log('Trying without spaces:', sectionId.replace(/\s/g, ''));
+    }
+    
+    // If still not found, try looking for an element with this text in its heading
+    if (!element) {
+      const headings = document.querySelectorAll('h2, h3, h4');
+      for (const heading of headings) {
+        if (heading.textContent.trim().includes(sectionId)) {
+          element = heading.closest('div[id]') || heading.parentElement;
+          console.log('Found by heading text:', heading.textContent.trim());
+          break;
+        }
+      }
+    }
+    
+    if (element) {
+      console.log('Found element:', element);
+      const yOffset = -100; // Adjust this value as needed for proper scrolling position
+      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      
+      window.scrollTo({
+        top: y,
+        behavior: 'smooth'
+      });
+    } else {
+      console.error('Could not find element with ID:', sectionId);
+    }
   };
 
   const handleClick = (text) => {
@@ -50,16 +57,15 @@ const NavigationBar = () => {
       return;
     }
 
-    const sectionId = text.toLowerCase();
-    console.log('Clicking:', sectionId); // Debug log
-    scrollToSection(sectionId);
+    // Preserve the original text for searching
+    console.log('Clicking:', text);
+    scrollToSection(text);
   };
 
   const navItems = [
     { icon: Users, text: 'About' },
     { icon: Table, text: 'Association Results' },
     { icon: FileText, text: 'Paper' },
-    // { icon: FileText, text: 'Summary' },
     { icon: FileText, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
