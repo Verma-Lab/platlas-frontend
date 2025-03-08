@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Github, Linkedin, Network, Share2, Database, ChartBar, Dna } from 'lucide-react';
 
 // TeamMember Component (Updated to match landing page style)
 const TeamMember = ({ name, role, description, imageUrl, socialLinks }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-lg text-center flex-none w-72">
+    <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow text-center w-full">
       <img
-        src={imageUrl || "/api/placeholder/400/320"}
+        src={imageUrl || "/api/placeholder/150/150"}
         alt={name}
         className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
       />
@@ -46,6 +46,50 @@ const TeamMember = ({ name, role, description, imageUrl, socialLinks }) => {
           </a>
         )}
       </div>
+    </div>
+  );
+};
+
+// Institution Section Component
+const InstitutionSection = ({ name, logo, investigators = [], dataAnalysts = [], developers = [] }) => {
+  return (
+    <div className="mb-12">
+      <div className="mb-6">
+        <h3 className="text-xl font-bold mb-2">{name} Logo</h3>
+      </div>
+      
+      {investigators.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3">Investigators</h4>
+          <ul className="list-none space-y-1">
+            {investigators.map(person => (
+              <li key={person.name}>{person.name}{person.title && `, ${person.title}`}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {dataAnalysts.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3">Data Analysis</h4>
+          <ul className="list-none space-y-1">
+            {dataAnalysts.map(person => (
+              <li key={person.name}>{person.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+      
+      {developers.length > 0 && (
+        <div className="mb-6">
+          <h4 className="text-lg font-semibold mb-3">Browser Development</h4>
+          <ul className="list-none space-y-1">
+            {developers.map(person => (
+              <li key={person.name}>{person.name}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
@@ -92,50 +136,59 @@ const AnimatedDNA = () => (
 
 // Main About Page Component
 const AboutPage = () => {
-  const [teamMembers, setTeamMembers] = useState([]);
+  const [activeTab, setActiveTab] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const teamScrollRef = useRef(null);
+  
+  // Static team data organized by institution
+  const teamData = {
+    penn: {
+      name: "Penn",
+      investigators: [
+        { name: "Anurag Verma" },
+        { name: "Scott Damrauer" },
+        { name: "Benjamin Voight" }
+      ],
+      dataAnalysts: [
+        { name: "Michael Levin" },
+        { name: "Sarah Abramowitz" },
+        { name: "David Zhang" }
+      ],
+      developers: [
+        { name: "Hritvik Gupta" }
+      ]
+    },
+    argonne: {
+      name: "Argonne National Lab",
+      investigators: [
+        { name: "Ravi Madduri" }
+      ],
+      dataAnalysts: [
+        { name: "Alex Rodriguez" }
+      ],
+      developers: [
+        { name: "Taylor Cohron" }
+      ]
+    },
+    mgh: {
+      name: "Mass General Hospital",
+      investigators: [
+        { name: "Pradeep Natarajan", title: "Mass General Hospital" }
+      ],
+      dataAnalysts: [
+        { name: "Satoshi Koyama" },
+        { name: "Buu Truong" }
+      ],
+      developers: []
+    }
+  };
 
   useEffect(() => {
-    fetch('/landingPageData.json')
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch landing page data.');
-        }
-        return response.json();
-      })
-      .then((jsonData) => {
-        setTeamMembers(jsonData.teamMembers);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching team members:', error);
-        setError(true);
-        setLoading(false);
-      });
+    // Simulate loading team data
+    setTimeout(() => {
+      setLoading(false);
+    }, 500);
   }, []);
-
-  // Auto-scroll effect for team members
-  useEffect(() => {
-    if (!teamMembers.length) return;
-
-    const scrollContainer = teamScrollRef.current;
-    if (!scrollContainer) return;
-
-    const scrollSpeed = 1; // pixels per interval
-    const intervalTime = 20; // milliseconds
-
-    const scrollInterval = setInterval(() => {
-      if (scrollContainer.scrollLeft + scrollContainer.clientWidth >= scrollContainer.scrollWidth) {
-        scrollContainer.scrollLeft = 0;
-      } else {
-        scrollContainer.scrollLeft += scrollSpeed;
-      }
-    }, intervalTime);
-
-    return () => clearInterval(scrollInterval);
-  }, [teamMembers]);
 
   if (loading) {
     return (
@@ -213,23 +266,157 @@ const AboutPage = () => {
         </div>
       </div>
 
-      {/* Team Section (Updated) */}
+      {/* Team Section (Redesigned with tabs) */}
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
-          <p className="text-lg text-gray-600">World-class experts in genomics and data science</p>
+          <p className="text-lg text-gray-600 mb-8">World-class experts in genomics and data science</p>
+          
+          {/* Tab Navigation */}
+          <div className="flex justify-center space-x-4 mb-10 border-b">
+            <button 
+              onClick={() => setActiveTab('all')}
+              className={`px-4 py-2 font-medium text-lg ${activeTab === 'all' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-500'}`}
+            >
+              All
+            </button>
+            <button 
+              onClick={() => setActiveTab('investigators')}
+              className={`px-4 py-2 font-medium text-lg ${activeTab === 'investigators' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-500'}`}
+            >
+              Investigators
+            </button>
+            <button 
+              onClick={() => setActiveTab('dataAnalysis')}
+              className={`px-4 py-2 font-medium text-lg ${activeTab === 'dataAnalysis' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-500'}`}
+            >
+              Data Analysis
+            </button>
+            <button 
+              onClick={() => setActiveTab('browserDevelopment')}
+              className={`px-4 py-2 font-medium text-lg ${activeTab === 'browserDevelopment' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-600 hover:text-indigo-500'}`}
+            >
+              Browser Development
+            </button>
+          </div>
         </div>
         
-        <div className="relative">
-          <div className="overflow-x-auto pb-4 hide-scrollbar" ref={teamScrollRef}>
-            <div className="flex space-x-6">
-              {teamMembers.map((member, index) => (
-                <TeamMember 
-                  key={member.name}
-                  {...member}
-                />
-              ))}
-            </div>
+        {/* Team Members Display - Organized by Institution */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Penn */}
+          <div className="border rounded-lg p-6 bg-white shadow-md">
+            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Penn Logo</h3>
+            
+            {(activeTab === 'all' || activeTab === 'investigators') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Investigators</h4>
+                <ul className="space-y-1">
+                  {teamData.penn.investigators.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'dataAnalysis') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Data Analysis</h4>
+                <ul className="space-y-1">
+                  {teamData.penn.dataAnalysts.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'browserDevelopment') && teamData.penn.developers.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Browser Development</h4>
+                <ul className="space-y-1">
+                  {teamData.penn.developers.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+          {/* Argonne National Lab */}
+          <div className="border rounded-lg p-6 bg-white shadow-md">
+            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Argonne National Lab Logo</h3>
+            
+            {(activeTab === 'all' || activeTab === 'investigators') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Investigators</h4>
+                <ul className="space-y-1">
+                  {teamData.argonne.investigators.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'dataAnalysis') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Data Analysis</h4>
+                <ul className="space-y-1">
+                  {teamData.argonne.dataAnalysts.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'browserDevelopment') && teamData.argonne.developers.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Browser Development</h4>
+                <ul className="space-y-1">
+                  {teamData.argonne.developers.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+          {/* Mass General Hospital */}
+          <div className="border rounded-lg p-6 bg-white shadow-md">
+            <h3 className="text-xl font-bold mb-6 pb-3 border-b">Mass General Hospital Logo</h3>
+            
+            {(activeTab === 'all' || activeTab === 'investigators') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Investigators</h4>
+                <ul className="space-y-1">
+                  {teamData.mgh.investigators.map(person => (
+                    <li key={person.name} className="font-medium">
+                      {person.name}{person.title ? `, ${person.title}` : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'dataAnalysis') && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Data Analysis</h4>
+                <ul className="space-y-1">
+                  {teamData.mgh.dataAnalysts.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {(activeTab === 'all' || activeTab === 'browserDevelopment') && teamData.mgh.developers.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold mb-4">Browser Development</h4>
+                <ul className="space-y-1">
+                  {teamData.mgh.developers.map(person => (
+                    <li key={person.name} className="font-medium">{person.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -239,15 +426,6 @@ const AboutPage = () => {
         @keyframes float {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-20px); }
-        }
-
-        .hide-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
         }
       `}</style>
     </div>
