@@ -748,56 +748,24 @@ const StudySelector = ({
 const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   const [maxInput, setMaxInput] = useState('');
   const [minInput, setMinInput] = useState('');
-  // Always work with -log10(p) values as that's what the backend expects
-  const [showLogScale, setShowLogScale] = useState(true);
   
   // Update input fields when props change
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
-      if (showLogScale) {
-        // If values are already in -log10(p) format, use them directly
-        setMaxInput(minPValue.toString());
-        setMinInput(maxPValue.toString());
-      } else {
-        // Convert from -log10(p) to p-values for display only
-        setMaxInput(formatPValue(Math.pow(10, -minPValue)));
-        setMinInput(formatPValue(Math.pow(10, -maxPValue)));
-      }
+      // Always work with -log10(p) values directly
+      setMaxInput(minPValue.toString());
+      setMinInput(maxPValue.toString());
     }
-  }, [maxPValue, minPValue, showLogScale]);
-
-  // Helper function to format p-values in scientific notation
-  const formatPValue = (value) => {
-    if (value === null || value === undefined) return '';
-    // Always use scientific notation for GWAS p-values
-    return value.toExponential(6);
-  };
+  }, [maxPValue, minPValue]);
 
   const handleApplyFilter = () => {
-    let minLog10p, maxLog10p;
+    // Always treat inputs as -log10(p) values
+    const minLog10p = parseFloat(minInput);
+    const maxLog10p = parseFloat(maxInput);
     
-    if (showLogScale) {
-      // Already in -log10(p) format
-      minLog10p = parseFloat(minInput);
-      maxLog10p = parseFloat(maxInput);
-      
-      if (isNaN(minLog10p) || isNaN(maxLog10p) || minLog10p > maxLog10p) {
-        alert('Invalid -log10(p) range: Min must be less than Max');
-        return;
-      }
-    } else {
-      // Convert from p-values to -log10(p)
-      const min = parseFloat(minInput);
-      const max = parseFloat(maxInput);
-      
-      if (isNaN(min) || isNaN(max) || min > max || min <= 0 || max > 1) {
-        alert('Invalid p-value range: Min must be less than Max and within 0 to 1');
-        return;
-      }
-      
-      // Convert to -log10(p) format
-      minLog10p = -Math.log10(max); // Smaller p-value = higher -log10(p)
-      maxLog10p = -Math.log10(min); // Larger p-value = lower -log10(p)
+    if (isNaN(minLog10p) || isNaN(maxLog10p) || minLog10p > maxLog10p) {
+      alert('Invalid -log10(p) range: Min must be less than Max');
+      return;
     }
     
     console.log(`Applying filter with -log10(p) range: ${minLog10p} to ${maxLog10p}`);
@@ -808,42 +776,29 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
 
   return (
     <div className="mb-6 p-4 bg-white rounded-lg shadow-sm border border-gray-200">
-      <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-medium text-gray-700">P-value Range Filter</h3>
-        <div className="flex items-center">
-          <label className="text-xs text-gray-600 mr-2">Show as -log10(p)</label>
-          <input
-            type="checkbox"
-            checked={showLogScale}
-            onChange={() => setShowLogScale(!showLogScale)}
-            className="form-checkbox h-4 w-4 text-blue-600"
-          />
-        </div>
+      <div className="mb-2">
+        <h3 className="text-sm font-medium text-gray-700">P-value Range Filter (-log10(p) format)</h3>
       </div>
       
       <div className="flex space-x-4 mb-4">
         <div className="flex-1">
-          <label className="text-xs text-gray-600">
-            {showLogScale ? "Min -log10(p)" : "Min P-value"}
-          </label>
+          <label className="text-xs text-gray-600">Min -log10(p)</label>
           <input
             type="text"
             value={minInput}
             onChange={(e) => setMinInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder={showLogScale ? "e.g., 5" : "e.g., 1e-5"}
+            placeholder="e.g., 5"
           />
         </div>
         <div className="flex-1">
-          <label className="text-xs text-gray-600">
-            {showLogScale ? "Max -log10(p)" : "Max P-value"}
-          </label>
+          <label className="text-xs text-gray-600">Max -log10(p)</label>
           <input
             type="text"
             value={maxInput}
             onChange={(e) => setMaxInput(e.target.value)}
             className="w-full p-2 border rounded"
-            placeholder={showLogScale ? "e.g., 8" : "e.g., 1e-8"}
+            placeholder="e.g., 8"
           />
         </div>
       </div>
@@ -856,9 +811,7 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
       </button>
       
       <p className="text-xs text-gray-500 mt-2">
-        {showLogScale 
-          ? "Higher -log10(p) values = more significant SNPs (e.g., 8 = p-value of 10^-8)"
-          : "Enter p-values using scientific notation (e.g., 1e-8) - will be converted to -log10(p) format"}
+        Higher -log10(p) values = more significant SNPs (e.g., 8 = p-value of 10^-8)
       </p>
     </div>
   );
@@ -1266,11 +1219,11 @@ const loadMetadata = async () => {
 
         let queryParams = `cohortId=${cohortId}&phenoId=${phenoId}&study=${selectedStudy}`;
         if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
-            queryParams += `&minPval=${filterMinPValue}`;
-        }
-        if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
-            queryParams += `&maxPval=${filterMaxPValue}`;
-        }
+          queryParams += `&minLog10p=${filterMinPValue}`;
+      }
+      if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+          queryParams += `&maxLog10p=${filterMaxPValue}`;
+      }
 
         const response = await fetch(`/api/queryGWASData?${queryParams}`);
         if (response.status === 404) {
@@ -1292,13 +1245,13 @@ const loadMetadata = async () => {
         }
 
         if (data.pValueRange) {
-            setMaxPValue(data.pValueRange.maxPValue);
-            setMinPValue(data.pValueRange.minPValue);
-            if (filterMinPValue === null || filterMaxPValue === null) {
-                setFilterMinPValue(data.pValueRange.minPValue);
-                setFilterMaxPValue(data.pValueRange.maxPValue);
-            }
-        }
+          setMaxPValue(data.pValueRange.maxLog10P);  // Changed from maxPValue
+          setMinPValue(data.pValueRange.minLog10P);  // Changed from minPValue
+          if (filterMinPValue === null || filterMaxPValue === null) {
+              setFilterMinPValue(data.pValueRange.minLog10P);  // Changed from minPValue
+              setFilterMaxPValue(data.pValueRange.maxLog10P);  // Changed from maxPValue
+          }
+      }
 
         setCachedData(prev => ({
             ...prev,
