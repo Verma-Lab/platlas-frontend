@@ -930,67 +930,85 @@ const GWASPage = () => {
 // Add this function to the GWASPage component:
 
 
-  const fetchHudsonTopData = async (ancestry) => {
-    try {
-      setLoadingTop(true);
-      // const response = await fetch(
-      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
-      // );
-      const response = await fetch(
-        `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
-      );
-      
-      
-      if (!response.ok) {
-        setDynTop([]);
-        setStatTop([]);
-        setTicksTop([]);
-        return;
-      }
-
-      const data = await response.json();
-      const processData = (data) => {
-        return Object.entries(data).flatMap(([chrom, snps]) =>
-          snps.map((snp) => {
-            const pVal = parseFloat(snp.p);
-            return {
-              chrom: parseInt(chrom),
-              pos: snp.pos,
-              log_p: -Math.log10(snp.p),
-              pval: pVal,
-              SNP_ID: snp.id || null
-            };
-          })
-        );
-      };
-
-      const dfTop = processData(data);
-      const { dyn: newDynTop, stat: newStatTop, ticks: newTicksTop } = generatePlotData(dfTop);
-      
-      setDynTop(newDynTop);
-      setStatTop(newStatTop);
-      setTicksTop(newTicksTop);
-
-    } catch (error) {
-      console.error('Failed to fetch or process Hudson top data:', error);
+const fetchHudsonTopData = async (ancestry) => {
+  try {
+    setLoadingTop(true);
+    
+    // Include the same filters used in fetchGWASData
+    let queryParams = `cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`;
+    if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
+      queryParams += `&minPval=${filterMinPValue}`;
+    }
+    if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+      queryParams += `&maxPval=${filterMaxPValue}`;
+    }
+    
+    const response = await fetch(`/api/queryGWASData?${queryParams}`);
+    
+    if (!response.ok) {
       setDynTop([]);
       setStatTop([]);
       setTicksTop([]);
-    } finally {
-      setLoadingTop(false);
+      return;
     }
-  };
+
+    const responseData = await response.json();
+    let dataToProcess = responseData.data ? responseData.data : responseData;
+    
+    // Improved data processing
+    const processData = (data) => {
+      if (!data || typeof data !== 'object') return [];
+      
+      return Object.entries(data).flatMap(([chrom, snps]) => {
+        // Check if snps is an array
+        if (!Array.isArray(snps)) return [];
+        
+        return snps
+          .filter(snp => snp && typeof snp === 'object') // Make sure snp is an object
+          .map((snp) => {
+            return {
+              chrom: parseInt(chrom),
+              pos: snp.pos,
+              log_p: snp.log10p ? parseFloat(snp.log10p) : (-Math.log10(parseFloat(snp.p))),
+              pval: parseFloat(snp.p),
+              SNP_ID: snp.id || null
+            };
+          });
+      });
+    };
+
+    const dfTop = processData(dataToProcess);
+    const { dyn: newDynTop, stat: newStatTop, ticks: newTicksTop } = generatePlotData(dfTop);
+    
+    setDynTop(newDynTop);
+    setStatTop(newStatTop);
+    setTicksTop(newTicksTop);
+
+  } catch (error) {
+    console.error('Failed to fetch or process Hudson top data:', error);
+    setDynTop([]);
+    setStatTop([]);
+    setTicksTop([]);
+  } finally {
+    setLoadingTop(false);
+  }
+};
 
   // Modify the fetchHudsonBottomData function
   const fetchHudsonBottomData = async (ancestry) => {
     try {
       setLoadingBottom(true);
-      // const response = await fetch(
-      //   `${baseURL}/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
-      // );
-      const response = await fetch(
-        `/api/queryGWASData?cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`
-      );
+      
+      // Include the same filters used in fetchGWASData
+      let queryParams = `cohortId=${ancestry}&phenoId=${phenoId}&study=${selectedStudy}`;
+      if (filterMinPValue !== null && !isNaN(filterMinPValue)) {
+        queryParams += `&minPval=${filterMinPValue}`;
+      }
+      if (filterMaxPValue !== null && !isNaN(filterMaxPValue)) {
+        queryParams += `&maxPval=${filterMaxPValue}`;
+      }
+      
+      const response = await fetch(`/api/queryGWASData?${queryParams}`);
       
       if (!response.ok) {
         setDynBott([]);
@@ -998,30 +1016,39 @@ const GWASPage = () => {
         setTicksBott([]);
         return;
       }
-
-      const data = await response.json();
-      const processData = (data) => {
-        return Object.entries(data).flatMap(([chrom, snps]) =>
-          snps.map((snp) => {
-            const pVal = parseFloat(snp.p);
-            return {
-              chrom: parseInt(chrom),
-              pos: snp.pos,
-              log_p: -Math.log10(snp.p),
-              pval: pVal,
-              SNP_ID: snp.id || null
-            };
-          })
-        );
-      };
+  
+      const responseData = await response.json();
+      let dataToProcess = responseData.data ? responseData.data : responseData;
       
-      const dfBott = processData(data);
+      // Improved data processing
+      const processData = (data) => {
+        if (!data || typeof data !== 'object') return [];
+        
+        return Object.entries(data).flatMap(([chrom, snps]) => {
+          // Check if snps is an array
+          if (!Array.isArray(snps)) return [];
+          
+          return snps
+            .filter(snp => snp && typeof snp === 'object') // Make sure snp is an object
+            .map((snp) => {
+              return {
+                chrom: parseInt(chrom),
+                pos: snp.pos,
+                log_p: snp.log10p ? parseFloat(snp.log10p) : (-Math.log10(parseFloat(snp.p))),
+                pval: parseFloat(snp.p),
+                SNP_ID: snp.id || null
+              };
+            });
+        });
+      };
+  
+      const dfBott = processData(dataToProcess);
       const { dyn: newDynBott, stat: newStatBott, ticks: newTicksBott } = generatePlotData(dfBott);
       
       setDynBott(newDynBott);
       setStatBott(newStatBott);
       setTicksBott(newTicksBott);
-
+  
     } catch (error) {
       console.error('Failed to fetch or process Hudson bottom data:', error);
       setDynBott([]);
