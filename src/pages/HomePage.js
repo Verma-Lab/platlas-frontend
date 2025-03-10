@@ -147,8 +147,8 @@ const StatsCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // const response = await fetch('/api/getGWASStatsRoute');
-        const response = await fetch(`${baseURL}/getGWASStatsRoute`)
+        const response = await fetch('/api/getGWASStatsRoute');
+        // const response = await fetch(`${baseURL}/getGWASStatsRoute`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -850,7 +850,7 @@ export const HomePage = () => {
         }
       `}</style>
 
-<MiniChat />
+
 
       <ChatInterface 
         isOpen={isChatOpen} 
