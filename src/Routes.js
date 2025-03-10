@@ -12,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import HomoSapieus from './pages/HomoSapieus';
 import LandingPageHomo from './pages/LandingHomoSapieus';
 import DownloadsPage from './pages/Downloads';
+import MiniChat from './components/MiniChat';
 const AppLayout = () => {
   const location = useLocation();
   const isHomoSapieusPage = location.pathname === '/homosapieus' || location.pathname === '/landingPageHomo';
@@ -60,6 +61,7 @@ const AppLayout = () => {
           } />
         </Routes>
       </div>
+      <MiniChat />
       {!isHomoSapieusPage && <Footer />}
     </div>
   );

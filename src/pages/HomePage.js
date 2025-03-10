@@ -26,6 +26,8 @@ import LeadVariantsTable from '../components/GwasMetaTable';
 import ResearchSection from '../components/ResearchSection';
 import NavigationBar from '../components/NavigationBar';
 import SummarySection from '../components/SummarySection';
+import MiniChat from '../components/MiniChat';
+import HorizontalChatBar from '../components/HorizontaChatBar';
 // Shared cohort styling function
 
 const AnimatedCounter = ({ end, duration = 2000 }) => {
@@ -145,8 +147,8 @@ const StatsCard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/getGWASStatsRoute');
-        // const response = await fetch(`${baseURL}/getGWASStatsRoute`)
+        // const response = await fetch('/api/getGWASStatsRoute');
+        const response = await fetch(`${baseURL}/getGWASStatsRoute`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -624,7 +626,7 @@ const getCohortStyle = (cohort) => {
 };
 const SearchSection = ({ projects }) => {
   return (
-    <div className="max-w-2xl mx-auto mt-20">
+    <div className="max-w-2xl mx-auto mt-8"> {/* Changed from mt-20 to mt-8 to account for the HorizontalChatBar */}
       <div className="bg-white rounded-xl shadow-xl p-6 transform transition-all duration-300 hover:shadow-2xl">
         <div className="space-y-4">
           {/* Header */}
@@ -650,27 +652,23 @@ const SearchSection = ({ projects }) => {
             >
               Search for a SNP, or phenotype:
             </label>
-            <div className="relative mb-8">  {/* Added margin-bottom */}
-  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-    <Search className="h-5 w-5 text-gray-400" />
-  </div>
-  <SearchBar 
-    items={projects}
-    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg 
-              bg-white shadow-sm focus:outline-none focus:ring-2 
-              focus:ring-blue-500 focus:border-blue-500
-              text-sm placeholder-gray-400
-              transition duration-150 ease-in-out"
-    placeholder="Type to search..."
-  />
-</div>
+            <div className="relative mb-8">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+              <SearchBar 
+                items={projects}
+                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg 
+                          bg-white shadow-sm focus:outline-none focus:ring-2 
+                          focus:ring-blue-500 focus:border-blue-500
+                          text-sm placeholder-gray-400
+                          transition duration-150 ease-in-out"
+                placeholder="Type to search..."
+              />
+            </div>
             
             {/* Quick Filters */}
             <div className="flex gap-2 mt-4 flex-wrap">
-              {/* <button className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 
-                               rounded-full hover:bg-blue-100 transition-colors duration-200">
-                Genes
-              </button> */}
               <button className="px-3 py-1 text-xs font-medium text-purple-600 bg-purple-50 
                                rounded-full hover:bg-purple-100 transition-colors duration-200">
                 SNPs
@@ -694,6 +692,7 @@ const SearchSection = ({ projects }) => {
     </div>
   );
 };
+
 
 
 export const HomePage = () => {
@@ -804,9 +803,15 @@ export const HomePage = () => {
           <StatsCard metadata={metadata} projects={projects} />
           
         </div>
+        <div className="max-w-7xl mx-auto px-4">
+        <div className="relative max-w-7xl mx-auto mt-16 z-20">
+          <HorizontalChatBar />
+        </div>
 
+        </div>
         <div className="max-w-7xl mx-auto px-4">
           {/* Search Section */}
+
           <div id="search" className="scroll-mt-16">
             <SearchSection projects={projects} />
           </div>
@@ -845,6 +850,7 @@ export const HomePage = () => {
         }
       `}</style>
 
+<MiniChat />
 
       <ChatInterface 
         isOpen={isChatOpen} 

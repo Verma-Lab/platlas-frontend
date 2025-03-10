@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Search, Table, Users, FileText, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -13,8 +13,15 @@ const NavigationBar = () => {
     
     // If not found, try with spaces removed (for IDs like "Association Results")
     if (!element) {
-      element = document.getElementById(sectionId.replace(/\s/g, ''));
-      console.log('Trying without spaces:', sectionId.replace(/\s/g, ''));
+      const noSpacesId = sectionId.replace(/\s/g, '');
+      element = document.getElementById(noSpacesId);
+      console.log('Trying without spaces:', noSpacesId);
+    }
+    
+    // If still not found, try looking for an element with data-section attribute
+    if (!element) {
+      element = document.querySelector(`[data-section="${sectionId}"]`);
+      console.log('Trying with data-section attribute:', sectionId);
     }
     
     // If still not found, try looking for an element with this text in its heading
@@ -39,9 +46,33 @@ const NavigationBar = () => {
         behavior: 'smooth'
       });
     } else {
+      // Fallback - try to find any div containing the section ID text
+      const allDivs = document.querySelectorAll('div');
+      for (const div of allDivs) {
+        if (div.textContent.includes(sectionId) && div.id) {
+          const y = div.getBoundingClientRect().top + window.pageYOffset - 100;
+          window.scrollTo({
+            top: y,
+            behavior: 'smooth'
+          });
+          console.log('Fallback: found div containing text:', sectionId);
+          return;
+        }
+      }
+      
       console.error('Could not find element with ID:', sectionId);
     }
   };
+
+  // Add this effect to handle hash URLs for direct section navigation
+  useEffect(() => {
+    if (window.location.hash) {
+      const sectionId = window.location.hash.substring(1); // Remove the # character
+      setTimeout(() => {
+        scrollToSection(sectionId);
+      }, 500); // Small delay to ensure DOM is fully loaded
+    }
+  }, []);
 
   const handleClick = (text) => {
     if (text === 'About') {
@@ -57,7 +88,7 @@ const NavigationBar = () => {
       return;
     }
 
-    // Preserve the original text for searching
+    // For section navigation within the page
     console.log('Clicking:', text);
     scrollToSection(text);
   };
@@ -65,7 +96,7 @@ const NavigationBar = () => {
   const navItems = [
     { icon: Users, text: 'About' },
     { icon: Table, text: 'Association Results' },
-    { icon: FileText, text: 'Paper' },
+    { icon: FileText, text: 'paper' },
     { icon: FileText, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
