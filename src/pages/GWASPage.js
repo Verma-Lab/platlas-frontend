@@ -753,8 +753,10 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
       // Always work with -log10(p) values directly
-      setMaxInput(minPValue.toString());
-      setMinInput(maxPValue.toString());
+      // setMaxInput(minPValue.toString());
+      // setMinInput(maxPValue.toString());
+      setMaxInput(maxPValue.toString());
+      setMinInput(minPValue.toString());
     }
   }, [maxPValue, minPValue]);
 
@@ -1252,10 +1254,10 @@ const loadMetadata = async () => {
         if (data.pValueRange) {
             setMaxPValue(data.pValueRange.maxLog10P);
             setMinPValue(data.pValueRange.minLog10P);
-            // if (filterMinPValue === null || filterMaxPValue === null) {
-            //     setFilterMinPValue(data.pValueRange.minLog10P);
-            //     setFilterMaxPValue(data.pValueRange.maxLog10P);
-            // }
+            if (filterMinPValue === null || filterMaxPValue === null) {
+                setFilterMinPValue(data.pValueRange.minLog10P);
+                setFilterMaxPValue(data.pValueRange.maxLog10P);
+            }
         }
 
         setCachedData(prev => ({
@@ -1585,18 +1587,6 @@ const generatePlotData = (df) => {
   return { dyn: dyn_out, stat: stat_out, ticks };
 };
 
-// useEffect(() => {
-//   if (tab === 'man' && selectedStudy && 
-//       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
-//        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
-//     const loadData = async () => {
-//       await fetchGWASData(selectedCohort);
-//       await fetchTopResults(selectedCohort);
-//     };
-//     loadData();
-//   }
-// }, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
-
 useEffect(() => {
   if (tab === 'man' && selectedStudy && 
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
@@ -1607,17 +1597,8 @@ useEffect(() => {
     };
     loadData();
   }
-}, [selectedCohort, selectedStudy, tab]); // No filter dependencies
+}, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
 
-// Filter change useEffect
-useEffect(() => {
-  if (tab === 'man' && filterMinPValue !== null && filterMaxPValue !== null &&
-      selectedStudy && 
-      ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
-       (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
-    fetchGWASData(selectedCohort);
-  }
-}, [filterMinPValue, filterMaxPValue, selectedCohort, selectedStudy, tab]);
 
 return (
   <div className="min-h-screen bg-gray-50">
