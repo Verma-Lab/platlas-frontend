@@ -753,10 +753,8 @@ const PValueRangeFilter = ({ maxPValue, minPValue, onFilterChange }) => {
   useEffect(() => {
     if (maxPValue !== null && minPValue !== null) {
       // Always work with -log10(p) values directly
-      // setMaxInput(minPValue.toString());
-      // setMinInput(maxPValue.toString());
-      setMaxInput(maxPValue.toString());
       setMinInput(minPValue.toString());
+      setMaxInput(maxPValue.toString());
     }
   }, [maxPValue, minPValue]);
 
