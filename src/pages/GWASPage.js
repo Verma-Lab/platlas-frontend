@@ -1252,10 +1252,10 @@ const loadMetadata = async () => {
         if (data.pValueRange) {
             setMaxPValue(data.pValueRange.maxLog10P);
             setMinPValue(data.pValueRange.minLog10P);
-            if (filterMinPValue === null || filterMaxPValue === null) {
-                setFilterMinPValue(data.pValueRange.minLog10P);
-                setFilterMaxPValue(data.pValueRange.maxLog10P);
-            }
+            // if (filterMinPValue === null || filterMaxPValue === null) {
+            //     setFilterMinPValue(data.pValueRange.minLog10P);
+            //     setFilterMaxPValue(data.pValueRange.maxLog10P);
+            // }
         }
 
         setCachedData(prev => ({
