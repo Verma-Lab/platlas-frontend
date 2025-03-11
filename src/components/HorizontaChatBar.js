@@ -539,9 +539,9 @@ const HorizontalChatBar = () => {
                               <ReportLink url={message.report.download_url} />
                             )}
 
-                            {message.webSearchResults && message.webSearchResults.length > 0 && (
+                            {/* {message.webSearchResults && message.webSearchResults.length > 0 && (
                               <WebSearchResultsComponent results={message.webSearchResults} />
-                            )}
+                            )} */}
                           </div>
                         </div>
 

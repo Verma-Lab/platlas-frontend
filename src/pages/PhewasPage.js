@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Info, BarChart2, Search, Network, Share2, Databasem, ChevronRight, ChevronLeft, Database } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
+import GenerlaBar from '../components/GeneralNavBar';
 const headers = [
   {
     key: 'SNP_ID',
