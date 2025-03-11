@@ -1585,44 +1585,36 @@ const generatePlotData = (df) => {
   return { dyn: dyn_out, stat: stat_out, ticks };
 };
 
-useEffect(() => {
-  console.log('useEffect running with:', { selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue });
+// useEffect(() => {
+//   console.log('useEffect running with:', { selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue });
   
+//   if (tab === 'man' && selectedStudy && 
+//       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
+//        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
+//     const loadData = async () => {
+//       await fetchGWASData(selectedCohort);
+//       await fetchTopResults(selectedCohort);
+//     };
+//     loadData();
+//   }
+// }, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
+// For GWAS data (Manhattan plot)
+useEffect(() => {
   if (tab === 'man' && selectedStudy && 
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
-    const loadData = async () => {
-      await fetchGWASData(selectedCohort);
-      await fetchTopResults(selectedCohort);
-    };
-    loadData();
+    fetchGWASData(selectedCohort);
   }
 }, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
-// useEffect(() => {
-//   const loadDataOnce = async () => {
-//     // Skip if we're already loading data
-//     if (isLoadingRef.current) {
-//       console.log('Data loading already in progress, skipping trigger');
-//       return;
-//     }
-    
-//     console.log('useEffect running with:', { selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue });
-//     if (tab === 'man' && selectedStudy && 
-//         ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
-//          (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
-//       isLoadingRef.current = true;
-//       try {
-//         await fetchGWASData(selectedCohort);
-//         await fetchTopResults(selectedCohort);
-//       } finally {
-//         isLoadingRef.current = false;
-//       }
-//     }
-//   };
-  
-//   loadDataOnce();
-// }, [selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue]);
 
+// For top results
+useEffect(() => {
+  if (tab === 'man' && selectedStudy && 
+      ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
+       (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
+    fetchTopResults(selectedCohort);
+  }
+}, [selectedCohort, selectedStudy, tab]);
 
 return (
   <div className="min-h-screen bg-gray-50">
