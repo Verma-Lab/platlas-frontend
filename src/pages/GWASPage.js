@@ -820,7 +820,7 @@ const GWASPage = () => {
   const { phenoId } = useParams();
   const [selectedPval, setSelectedPval] = useState('1e-05'); // Default pval threshold
   const [selectedStudy, setSelectedStudy] = useState('mrmega');
-  const [selectedCohort, setSelectedCohort] = useState('EUR'); // Initialize as null
+  const [selectedCohort, setSelectedCohort] = useState(null); // Initialize as null
   const [selectedSNP, setSelectedSNP] = useState(null);
   const [statData, setStatData] = useState([]);
   const [dynData, setDynData] = useState([]);
@@ -1060,7 +1060,7 @@ const fetchHudsonTopData = async (ancestry) => {
     };
   
     fetchHudsonData();
-  }, [tab, selectedTopAncestry, selectedBottomAncestry]); // Added selectedStudy as dependency
+  }, [tab, selectedStudy, selectedTopAncestry, selectedBottomAncestry]); // Added selectedStudy as dependency
 
   // Fetch /findfiles once in GWASPage
   useEffect(() => {
@@ -1252,10 +1252,10 @@ const loadMetadata = async () => {
         if (data.pValueRange) {
             setMaxPValue(data.pValueRange.maxLog10P);
             setMinPValue(data.pValueRange.minLog10P);
-            // if (filterMinPValue === null || filterMaxPValue === null) {
-            //     setFilterMinPValue(data.pValueRange.minLog10P);
-            //     setFilterMaxPValue(data.pValueRange.maxLog10P);
-            // }
+            if (filterMinPValue === null || filterMaxPValue === null) {
+                setFilterMinPValue(data.pValueRange.minLog10P);
+                setFilterMaxPValue(data.pValueRange.maxLog10P);
+            }
         }
 
         setCachedData(prev => ({
@@ -1586,6 +1586,7 @@ const generatePlotData = (df) => {
 };
 
 useEffect(() => {
+  console.log('useEffect running with:', { selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue });
   if (tab === 'man' && selectedStudy && 
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
