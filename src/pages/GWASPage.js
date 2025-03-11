@@ -820,7 +820,7 @@ const GWASPage = () => {
   const { phenoId } = useParams();
   const [selectedPval, setSelectedPval] = useState('1e-05'); // Default pval threshold
   const [selectedStudy, setSelectedStudy] = useState('mrmega');
-  const [selectedCohort, setSelectedCohort] = useState(null); // Initialize as null
+  const [selectedCohort, setSelectedCohort] = useState('EUR'); // Initialize as null
   const [selectedSNP, setSelectedSNP] = useState(null);
   const [statData, setStatData] = useState([]);
   const [dynData, setDynData] = useState([]);
@@ -1060,7 +1060,7 @@ const fetchHudsonTopData = async (ancestry) => {
     };
   
     fetchHudsonData();
-  }, [tab, selectedStudy, selectedTopAncestry, selectedBottomAncestry]); // Added selectedStudy as dependency
+  }, [tab, selectedTopAncestry, selectedBottomAncestry]); // Added selectedStudy as dependency
 
   // Fetch /findfiles once in GWASPage
   useEffect(() => {
