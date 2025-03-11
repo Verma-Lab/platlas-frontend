@@ -9,17 +9,16 @@ import {
   Activity, 
   ChevronDown,
   Globe,
-  BarChart
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { 
+  BarChart,
+  Menu,
+  X,
   Filter,
   SlidersHorizontal,
   ArrowUpDown
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import _ from 'lodash';
-import { X } from 'lucide-react';
 
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
 
@@ -63,346 +62,313 @@ const getCohortStyle = (cohort) => {
 };
 
 /**
- * Component to display statistical values with labels and icons.
+ * Component for mobile card view of a table row
  */
-const StatCell = ({ value, label, icon: Icon }) => (
-  <motion.div 
-    className="flex flex-col space-y-1"
-    whileHover={{ scale: 1.05 }}
-    transition={{ type: "spring", stiffness: 300 }}
-  >
-    <span className="text-lg font-bold text-gray-900">
-      {new Intl.NumberFormat('en-US').format(value)}
-    </span>
-    <div className="flex items-center space-x-1 text-xs text-gray-500">
-      {Icon && <Icon className="w-3 h-3" />}
-      <span>{label}</span>
-    </div>
-  </motion.div>
-);
-
-/**
- * Modified SampleSizeCell component with progress bars
- */
-const SampleSizeCell = ({ variants }) => {
-  const sampleSizes = variants.reduce((acc, variant) => {
-    if (!acc[variant.cohort]) {
-      acc[variant.cohort] = variant.n_total;
-    }
-    return acc;
-  }, {});
-
-  // Find the maximum sample size for scaling the bars
-  const maxSize = Math.max(...Object.values(sampleSizes));
-
-  return (
-    <div className="space-y-2">
-      {Object.entries(sampleSizes).map(([cohort, size], idx) => (
-        <div key={idx} className="space-y-1">
-          <div className="flex items-center justify-between text-xs">
-            <span className={`font-medium ${getCohortStyle(cohort).text}`}>{cohort}:</span>
-            <span className="text-gray-600">{new Intl.NumberFormat('en-US').format(size)}</span>
-          </div>
-          <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-            <div 
-              className={`h-full rounded-full ${getCohortStyle(cohort).bar}`}
-              style={{ width: `${(size / maxSize) * 100}%` }}
-            />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/**
- * Updated CompactCohortCell component to show inline populations.
- */
-const CompactCohortCell = ({ cohorts, onCohortClick, traitName }) => {
-  return (
-    <div className="flex flex-wrap gap-2">
-      {cohorts.map((cohort, idx) => (
-        <motion.button
-          key={idx}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => onCohortClick(traitName, cohort)}
-          className={`px-2 py-1 rounded-md text-xs font-medium ${getCohortStyle(cohort).tag}`}
-        >
-          {cohort}
-        </motion.button>
-      ))}
-    </div>
-  );
-};
-
-/**
- * Updated CompactLeadSNPCell with population information
- */
-const CompactLeadSNPCell = ({ variants, onLeadSNPClick }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  // Group variants by population
-  const variantsByPopulation = variants.reduce((acc, variant) => {
-    if (!acc[variant.cohort]) {
-      acc[variant.cohort] = [];
-    }
-    acc[variant.cohort].push(variant);
-    return acc;
-  }, {});
+const MobileVariantCard = ({ item, onCohortClick, onLeadSNPClick }) => {
+  const [expanded, setExpanded] = useState(false);
   
   return (
-    <div className="relative">
-      <motion.div 
-        className="relative group"
-        whileHover={{ scale: 1.02 }}
-        transition={{ type: "spring", stiffness: 300 }}
-      >
-        <div 
-          className="p-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer"
-          onClick={() => setIsExpanded(!isExpanded)}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <span className="text-sm font-semibold text-gray-900">{variants.length}</span>
-              <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">variants</span>
-            </div>
-            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-          </div>
+    <motion.div 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4"
+      whileHover={{ scale: 1.01 }}
+    >
+      {/* Card Header - Always visible */}
+      <div className="flex justify-between items-start mb-3">
+        <div>
+          <h3 className="font-medium text-gray-900">{item.trait.name}</h3>
+          <p className="text-xs text-gray-500 mt-1">{item.trait.description}</p>
         </div>
-      </motion.div>
+        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
+          {item.category}
+        </span>
+      </div>
       
-      {isExpanded && (
-        <div 
-          className="absolute left-0 mt-2 w-72 bg-white rounded-lg shadow-lg border border-gray-200 p-2 space-y-2 z-50"
-          style={{ 
-            maxHeight: '400px', 
-            overflowY: 'auto',
-            top: '100%'
-          }}
-        >
-          {Object.entries(variantsByPopulation).map(([population, populationVariants], popIdx) => (
-            <div key={popIdx} className="space-y-2">
-              <div className={`text-xs font-semibold px-2 py-1 rounded ${getCohortStyle(population).text} bg-gray-50`}>
-                {population} ({populationVariants.length} variants)
-              </div>
-              
-              {populationVariants.map((variant, idx) => (
-                <div 
+      {/* Quick Stats - Always visible */}
+      <div className="grid grid-cols-3 gap-2 mb-3 py-2 border-t border-b border-gray-100">
+        <div className="text-center">
+          <div className="flex items-center justify-center text-sm font-semibold text-gray-900">
+            {item.cohorts.length}
+          </div>
+          <div className="text-xs text-gray-500">Populations</div>
+        </div>
+        <div className="text-center">
+          <div className="flex items-center justify-center text-sm font-semibold text-gray-900">
+            {item.variants.length}
+          </div>
+          <div className="text-xs text-gray-500">Lead SNPs</div>
+        </div>
+        <div className="text-center">
+          <div className="flex items-center justify-center text-sm font-semibold text-gray-900">
+            {Object.values(item.studies_by_pop).reduce((a, b) => a + b, 0)}
+          </div>
+          <div className="text-xs text-gray-500">Studies</div>
+        </div>
+      </div>
+      
+      {/* Expand/Collapse Button */}
+      <button 
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center justify-center py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-md"
+      >
+        <span>{expanded ? "Show Less" : "Show More"}</span>
+        <ChevronDown className={`ml-1 w-4 h-4 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+      </button>
+      
+      {/* Expanded Content */}
+      {expanded && (
+        <div className="mt-4 space-y-4">
+          {/* Populations */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Populations</h4>
+            <div className="flex flex-wrap gap-2">
+              {item.cohorts.map((cohort, idx) => (
+                <button
                   key={idx}
-                  onClick={() => {
-                    onLeadSNPClick(variant);
-                    setIsExpanded(false);
-                  }}
-                  className="p-2 hover:bg-gray-50 rounded cursor-pointer ml-2 border-l-2 border-gray-100"
+                  onClick={() => onCohortClick(item.trait.name, cohort)}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium ${getCohortStyle(cohort).tag}`}
                 >
-                  <div className="flex items-center space-x-2 text-xs text-gray-600">
+                  {cohort}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Sample Sizes */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Sample Sizes</h4>
+            <div className="space-y-2">
+              {item.cohorts.map((cohort, idx) => {
+                const variant = item.variants.find(v => v.cohort === cohort);
+                const size = variant ? variant.n_total : 0;
+                const maxSize = Math.max(...item.variants.map(v => v.n_total));
+                
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className={`font-medium ${getCohortStyle(cohort).text}`}>{cohort}:</span>
+                      <span className="text-gray-600">{new Intl.NumberFormat('en-US').format(size)}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${getCohortStyle(cohort).bar}`}
+                        style={{ width: `${(size / maxSize) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Lead SNPs */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Lead SNPs</h4>
+            {item.variants.map((variant, idx) => (
+              <div 
+                key={idx}
+                onClick={() => onLeadSNPClick(variant)}
+                className="p-3 mb-2 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer"
+              >
+                <div className="flex justify-between">
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${getCohortStyle(variant.cohort).tag}`}>
+                    {variant.cohort}
+                  </span>
+                  <span className="text-xs text-gray-500 font-mono">{variant.lead_snp.rsid}</span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center space-x-1 text-gray-600">
                     <MapPin className="w-3 h-3" />
                     <span>Chr{variant.lead_snp.position.chromosome}:{variant.lead_snp.position.position.toLocaleString()}</span>
                   </div>
-                  <div className="flex items-center space-x-2 text-xs text-gray-600">
+                  <div className="flex items-center space-x-1 text-gray-600">
                     <Activity className="w-3 h-3" />
                     <span>Log10P: {variant.lead_snp.log10p.toFixed(2)}</span>
                   </div>
-                  <div className="text-xs text-gray-500 font-mono">{variant.lead_snp.rsid}</div>
-                  <div className="mt-1 flex items-center space-x-2 text-xs text-gray-600">
-                    <FileText className="w-3 h-3" />
-                    <span>Studies: {variant.n_study}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Studies */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Studies</h4>
+            <div className="space-y-2">
+              {Object.entries(item.studies_by_pop).map(([pop, studyCount]) => (
+                <div key={pop} className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Globe className="w-4 h-4 text-gray-400 mr-2" />
+                    <span className={`text-sm ${getCohortStyle(pop).text}`}>
+                      {pop}:
+                    </span>
                   </div>
+                  <span className="text-sm text-gray-600">
+                    {studyCount}
+                  </span>
                 </div>
               ))}
             </div>
-          ))}
+          </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 
 /**
- * New StudiesBreakdownCell component to show studies per population.
+ * Filter drawer for mobile
  */
-const StudiesPerPopCell = ({ studies }) => (
-    <div className="space-y-2">
-      {Object.entries(studies).map(([pop, studyInfo]) => (
-        <div key={pop} className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Globe className="w-4 h-4 text-gray-400" />
-            <span className={`text-sm ml-2 ${getCohortStyle(pop).text}`}>
-              {pop}:
-            </span>
-          </div>
-          <span className="text-sm -ml-2 right-2 text-gray-600">
-            {studyInfo}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-const StudiesBreakdownCell = ({ popGwasData, studies }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
+const MobileFilterDrawer = ({ isOpen, onClose, filters, setFilters, filterOptions }) => {
   return (
-    <div className="relative">
-      <motion.div 
-        className="cursor-pointer"
-        onClick={() => setIsExpanded(!isExpanded)}
-      >
-        <div className="flex items-center space-x-2">
-          <span className="text-sm font-medium">{studies} studies</span>
-          <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
-        </div>
-      </motion.div>
-      
-      {isExpanded && (
-        <div className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border p-3 min-w-[200px]">
-          {Object.entries(popGwasData).map(([pop, count]) => (
-            <div key={pop} className="flex justify-between items-center py-1">
-              <span className={`text-sm ${getCohortStyle(pop).text}`}>{pop}:</span>
-              <span className="text-sm text-gray-600">{count} studies</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anchorRef }) => {
-  const popoverRef = useRef(null);
-  
-  useEffect(() => {
-    if (anchorRef && popoverRef.current) {
-      const buttonRect = anchorRef.getBoundingClientRect();
-      const popover = popoverRef.current;
-      
-      popover.style.position = 'fixed';
-      popover.style.top = `${buttonRect.bottom + 8}px`;
-      popover.style.left = `${buttonRect.left}px`;
-      popover.style.width = '280px';
-      popover.style.maxHeight = '400px';
-      popover.style.zIndex = '51';
-    }
-  }, [anchorRef]);
-
-  return (
-    <>
+    <div className={`fixed inset-0 z-50 transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/5"
+        className="absolute inset-0 bg-black/30" 
         onClick={onClose}
-        style={{ zIndex: 50 }}
       />
       
-      <div 
-        ref={popoverRef}
-        className="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden"
-      >
-        <div className="flex justify-between items-center p-3 border-b border-gray-100">
-          <span className="text-sm font-medium text-gray-700">Filter {column}</span>
+      {/* Drawer */}
+      <div className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 transform transition-transform ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-medium">Filters</h3>
           <button 
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="p-2 rounded-full hover:bg-gray-100"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
-
-        <div className="p-3 max-h-[320px] overflow-y-auto">
-          <div className="space-y-2">
-            {options.map((option, idx) => (
-              <label 
-                key={idx} 
-                className="flex items-center space-x-2 hover:bg-gray-50 p-2 rounded cursor-pointer"
-              >
-                <input
-                  type="checkbox"
-                  checked={selectedValues.includes(option)}
-                  onChange={(e) => {
-                    const newValues = e.target.checked
-                      ? [...selectedValues, option]
-                      : selectedValues.filter(val => val !== option); // Fixed this line
-                    onChange(newValues);
+        
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pb-6">
+          {/* Category Filter */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Category</h4>
+            <div className="space-y-2">
+              {filterOptions.category.map((option) => (
+                <label 
+                  key={option} 
+                  className="flex items-center p-2 hover:bg-gray-50 rounded-md"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.category.includes(option)}
+                    onChange={(e) => {
+                      const newValues = e.target.checked
+                        ? [...filters.category, option]
+                        : filters.category.filter(val => val !== option);
+                      setFilters({...filters, category: newValues});
+                    }}
+                    className="mr-2 rounded-sm text-blue-600"
+                  />
+                  <span className="text-sm">{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          {/* Population Filter */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Populations</h4>
+            <div className="flex flex-wrap gap-2">
+              {filterOptions.populations.map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    const newValues = filters.populations.includes(option)
+                      ? filters.populations.filter(val => val !== option)
+                      : [...filters.populations, option];
+                    setFilters({...filters, populations: newValues});
                   }}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-sm text-gray-600">{option}</span>
-              </label>
-            ))}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                    filters.populations.includes(option)
+                      ? getCohortStyle(option).tag
+                      : 'bg-gray-100 text-gray-600'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {/* Lead SNPs Filter */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Lead SNPs Count</h4>
+            <div className="space-y-2">
+              {filterOptions.leadsnps.map((option) => (
+                <label 
+                  key={option} 
+                  className="flex items-center p-2 hover:bg-gray-50 rounded-md"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.leadsnps.includes(option)}
+                    onChange={(e) => {
+                      const newValues = e.target.checked
+                        ? [...filters.leadsnps, option]
+                        : filters.leadsnps.filter(val => val !== option);
+                      setFilters({...filters, leadsnps: newValues});
+                    }}
+                    className="mr-2 rounded-sm text-blue-600"
+                  />
+                  <span className="text-sm">{option} variants</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          {/* Studies Filter */}
+          <div>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Studies Count</h4>
+            <div className="space-y-2">
+              {filterOptions.studies.map((option) => (
+                <label 
+                  key={option} 
+                  className="flex items-center p-2 hover:bg-gray-50 rounded-md"
+                >
+                  <input
+                    type="checkbox"
+                    checked={filters.studies.includes(option)}
+                    onChange={(e) => {
+                      const newValues = e.target.checked
+                        ? [...filters.studies, option]
+                        : filters.studies.filter(val => val !== option);
+                      setFilters({...filters, studies: newValues});
+                    }}
+                    className="mr-2 rounded-sm text-blue-600"
+                  />
+                  <span className="text-sm">{option} studies</span>
+                </label>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </>
-  );
-};
-const ColumnHeader = ({ title, onSort, sortConfig, hasSort = true }) => {
-  return (
-    <th className="px-6 py-3 text-left">
-      <div className="flex items-center space-x-2">
-        {hasSort ? (
-          <button 
-            onClick={onSort}
-            className="group flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+        
+        <div className="flex space-x-2 mt-4 pt-3 border-t border-gray-200">
+          <button
+            onClick={() => setFilters({
+              category: [],
+              populations: [],
+              leadsnps: [],
+              studies: []
+            })}
+            className="flex-1 py-2 px-4 border border-gray-300 rounded-lg text-gray-700 text-center"
           >
-            <span>{title}</span>
-            <ArrowUpDown className={`w-4 h-4 ${
-              sortConfig?.key === title.toLowerCase() 
-                ? 'text-blue-600' 
-                : 'text-gray-400 group-hover:text-gray-600'
-            }`} />
+            Clear All
           </button>
-        ) : (
-          <span className="text-sm font-medium text-gray-700">{title}</span>
-        )}
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg text-center"
+          >
+            Apply Filters
+          </button>
+        </div>
       </div>
-    </th>
+    </div>
   );
 };
 
-// const ColumnHeader = ({ title, onSort, sortConfig, onFilter, hasFilter = true, hasSort = true }) => {
-//   const [showFilter, setShowFilter] = useState(false);
-//   const filterButtonRef = useRef(null);
-  
-//   return (
-//     <th className="px-6 py-3 text-left">
-//       <div className="flex items-center space-x-2">
-//         {hasSort ? (
-//           <div className="flex items-center space-x-1">
-//             <button 
-//               onClick={onSort}
-//               className="group flex items-center space-x-1 text-xs font-medium text-gray-500 hover:text-gray-700"
-//             >
-//               <span>{title}</span>
-//               <ArrowUpDown className={`w-4 h-4 ${
-//                 sortConfig?.key === title.toLowerCase() 
-//                   ? 'text-blue-600' 
-//                   : 'text-gray-400 group-hover:text-gray-600'
-//               }`} />
-//             </button>
-//           </div>
-//         ) : (
-//           <span className="text-xs font-medium text-gray-500">{title}</span>
-//         )}
-        
-//         {hasFilter && (
-//           <button
-//             ref={filterButtonRef}
-//             onClick={() => {
-//               setShowFilter(!showFilter);
-//               onFilter(filterButtonRef);
-//             }}
-//             className={`p-1 rounded-md hover:bg-gray-100 ${
-//               showFilter ? 'bg-blue-50 text-blue-600' : 'text-gray-400'
-//             }`}
-//           >
-//             <Filter className="w-4 h-4" />
-//           </button>
-//         )}
-//       </div>
-//     </th>
-//   );
-// };
 /**
- * Main component to display the Lead Variants Table.
+ * Main component to display the Lead Variants Table with mobile optimization
  */
 const LeadVariantsTable = () => {
   const [data, setData] = useState([]);
@@ -411,7 +377,7 @@ const LeadVariantsTable = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState({ key: 'leadsnps', direction: 'desc' });
   const [filters, setFilters] = useState({
     category: [],
@@ -419,31 +385,42 @@ const LeadVariantsTable = () => {
     leadsnps: [],
     studies: []
   });
-  const [activeFilter, setActiveFilter] = useState(null);
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const navigate = useNavigate();
+
+  // Check screen size on mount and when window resizes
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Adjust items per page for mobile
+      setItemsPerPage(window.innerWidth < 768 ? 5 : 10);
+    };
+    
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  // Get unique values for filters
+  const filterOptions = {
+    category: Array.from(new Set(groupedData.map(item => item.category))).sort(),
+    populations: Array.from(new Set(groupedData.flatMap(item => item.cohorts))).sort(),
+    leadsnps: Array.from(new Set(groupedData.map(item => item.variants.length.toString()))).sort((a, b) => Number(a) - Number(b)),
+    studies: Array.from(new Set(groupedData.map(item => {
+      const totalStudies = Object.values(item.studies_by_pop).reduce((a, b) => a + b, 0);
+      return totalStudies.toString();
+    }))).sort((a, b) => Number(a) - Number(b))
+  };
+
   const handleSort = (key) => {
     setSortConfig(current => ({
       key,
       direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
-  const [filterAnchorRef, setFilterAnchorRef] = useState(null);
-
-  // const handleFilterClick = (columnKey, buttonRef) => {
-  //   setFilterAnchorRef(buttonRef);
-  //   setActiveFilter(activeFilter === columnKey ? null : columnKey);
-  // };
-  const handleFilterClick = (columnKey) => {
-    const buttonRef = filterRefs[columnKey].current;
-    setFilterAnchorRef(buttonRef);
-    setActiveFilter(activeFilter === columnKey ? null : columnKey);
-  };
-  const filterRefs = {
-    category: useRef(null),
-    populations: useRef(null),
-    leadsnps: useRef(null),  // Added this
-    studies: useRef(null)
-  };
-  const navigate = useNavigate();
 
   const getSortValue = (item, key) => {
     switch (key) {
@@ -462,6 +439,54 @@ const LeadVariantsTable = () => {
     }
   };
 
+  // Data fetching logic
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(`/api/getLeadVariants`);
+        if (!response.ok) throw new Error('Failed to fetch data');
+        const leadVariants = await response.json();
+        
+        // Process data with studies per population
+        const processedData = leadVariants.reduce((acc, item) => {
+          const key = item.trait.name;
+          if (!acc[key]) {
+            acc[key] = {
+              trait: item.trait,
+              category: item.category,
+              cohorts: new Set(),
+              variants: [],
+              total_samples: 0,
+              studies_by_pop: {}
+            };
+          }
+          
+          acc[key].cohorts.add(item.cohort);
+          acc[key].variants.push(item);
+          acc[key].total_samples += item.n_total;
+          
+          // Store studies count per population
+          if (!acc[key].studies_by_pop[item.cohort]) {
+            acc[key].studies_by_pop[item.cohort] = item.n_study;
+          }
+          
+          return acc;
+        }, {});
+        
+        setGroupedData(Object.values(processedData).map(group => ({
+          ...group,
+          cohorts: Array.from(group.cohorts)
+        })));
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Sort and filter data
   const sortedData = React.useMemo(() => {
     if (!sortConfig.key) return groupedData;
     
@@ -503,86 +528,11 @@ const LeadVariantsTable = () => {
     });
   }, [sortedData, searchTerm, filters]);
 
-  // Get unique values for filters
-  const getFilterOptions = (key) => {
-    const options = new Set();
-    groupedData.forEach(item => {
-      switch (key) {
-        case 'category':
-          options.add(item.category);
-          break;
-        case 'populations':
-          item.cohorts.forEach(cohort => options.add(cohort));
-          break;
-        case 'leadsnps':
-          options.add(item.variants.length.toString());
-          break;
-        case 'studies':
-          const totalStudies = Object.values(item.studies_by_pop)
-            .reduce((a, b) => a + b, 0);
-          options.add(totalStudies.toString());
-          break;
-      }
-    });
-    return Array.from(options).sort();
-  };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // const response = await fetch(`${baseURL}/getLeadVariants`);
-        const response = await fetch(`/api/getLeadVariants`);
-        if (!response.ok) throw new Error('Failed to fetch data');
-        const leadVariants = await response.json();
-        
-        // Process data with studies per population
-        const processedData = leadVariants.reduce((acc, item) => {
-          const key = item.trait.name;
-          if (!acc[key]) {
-            acc[key] = {
-              trait: item.trait,
-              category: item.category,
-              cohorts: new Set(),
-              variants: [],
-              total_samples: 0,
-              studies_by_pop: {}  // Track studies by population
-            };
-          }
-          
-          acc[key].cohorts.add(item.cohort);
-          acc[key].variants.push(item);
-          acc[key].total_samples += item.n_total;
-          
-          // Store studies count per population
-          if (!acc[key].studies_by_pop[item.cohort]) {
-            acc[key].studies_by_pop[item.cohort] = item.n_study;
-          }
-          
-          return acc;
-        }, {});
-        
-        setGroupedData(Object.values(processedData).map(group => ({
-          ...group,
-          cohorts: Array.from(group.cohorts)
-        })));
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
-  /**
-   * Handler for cohort button clicks.
-   */
+  // Handlers
   const handleCohortClick = (traitName, cohort) => {
     navigate(`/gwas/${traitName}`, { state: { selectedCohort: cohort } });
   };
 
-  /**
-   * Handler for Lead SNP clicks.
-   */
   const handleLeadSNPClick = async (data) => {
     try {
       const snpData = {
@@ -592,8 +542,6 @@ const LeadVariantsTable = () => {
       };
 
       const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
-      // const url = `${baseURL}/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
-
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -612,26 +560,13 @@ const LeadVariantsTable = () => {
     }
   };
 
-  /**
-   * Filter data based on search term.
-   */
-  // const filteredData = groupedData.filter(item => {
-  //   const searchLower = searchTerm.toLowerCase();
-  //   return (
-  //     item.trait.name?.toLowerCase().includes(searchLower) ||
-  //     item.trait.description?.toLowerCase().includes(searchLower) ||
-  //     item.category?.toLowerCase().includes(searchLower)
-  //   );
-  // });
-
-  /**
-   * Pagination logic.
-   */
+  // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
+  // Loading and error states
   if (loading) {
     return (
       <div className="flex justify-center items-center p-8">
@@ -652,257 +587,263 @@ const LeadVariantsTable = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-6"
+      className="space-y-4"
     >
-      {/* Search and Pagination Bar */}
-      <motion.div 
-        className="flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100"
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-      >
-        {/* Search Input */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="Search by phenotype ID or trait..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-10 z-index 40 pr-4 py-2 w-80 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-          />
-          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-        </div>
+      {/* Mobile Search and Filter Bar */}
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex flex-col space-y-3 md:space-y-0 md:flex-row md:justify-between md:items-center">
+          {/* Search Input - Full width on mobile */}
+          <div className="relative w-full md:w-auto">
+            <input
+              type="text"
+              placeholder="Search by phenotype or trait..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-10 pr-4 py-3 w-full md:w-80 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <Search className="absolute left-3 top-3.5 h-5 w-5 text-gray-400" />
+          </div>
 
-        {/* Pagination Controls */}
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">
-            {filteredData.length} results | Page {currentPage} of {totalPages}
-          </span>
-          <div className="flex space-x-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-lg ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+          {/* Filter Button - Mobile only */}
+          <div className="flex md:hidden">
+            <button
+              onClick={() => setShowFilterDrawer(true)}
+              className="w-full flex items-center justify-center space-x-2 py-3 bg-blue-50 text-blue-600 rounded-lg border border-blue-100"
             >
-              <ChevronLeft className="w-5 h-5" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
-            >
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
+              <Filter className="w-5 h-5" />
+              <span>Filters {Object.values(filters).flat().length > 0 && `(${Object.values(filters).flat().length})`}</span>
+            </button>
+          </div>
+
+          {/* Desktop Filter Buttons */}
+          <div className="hidden md:flex md:items-center md:space-x-3">
+            <span className="text-sm font-medium text-gray-700">Filter by:</span>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => {
+                  setFilters({...filters, category: []});
+                  setShowFilterDrawer(true);
+                }}
+                className="flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-emerald-500 to-green-500 text-white"
+              >
+                <SlidersHorizontal className="w-4 h-4 mr-2" />
+                <span className="text-sm">Category</span>
+                {filters.category.length > 0 && (
+                  <span className="ml-2 bg-white text-green-600 px-2 rounded-full text-xs">
+                    {filters.category.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => {
+                  setFilters({...filters, populations: []});
+                  setShowFilterDrawer(true);
+                }}
+                className="flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+              >
+                <Globe className="w-4 h-4 mr-2" />
+                <span className="text-sm">Populations</span>
+                {filters.populations.length > 0 && (
+                  <span className="ml-2 bg-white text-blue-600 px-2 rounded-full text-xs">
+                    {filters.populations.length}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </motion.div>
 
-{/* Filter Bar */}
-<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-{/* Filter Buttons */}
-{/* Filter Bar */}
-<div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-  <div className="flex items-center space-x-4">
-    <span className="text-sm font-medium text-gray-700">Filter by:</span>
-    <div className="flex space-x-2">
-      <button
-        ref={filterRefs.category}
-        onClick={() => handleFilterClick('category')}
-        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-emerald-500 to-green-500 text-white${
-          filters.category.length > 0 
-            ? 'border-blue-200 bg-blue-50 text-white' 
-            : 'border-gray-200 text-white hover:bg-gray-50'
-        }`}
-      >
-        <SlidersHorizontal className="w-4 h-4 mr-2" />
-        <span className="text-sm">Category</span>
-        {filters.category.length > 0 && (
-          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
-            {filters.category.length}
+        {/* Results count and Sort - Mobile friendly */}
+        <div className="flex justify-between items-center mt-4 pt-3 border-t border-gray-100">
+          <span className="text-xs text-gray-500">
+            {filteredData.length} results
           </span>
-        )}
-      </button>
-
-      <button
-        ref={filterRefs.populations}
-        onClick={() => handleFilterClick('populations')}
-        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-500 to-blue-600 text-white${
-          filters.populations.length > 0 
-            ? 'border-blue-200 bg-blue-50 text-white' 
-            : 'border-gray-200 text-white hover:bg-gray-50'
-        }`}
-      >
-        <Globe className="w-4 h-4 mr-2" />
-        <span className="text-sm">Populations</span>
-        {filters.populations.length > 0 && (
-          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
-            {filters.populations.length}
-          </span>
-        )}
-      </button>
-
-      {/* Added Lead SNPs filter button */}
-      <button
-        ref={filterRefs.leadsnps}
-        onClick={() => handleFilterClick('leadsnps')}
-        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-red-400 to-red-600 text-white${
-          filters.leadsnps.length > 0 
-            ? 'border-blue-200 bg-blue-50 text-white' 
-            : 'border-gray-200 text-white hover:bg-gray-50'
-        }`}
-      >
-        <Activity className="w-4 h-4 mr-2" />
-        <span className="text-sm">Lead SNPs</span>
-        {filters.leadsnps.length > 0 && (
-          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
-            {filters.leadsnps.length}
-          </span>
-        )}
-      </button>
-
-      <button
-        ref={filterRefs.studies}
-        onClick={() => handleFilterClick('studies')}
-        className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-orange-500 to-orange-600 text-white${
-          filters.studies.length > 0 
-            ? 'border-blue-200 bg-blue-50 text-white' 
-            : 'border-gray-200 text-white hover:bg-gray-50'
-        }`}
-      >
-        <BarChart className="w-4 h-4 mr-2" />
-        <span className="text-sm">Studies</span>
-        {filters.studies.length > 0 && (
-          <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
-            {filters.studies.length}
-          </span>
-        )}
-      </button>
-    </div>
-  </div>
-</div>
-</div>
-
-      {/* Lead Variants Table */}
-      <motion.div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-              <tr>
-                {[
-                  { title: 'Trait', key: 'trait', hasFilter: false, hasSort: false },
-                  { title: 'Category', key: 'category' },
-                  { title: 'Populations', key: 'populations' },
-                  { title: 'Lead SNPs', key: 'leadsnps' },
-                  { title: 'Sample Sizes', key: 'samplesize', hasFilter: false },
-                  { title: 'Studies', key: 'studies' }
-                ].map(({ title, key, hasFilter = true, hasSort = true }) => (
-                  <ColumnHeader
-                    key={key}
-                    title={title}
-                    onSort={() => handleSort(key, hasSort)}
-                    sortConfig={sortConfig}
-                    hasFilter={hasFilter}
-                    hasSort={hasSort}
-                    onFilter={(buttonRef) => handleFilterClick(key, buttonRef)}
-                  />
-                ))}
-              </tr>
-            </thead>
-        <tbody className="divide-y divide-gray-200">
-          {currentItems.map((group, idx) => (
-            <tr key={idx} className="hover:bg-gray-50">
-              {/* First 5 columns remain the same */}
-              <td className="px-6 py-4">
-                <motion.div className="flex flex-col space-y-1">
-                  <span className="text-sm font-semibold text-gray-900">{group.trait.name}</span>
-                  <span className="text-xs text-gray-500">{group.trait.description}</span>
-                </motion.div>
-              </td>
-
-              <td className="px-6 py-4">
-                <motion.span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
-                  {group.category}
-                </motion.span>
-              </td>
-
-              <td className="px-6 py-4">
-                <CompactCohortCell 
-                  cohorts={group.cohorts}
-                  onCohortClick={handleCohortClick}
-                  traitName={group.trait.name}
-                />
-              </td>
-
-              <td className="px-6 py-4">
-                <CompactLeadSNPCell 
-                  variants={group.variants}
-                  onLeadSNPClick={handleLeadSNPClick}
-                />
-              </td>
-
-              <td className="px-6 py-4">
-                <SampleSizeCell variants={group.variants} />
-              </td>
-
-              {/* Combined Studies per Population Column */}
-              <td className="px-6 py-4">
-                <StudiesPerPopCell studies={group.studies_by_pop} />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
+          
+          <div className="flex items-center space-x-2">
+            <span className="text-xs text-gray-500">Sort by:</span>
+            <select
+              value={sortConfig.key}
+              onChange={(e) => handleSort(e.target.value)}
+              className="text-xs border border-gray-200 rounded py-1 pl-2 pr-6 bg-white"
+            >
+              <option value="trait">Trait</option>
+              <option value="category">Category</option>
+              <option value="populations">Populations</option>
+              <option value="leadsnps">Lead SNPs</option>
+              <option value="studies">Studies</option>
+            </select>
+            
+            <button
+              onClick={() => setSortConfig({...sortConfig, direction: sortConfig.direction === 'asc' ? 'desc' : 'asc'})}
+              className="p-1 rounded border border-gray-200"
+            >
+              <ArrowUpDown className={`w-4 h-4 ${sortConfig.direction === 'asc' ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Optional: Summary Stats Section */}
-      {/* Uncomment the section below if you wish to include summary statistics */}
-      {/*
-      <motion.div 
-        className="grid grid-cols-3 gap-6"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        {[
-          { label: 'Total Variants', value: filteredData.reduce((sum, item) => sum + item.variants.length, 0) },
-          { label: 'Total Studies', value: filteredData.reduce((sum, item) => sum + Object.values(item.studies).reduce((a, b) => a + b, 0), 0) },
-          { label: 'Total Samples', value: filteredData.reduce((sum, item) => sum + item.total_samples, 0) }
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            className="bg-white rounded-lg shadow-sm p-6 border border-gray-100"
-            whileHover={{ scale: 1.02 }}
-            transition={{ type: "spring", stiffness: 300 }}
+      {/* Content: Table for desktop, Cards for mobile */}
+      <div className="bg-gray-50 rounded-xl p-4">
+        {/* Mobile Card View */}
+        <div className={`${isMobile ? 'block' : 'hidden'}`}>
+          {currentItems.map((item, idx) => (
+            <MobileVariantCard 
+              key={idx} 
+              item={item} 
+              onCohortClick={handleCohortClick}
+              onLeadSNPClick={handleLeadSNPClick}
+            />
+          ))}
+        </div>
+        
+        {/* Desktop Table View */}
+        <div className={`${isMobile ? 'hidden' : 'block'} bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden`}>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Trait</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Category</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Populations</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Lead SNPs</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Sample Sizes</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Studies</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {currentItems.map((group, idx) => (
+                  <tr key={idx} className="hover:bg-gray-50">
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-sm font-semibold text-gray-900">{group.trait.name}</span>
+                        <span className="text-xs text-gray-500">{group.trait.description}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
+                        {group.category}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-2">
+                        {group.cohorts.map((cohort, idx) => (
+                          <button
+                            key={idx}
+                            onClick={() => handleCohortClick(group.trait.name, cohort)}
+                            className={`px-2 py-1 rounded-md text-xs font-medium ${getCohortStyle(cohort).tag}`}
+                          >
+                            {cohort}
+                          </button>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm font-semibold">
+                        {group.variants.length} variants
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-2">
+                        {group.cohorts.map((cohort, idx) => {
+                          const variant = group.variants.find(v => v.cohort === cohort);
+                          const size = variant ? variant.n_total : 0;
+                          const maxSize = Math.max(...group.variants.map(v => v.n_total));
+                          
+                          return (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className={`font-medium ${getCohortStyle(cohort).text}`}>{cohort}:</span>
+                                <span className="text-gray-600">{new Intl.NumberFormat('en-US').format(size)}</span>
+                              </div>
+                              <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full ${getCohortStyle(cohort).bar}`}
+                                  style={{ width: `${(size / maxSize) * 100}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="space-y-2">
+                        {Object.entries(group.studies_by_pop).map(([pop, studyCount]) => (
+                          <div key={pop} className="flex items-center justify-between">
+                            <span className={`text-sm ${getCohortStyle(pop).text}`}>
+                              {pop}:
+                            </span>
+                            <span className="text-sm text-gray-600">
+                              {studyCount}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* Pagination - Mobile friendly */}
+      <div className="flex items-center justify-between px-4 py-3 bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+            className={`p-2 rounded-md ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
           >
-            <h3 className="text-sm font-medium text-gray-500">{stat.label}</h3>
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              {new Intl.NumberFormat('en-US').format(stat.value)}
-            </p>
-          </motion.div>
-        ))}
-      </motion.div>
-      */}
-      {activeFilter && (
-        <FilterPopover
-          column={activeFilter}
-          options={getFilterOptions(activeFilter)}
-          selectedValues={filters[activeFilter]}
-          onChange={(newValues) => setFilters({ ...filters, [activeFilter]: newValues })}
-          onClose={() => {
-            setActiveFilter(null);
-            setFilterAnchorRef(null);
-          }}
-          anchorRef={filterAnchorRef}
-        />
-      )}
+            <span className="hidden md:inline">First</span>
+            <span className="md:hidden">«</span>
+          </button>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className={`p-2 rounded-md ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="text-sm text-gray-600">
+          Page {currentPage} of {totalPages}
+        </div>
+        
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className={`p-2 rounded-md ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+            className={`p-2 rounded-md ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+          >
+            <span className="hidden md:inline">Last</span>
+            <span className="md:hidden">»</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Filter Drawer */}
+      <MobileFilterDrawer 
+        isOpen={showFilterDrawer}
+        onClose={() => setShowFilterDrawer(false)}
+        filters={filters}
+        setFilters={setFilters}
+        filterOptions={filterOptions}
+      />
     </motion.div>
   );
 };

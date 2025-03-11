@@ -809,7 +809,7 @@ export const HomePage = () => {
               </div>
               
               {/* Navigation Bar - Hide on mobile, show centered on tablet/desktop */}
-              <div className="flex-1 flex justify-center mt-10 sm:mt-20 overflow-x-auto">
+              <div className="flex-1 flex justify-center mt-20 sm:-mt-15 overflow-x-auto">
                 <NavigationBar />
               </div>
             </div>
