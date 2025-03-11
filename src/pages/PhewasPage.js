@@ -360,7 +360,7 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick }) => {
         
         {/* Added GeneralBar component here */}
         <div className='p-5 -mt-10'>
-          <GeneralBar />
+          <GenerlaBar />
         </div>
       </div>
       
