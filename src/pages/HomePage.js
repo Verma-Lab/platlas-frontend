@@ -89,7 +89,7 @@ const StatCard = ({ icon: Icon, label, mainValue, subValues, isVisible }) => {
                 <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
                   Total SNPs
                 </span>
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-lg sm:text-2xl font-bold text-gray-900">
                   {isVisible && subValues.gwama > 0 ? (
                     <AnimatedCounter end={60297399} />
                   ) : (
@@ -97,18 +97,6 @@ const StatCard = ({ icon: Icon, label, mainValue, subValues, isVisible }) => {
                   )}
                 </span>
               </div>
-              {/* <div className="flex items-center gap-2">
-                <span className="bg-green-500 text-white text-xs font-medium px-2.5 py-1 rounded">
-                  MR-MEGA
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {isVisible && subValues.mrmega > 0 ? (
-                    <AnimatedCounter end={subValues.mrmega} />
-                  ) : (
-                    subValues.mrmega.toLocaleString()
-                  )}
-                </span>
-              </div> */}
             </div>
           ) : (
             // For other stats (Phenotypes and Sample Size)
@@ -116,7 +104,7 @@ const StatCard = ({ icon: Icon, label, mainValue, subValues, isVisible }) => {
               <span className="bg-blue-500 text-white text-xs font-medium px-2.5 py-1 rounded">
                 Total
               </span>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-lg sm:text-2xl font-bold text-gray-900">
                 {isVisible && mainValue > 0 ? (
                   <AnimatedCounter end={mainValue} />
                 ) : (
@@ -148,7 +136,6 @@ const StatsCard = () => {
     const fetchStats = async () => {
       try {
         const response = await fetch('/api/getGWASStatsRoute');
-        // const response = await fetch(`${baseURL}/getGWASStatsRoute`)
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -207,7 +194,7 @@ const StatsCard = () => {
   return (
     <div 
       ref={cardRef} 
-      className="grid grid-cols-3 mt-10 gap-6 px-4 max-w-7xl mx-auto"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mt-10 gap-4 sm:gap-6 px-4 max-w-7xl mx-auto"
     >
       <StatCard 
         icon={ChartBar}
@@ -237,12 +224,12 @@ const HeaderContent = ({ metadata, projects }) => {
   return (
     <div className="relative z-10">
       <div className="flex items-center mb-6">
-        <Fingerprint className="mr-4 h-10 w-10 text-white" />
+        <Fingerprint className="mr-4 h-8 w-8 sm:h-10 sm:w-10 text-white" />
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
  
           </h1>
-          <p className="text-blue-100 opacity-75">
+          <p className="text-sm sm:text-base text-blue-100 opacity-75">
             Explore genetic associations across multiple phenotypes
           </p>
         </div>
@@ -314,7 +301,7 @@ const CohortStats = ({ cohortData, phenotypeId, onCohortClick }) => {
               <button
                 onClick={() => onCohortClick(phenotypeId, cohort)}
                 className={`
-                  px-3 py-1 rounded-md text-xs font-medium min-w-[70px] text-center
+                  px-2 sm:px-3 py-1 rounded-md text-xs font-medium min-w-[60px] sm:min-w-[70px] text-center
                   shadow-sm transition-all duration-300 hover:scale-105 cursor-pointer
                   ${style.tag}
                 `}
@@ -322,17 +309,17 @@ const CohortStats = ({ cohortData, phenotypeId, onCohortClick }) => {
                 {cohort}
               </button>
               
-              <div className="relative flex-grow h-8 rounded-md overflow-hidden bg-gray-50">
+              <div className="relative flex-grow h-6 sm:h-8 rounded-md overflow-hidden bg-gray-50">
                 <div 
                   className={`absolute top-0 left-0 h-full transition-all duration-500 ease-out ${style.bar}`}
                   style={{ width: `${percentage}%` }}
                 />
-                <div className="absolute inset-0 flex items-center justify-between px-3">
-                  <span className={`text-sm font-medium ${style.text}`}>
+                <div className="absolute inset-0 flex items-center justify-between px-2 sm:px-3">
+                  <span className={`text-xs sm:text-sm font-medium ${style.text}`}>
                     {value.toLocaleString()}
                   </span>
                   <ChevronRight 
-                    className={`w-4 h-4 transition-all duration-300 ${style.text} opacity-0 group-hover:opacity-100`}
+                    className={`w-3 h-3 sm:w-4 sm:h-4 transition-all duration-300 ${style.text} opacity-0 group-hover:opacity-100`}
                   />
                 </div>
               </div>
@@ -358,7 +345,6 @@ const GWASMetadataTable = () => {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        // const response = await fetch(`${baseURL}/getGWASMetadata`);
         const response = await fetch(`/api/getGWASMetadata`);
 
         if (!response.ok) throw new Error('Failed to fetch metadata');
@@ -422,10 +408,64 @@ const GWASMetadataTable = () => {
     </div>
   );
 
+  // This is the mobile-optimized table
+  const renderMobileView = () => (
+    <div className="space-y-4 sm:hidden">
+      {currentItems.map((item) => (
+        <div key={item.phenotype_id} className="bg-white rounded-lg shadow p-4 border border-gray-200">
+          <div className="mb-2">
+            <span className="text-sm font-semibold text-gray-900">ID: </span>
+            <span className="text-sm">{item.phenotype_id}</span>
+          </div>
+          <div className="mb-3">
+            <span className="text-sm font-semibold text-gray-900">Name: </span>
+            <span className="text-sm text-gray-500 break-words">{item.phenotype_name}</span>
+          </div>
+          <div className="mb-3">
+            <span className="text-sm font-semibold text-gray-900 block mb-1">Cohorts:</span>
+            <div className="flex flex-wrap gap-1">
+              {Array.from(item.cohorts).sort((a, b) => {
+                if (a === 'META') return -1;
+                if (b === 'META') return 1;
+                return a.localeCompare(b);
+              }).map(cohort => (
+                <button
+                  key={cohort}
+                  onClick={() => handleCohortClick(item.phenotype_id, cohort)}
+                  className={`px-2 py-0.5 text-xs font-medium rounded-md 
+                    transition-transform duration-200 hover:scale-105 cursor-pointer
+                    ${getCohortStyle(cohort).tag}`}
+                >
+                  {cohort}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="mb-3">
+            <span className="text-sm font-semibold text-gray-900 block mb-1">SNPs by Cohort:</span>
+            <CohortStats 
+              cohortData={item.snps_by_cohort} 
+              phenotypeId={item.phenotype_id}
+              onCohortClick={handleCohortClick}
+            />
+          </div>
+          <div>
+            <span className="text-sm font-semibold text-gray-900 block mb-1">Sample Size by Cohort:</span>
+            <CohortStats 
+              cohortData={item.samples_by_cohort}
+              phenotypeId={item.phenotype_id}
+              onCohortClick={handleCohortClick}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {/* Search and Pagination Controls */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-0">
         <input
           type="text"
           placeholder="Search by phenotype ID or name..."
@@ -434,43 +474,46 @@ const GWASMetadataTable = () => {
             setSearchTerm(e.target.value);
             setCurrentPage(1);  // Reset to first page when searching
           }}
-          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 w-64 transition-shadow duration-200"
+          className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 w-full sm:w-64 transition-shadow duration-200"
         />
-        <div className="flex items-center space-x-2">
-        <span className="text-sm text-gray-600">
+        <div className="flex items-center space-x-2 self-end sm:self-auto">
+          <span className="text-sm text-gray-600">
             Page {currentPage} of {totalPages} ({filteredData.length} total)
           </span>
-        <button
-              onClick={() => paginate(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                currentPage === 1 
-                ? 'text-gray-300 cursor-not-allowed' 
-                : 'text-gray-600 hover:bg-gray-100 active:bg-gray-200'
-              }`}
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => paginate(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`p-2 rounded-lg transition-colors duration-200 ${
-                currentPage === totalPages 
-                ? 'text-gray-300 cursor-not-allowed' 
-                : 'text-gray-600 hover:bg-gray-100 active:bg-gray-200'
-              }`}
-              aria-label="Next page"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`p-2 rounded-lg transition-colors duration-200 ${
+              currentPage === 1 
+              ? 'text-gray-300 cursor-not-allowed' 
+              : 'text-gray-600 hover:bg-gray-100 active:bg-gray-200'
+            }`}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`p-2 rounded-lg transition-colors duration-200 ${
+              currentPage === totalPages 
+              ? 'text-gray-300 cursor-not-allowed' 
+              : 'text-gray-600 hover:bg-gray-100 active:bg-gray-200'
+            }`}
+            aria-label="Next page"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
       </div>
 
-      {/* Table with fixed height */}
-      <div className="border rounded-lg shadow-lg bg-white">
+      {/* Mobile view */}
+      {renderMobileView()}
+
+      {/* Desktop Table with fixed height */}
+      <div className="border rounded-lg shadow-lg bg-white hidden sm:block">
         <div className="overflow-x-auto">
-          <table className="min-w-[1000px] w-full table-fixed divide-y divide-gray-200">
+          <table className="w-full table-fixed divide-y divide-gray-200">
             <thead className="bg-gray-50 sticky top-0 z-10">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[15%]">
@@ -551,8 +594,8 @@ const GWASMetadataTable = () => {
 
 
 const AnimatedDNA = () => (
-  <div className="position-absolute end-0 top-0 h-100 w-25 overflow-hidden opacity-25">
-    <svg viewBox="0 0 100 200" className="h-100 w-100">
+  <div className="absolute right-0 top-0 h-full w-1/4 overflow-hidden opacity-25 hidden sm:block">
+    <svg viewBox="0 0 100 200" className="h-full w-full">
       <path
         d="M30,10 Q50,50 30,90 Q10,130 30,170 Q50,210 30,250"
         stroke="rgba(255,255,255,0.5)"
@@ -624,21 +667,22 @@ const getCohortStyle = (cohort) => {
   };
   return styles[cohort] || styles.default;
 };
+
 const SearchSection = ({ projects }) => {
   return (
-    <div className="max-w-2xl mx-auto mt-8"> {/* Changed from mt-20 to mt-8 to account for the HorizontalChatBar */}
-      <div className="bg-white rounded-xl shadow-xl p-6 transform transition-all duration-300 hover:shadow-2xl">
+    <div className="w-full max-w-2xl mx-auto mt-8 px-4 sm:px-0"> 
+      <div className="bg-white rounded-xl shadow-xl p-4 sm:p-6 transform transition-all duration-300 hover:shadow-2xl">
         <div className="space-y-4">
           {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-4 sm:mb-6">
             <div className="p-2 bg-blue-50 rounded-lg">
-              <Search className="w-5 h-5 text-blue-600" />
+              <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                 Search Database
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 Find genetic associations across phenotypes
               </p>
             </div>
@@ -652,13 +696,13 @@ const SearchSection = ({ projects }) => {
             >
               Search for a SNP, or phenotype:
             </label>
-            <div className="relative mb-8">
+            <div className="relative mb-4 sm:mb-8">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
+                <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
               </div>
               <SearchBar 
                 items={projects}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg 
+                className="block w-full pl-10 pr-3 py-2 sm:py-3 border border-gray-300 rounded-lg 
                           bg-white shadow-sm focus:outline-none focus:ring-2 
                           focus:ring-blue-500 focus:border-blue-500
                           text-sm placeholder-gray-400
@@ -668,7 +712,7 @@ const SearchSection = ({ projects }) => {
             </div>
             
             {/* Quick Filters */}
-            <div className="flex gap-2 mt-4 flex-wrap">
+            <div className="flex gap-2 mt-3 sm:mt-4 flex-wrap">
               <button className="px-3 py-1 text-xs font-medium text-purple-600 bg-purple-50 
                                rounded-full hover:bg-purple-100 transition-colors duration-200">
                 SNPs
@@ -680,7 +724,7 @@ const SearchSection = ({ projects }) => {
             </div>
 
             {/* Search Tips */}
-            <div className="mt-4 text-xs text-gray-500">
+            <div className="mt-3 sm:mt-4 text-xs text-gray-500">
               <p>
                 <span className="font-medium">Pro tip:</span> Use quotes for exact matches, 
                 e.g., "rs1234"
@@ -693,8 +737,6 @@ const SearchSection = ({ projects }) => {
   );
 };
 
-
-
 export const HomePage = () => {
   const [metadata, setMetadata] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -704,10 +746,8 @@ export const HomePage = () => {
   useEffect(() => {
     const fetchMetadata = async () => {
       try {
-        // const response = await fetch(`${baseURL}/getGWASMetadata`);
         const response = await fetch(`/api/getGWASMetadata`);
         console.log('FETCHED META', response)
-        // console.log(response.json())
         if (!response.ok) throw new Error('Failed to fetch metadata');
         const data = await response.json();
         
@@ -738,50 +778,48 @@ export const HomePage = () => {
       <div className="relative">
         {/* Gradient Background */}
         <div
-          className="w-full pb-32 relative overflow-hidden"
+          className="w-full pb-12 sm:pb-32 relative overflow-hidden"
           style={{
             background: 'linear-gradient(135deg, #0F33E5 0%, #2563EB 100%)',
-            borderRadius: '0 0 2rem 2rem'
+            borderRadius: '0 0 1rem 1rem sm:2rem sm:2rem'
           }}
         >
           
           {/* Header content */}
-          <div className="max-w-7xl mx-auto px-4 pt-8">
+          <div className="max-w-7xl mx-auto px-4 pt-4 sm:pt-8">
             {/* Top section with Nav and Logo */}
-            <div className="flex justify-between items-start -mt-10">
+            <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start -mt-2 sm:-mt-10">
               {/* Logo and Title Section */}
-              <div className="flex items-center -mt-19">
+              <div className="flex items-center mt-2 sm:-mt-19">
                 <div>
                   <img 
                     src="/images/platypushomepage.png"
                     alt="Platypus Logo" 
-                    className="h-44 w-28 object-cover mt-2"
+                    className="h-24 w-20 sm:h-44 sm:w-28 object-cover mt-2"
                   />   
                 </div>
                 <div>
-                  <h1 className="text-3xl -ml-4 mt-5 font-bold text-white mb-2">
+                  <h1 className="text-2xl sm:text-3xl -ml-2 sm:-ml-4 mt-2 sm:mt-5 font-bold text-white mb-1 sm:mb-2">
                     PLATLAS
                   </h1>  
-                  <p className="text-blue-100 -ml-4 -mt-2 opacity-75">
-                  PLeiotropic ATLAS 
+                  <p className="text-xs sm:text-sm text-blue-100 -ml-2 sm:-ml-4 -mt-1 sm:-mt-2 opacity-75">
+                    PLeiotropic ATLAS 
                   </p>
-                  
                 </div>
               </div>
-              <div className="flex-1 flex justify-center mt-20">
-      <NavigationBar />
-    </div>
-              {/* Navigation Bar */}
               
+              {/* Navigation Bar - Hide on mobile, show centered on tablet/desktop */}
+              <div className="flex-1 flex justify-center mt-10 sm:mt-20 overflow-x-auto">
+                <NavigationBar />
+              </div>
             </div>
-
-       
           </div>
 
           <AnimatedDNA />
           
+          {/* Icons - hide on small screens */}
           <Network 
-            className="absolute left-[10%] top-[20%] opacity-20"
+            className="absolute left-[10%] top-[20%] opacity-20 hidden sm:block"
             size={30}
             color="white"
             style={{
@@ -789,7 +827,7 @@ export const HomePage = () => {
             }}
           />
           <Share2 
-            className="absolute right-[15%] bottom-[30%] opacity-20"
+            className="absolute right-[15%] bottom-[30%] opacity-20 hidden sm:block"
             size={24}
             color="white"
             style={{
@@ -801,42 +839,36 @@ export const HomePage = () => {
         {/* Stats Cards */}
         <div className="relative -mt-40 mb-8">
           <StatsCard metadata={metadata} projects={projects} />
-          
         </div>
+        
+        {/* Horizontal Chat Bar */}
         <div className="max-w-7xl mx-auto px-4">
-        <div className="relative max-w-7xl mx-auto mt-16 z-20">
-          <HorizontalChatBar />
+          <div className="relative max-w-7xl mx-auto mt-16 z-20">
+            <HorizontalChatBar />
+          </div>
         </div>
 
-        </div>
         <div className="max-w-7xl mx-auto px-4">
           {/* Search Section */}
-
           <div id="search" className="scroll-mt-16">
             <SearchSection projects={projects} />
           </div>
           
           {/* Table Section */}
-          {/* Table Section */}
           <div id="Association Results" className="scroll-mt-16">
-  <div className="container mx-auto p-4">
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-      <div className="p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">
-          Overview of Association Results 
-        </h2>
-        <LeadVariantsTable />
-      </div>
-    </div>
-  </div>
-</div>
+            <div className="container mx-auto p-4">
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+                    Overview of Association Results 
+                  </h2>
+                  <LeadVariantsTable />
+                </div>
+              </div>
+            </div>
+          </div>
 
-          {/* Teams Section */}
-          {/* <div id="summary" className="scroll-mt-16">
-  <SummarySection />
-</div> */}
-
-          {/* Summary Section */}
+          {/* Research Section */}
           <div id="paper" className="scroll-mt-16">
             <ResearchSection/>
           </div>
@@ -849,8 +881,6 @@ export const HomePage = () => {
           50% { transform: translateY(-20px); }
         }
       `}</style>
-
-
 
       <ChatInterface 
         isOpen={isChatOpen} 

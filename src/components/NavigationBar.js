@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
-import { Search, Table, Users, FileText, Brain, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Table, Users, FileText, Brain, Download, Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const NavigationBar = () => {
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const scrollToSection = (sectionId) => {
     console.log('Attempting to scroll to:', sectionId);
@@ -45,6 +46,9 @@ const NavigationBar = () => {
         top: y,
         behavior: 'smooth'
       });
+      
+      // Close mobile menu after navigation
+      setMobileMenuOpen(false);
     } else {
       // Fallback - try to find any div containing the section ID text
       const allDivs = document.querySelectorAll('div');
@@ -56,6 +60,7 @@ const NavigationBar = () => {
             behavior: 'smooth'
           });
           console.log('Fallback: found div containing text:', sectionId);
+          setMobileMenuOpen(false);
           return;
         }
       }
@@ -77,14 +82,17 @@ const NavigationBar = () => {
   const handleClick = (text) => {
     if (text === 'About') {
       navigate('/about');
+      setMobileMenuOpen(false);
       return;
     }
     if (text === 'HomoSapieus') {
       navigate('/landingPageHomo');
+      setMobileMenuOpen(false);
       return;
     }
     if (text === 'Downloads') {
       navigate('/downloads');
+      setMobileMenuOpen(false);
       return;
     }
 
@@ -101,8 +109,9 @@ const NavigationBar = () => {
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
 
-  return (
-    <nav className="flex items-center space-x-4">
+  // Desktop version
+  const DesktopNav = () => (
+    <nav className="hidden md:flex items-center space-x-4">
       {navItems.map(({ icon: Icon, text, secondaryText }) => (
         <button
           key={text}
@@ -119,6 +128,79 @@ const NavigationBar = () => {
         </button>
       ))}
     </nav>
+  );
+
+  // Mobile version - horizontal scrollable menu
+  const MobileScrollableNav = () => (
+    <div className="md:hidden flex overflow-x-auto px-2 py-1 no-scrollbar">
+      {navItems.map(({ icon: Icon, text }) => (
+        <button
+          key={text}
+          onClick={() => handleClick(text)}
+          className="flex flex-col items-center justify-center min-w-[70px] mx-1
+                   text-white/90 hover:text-white transition-colors duration-200 
+                   px-2 py-2 focus:outline-none focus:bg-white/10 rounded-lg"
+        >
+          <Icon className="w-5 h-5 mb-1" />
+          <span className="text-xs font-medium whitespace-nowrap">
+            {text}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+
+  // Mobile version - hamburger menu (alternative option)
+  const MobileHamburgerNav = () => (
+    <div className="relative md:hidden">
+      <button 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+        className="p-2 text-white/90 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/50 rounded-lg"
+      >
+        {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+      </button>
+      
+      {mobileMenuOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-blue-800 rounded-lg shadow-lg py-2 z-50">
+          {navItems.map(({ icon: Icon, text, secondaryText }) => (
+            <button
+              key={text}
+              onClick={() => handleClick(text)}
+              className="flex items-center w-full px-4 py-2 text-white/90 hover:bg-blue-700 hover:text-white"
+            >
+              <Icon className="w-4 h-4 mr-2" />
+              <span className="text-sm">
+                {text}
+                {secondaryText && <span className="text-xs ml-1 text-white/70">{secondaryText}</span>}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  // Choose which mobile version to use - scrollable is generally better for this few number of items
+  return (
+    <>
+      <DesktopNav />
+      <MobileScrollableNav />
+      
+      {/* If you prefer the hamburger menu style instead, replace the line above with:
+      <MobileHamburgerNav /> */}
+      
+      {/* Add this style to hide scrollbars but maintain functionality */}
+      <style jsx>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </>
   );
 };
 
