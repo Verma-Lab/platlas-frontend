@@ -1071,30 +1071,28 @@ const fetchHudsonTopData = async (ancestry) => {
       if (!phenoId) return;
       try {
         setLoading(true);
-        // const response = await fetch(`${baseURL}/findfiles?phenoId=${phenoId}`);
         const response = await fetch(`/api/findfiles?phenoId=${phenoId}`);
-
         if (!response.ok) {
           throw new Error('Failed to fetch available studies and cohorts');
         }
-
         const data = await response.json();
         const { gwamaAvailable: gAvail, mrmegaAvailable: mAvail, gwamaCohorts: gCohorts } = data;
-
         setGwamaAvailable(gAvail);
         setMrmegaAvailable(mAvail);
-        
         const studies = [];
         if (gAvail) studies.push('gwama');
         if (mAvail) studies.push('mrmega');
         setAvailableStudies(studies);
         setGwamaCohorts(gCohorts);
-
         // Set default study and cohort
-        if (gAvail && gCohorts.length > 0) {
+        if (mAvail) {
+          setSelectedStudy('mrmega');
+          setSelectedCohort('ALL');
+          setSelectedTopAncestry('ALL');
+          setSelectedBottomAncestry('ALL');
+        } else if (gAvail && gCohorts.length > 0) {
           setSelectedStudy('gwama');
           setSelectedCohort(gCohorts[0]);
-          // Initialize top/bottom ancestry for Hudson if needed
           if (gCohorts.length >= 2) {
             setSelectedTopAncestry(gCohorts[0]);
             setSelectedBottomAncestry(gCohorts[1]);
@@ -1102,20 +1100,13 @@ const fetchHudsonTopData = async (ancestry) => {
             setSelectedTopAncestry(gCohorts[0]);
             setSelectedBottomAncestry(gCohorts[0]);
           }
-        } else if (mAvail) {
-          setSelectedStudy('mrmega');
-          setSelectedCohort('ALL');
-          setSelectedTopAncestry('ALL');
-          setSelectedBottomAncestry('ALL');
         }
-
       } catch (err) {
         console.error('Error fetching studies and cohorts:', err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchAvailableStudiesAndCohorts();
   }, [phenoId]);
 
