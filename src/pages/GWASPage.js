@@ -868,6 +868,9 @@ const GWASPage = () => {
   const [minPValue, setMinPValue] = useState(null);
   const [filterMaxPValue, setFilterMaxPValue] = useState(null);
   const [filterMinPValue, setFilterMinPValue] = useState(null);
+  const isLoadingRef = useRef(false);
+
+
 // Add this function to the GWASPage component:
 
 
@@ -1208,8 +1211,13 @@ const loadMetadata = async () => {
   // };
 
   const fetchGWASData = async (cohortId) => {
+    if (isLoadingRef.current) {
+      console.log('Request already in progress, skipping duplicate call');
+      return;
+    }
     try {
-        setLoading(true);
+      isLoadingRef.current = true;
+      setLoading(true);
         const cacheKey = `${cohortId}_${filterMinPValue}_${filterMaxPValue}_${selectedStudy}`;
         if (cachedData.cohortData[cacheKey]) {
             console.log(`Using cached data for range: ${filterMinPValue} to ${filterMaxPValue}`);
@@ -1275,7 +1283,8 @@ const loadMetadata = async () => {
         setQQ(null);
         handleShowModal();
     } finally {
-        setLoading(false);
+      setLoading(false);
+      isLoadingRef.current = false;
     }
 };
   // Handle p-value changes:
@@ -1587,6 +1596,7 @@ const generatePlotData = (df) => {
 
 useEffect(() => {
   console.log('useEffect running with:', { selectedCohort, selectedStudy, tab, filterMinPValue, filterMaxPValue });
+  
   if (tab === 'man' && selectedStudy && 
       ((selectedStudy === 'mrmega' && selectedCohort === 'ALL') || 
        (selectedStudy === 'gwama' && selectedCohort && selectedCohort !== 'ALL'))) {
