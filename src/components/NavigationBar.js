@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Search, Table, Users, FileText, Brain } from 'lucide-react';
+import { Search, Table, Users, FileText, Brain, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const NavigationBar = () => {
@@ -97,7 +97,7 @@ const NavigationBar = () => {
     { icon: Users, text: 'About' },
     { icon: Table, text: 'Association Results' },
     { icon: FileText, text: 'paper' },
-    { icon: FileText, text: 'Downloads' },
+    { icon: Download, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
 

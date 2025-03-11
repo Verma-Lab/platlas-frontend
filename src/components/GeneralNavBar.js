@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Table, Users, FileText, Brain } from 'lucide-react';
+import { Search, Table, Users, FileText, Brain, Home, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const GenerlaBar = () => {
@@ -56,11 +56,11 @@ const GenerlaBar = () => {
   };
 
   const navItems = [
-    { icon: Users, text: 'Home' },
+    { icon: Home, text: 'Home' },
     // { icon: Table, text: 'Association Results' },
     // { icon: FileText, text: 'Paper' },
     // { icon: FileText, text: 'Summary' },
-    { icon: FileText, text: 'Downloads' },
+    { icon: Download, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
 

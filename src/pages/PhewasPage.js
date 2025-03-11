@@ -356,6 +356,11 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick }) => {
             animation: 'float 6s ease-in-out infinite 1s'
           }}
         />
+        
+        {/* Added GeneralBar component here */}
+        <div className='p-5 -mt-10'>
+          <GeneralBar />
+        </div>
       </div>
       
       <div className="max-w-7xl mx-auto">
