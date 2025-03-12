@@ -10,7 +10,8 @@ import {
   ChevronDown,
   Globe,
   BarChart,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -20,7 +21,6 @@ import {
   ArrowUpDown
 } from 'lucide-react';
 import _ from 'lodash';
-import { X } from 'lucide-react';
 
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
 
@@ -72,7 +72,7 @@ const StatCell = ({ value, label, icon: Icon }) => (
     whileHover={{ scale: 1.05 }}
     transition={{ type: "spring", stiffness: 300 }}
   >
-    <span className="text-base md:text-lg font-bold text-gray-900">
+    <span className="text-lg font-bold text-gray-900">
       {new Intl.NumberFormat('en-US').format(value)}
     </span>
     <div className="flex items-center space-x-1 text-xs text-gray-500">
@@ -121,14 +121,14 @@ const SampleSizeCell = ({ variants }) => {
  */
 const CompactCohortCell = ({ cohorts, onCohortClick, traitName }) => {
   return (
-    <div className="flex flex-wrap gap-1">
+    <div className="flex flex-wrap gap-2 md:gap-2">
       {cohorts.map((cohort, idx) => (
         <motion.button
           key={idx}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => onCohortClick(traitName, cohort)}
-          className={`px-1.5 py-0.5 rounded-md text-xs font-medium ${getCohortStyle(cohort).tag}`}
+          className={`px-1.5 py-0.5 md:px-2 md:py-1 rounded-md text-xs font-medium ${getCohortStyle(cohort).tag}`}
         >
           {cohort}
         </motion.button>
@@ -160,13 +160,13 @@ const CompactLeadSNPCell = ({ variants, onLeadSNPClick }) => {
         transition={{ type: "spring", stiffness: 300 }}
       >
         <div 
-          className="p-2 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer"
+          className="p-2 md:p-3 rounded-lg bg-white shadow-sm border border-gray-100 hover:shadow-md transition-all duration-300 cursor-pointer"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1">
+            <div className="flex items-center space-x-1 md:space-x-2">
               <span className="text-sm font-semibold text-gray-900">{variants.length}</span>
-              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded-full">variants</span>
+              <span className="text-xs bg-blue-50 text-blue-700 px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-full">variants</span>
             </div>
             <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
           </div>
@@ -199,13 +199,13 @@ const CompactLeadSNPCell = ({ variants, onLeadSNPClick }) => {
                 >
                   <div className="flex items-center space-x-2 text-xs text-gray-600">
                     <MapPin className="w-3 h-3" />
-                    <span>Chr{variant.lead_snp.position.chromosome}:{variant.lead_snp.position.position.toLocaleString()}</span>
+                    <span className="truncate">Chr{variant.lead_snp.position.chromosome}:{variant.lead_snp.position.position.toLocaleString()}</span>
                   </div>
                   <div className="flex items-center space-x-2 text-xs text-gray-600">
                     <Activity className="w-3 h-3" />
                     <span>Log10P: {variant.lead_snp.log10p.toFixed(2)}</span>
                   </div>
-                  <div className="text-xs text-gray-500 font-mono">{variant.lead_snp.rsid}</div>
+                  <div className="text-xs text-gray-500 font-mono truncate">{variant.lead_snp.rsid}</div>
                   <div className="mt-1 flex items-center space-x-2 text-xs text-gray-600">
                     <FileText className="w-3 h-3" />
                     <span>Studies: {variant.n_study}</span>
@@ -224,22 +224,22 @@ const CompactLeadSNPCell = ({ variants, onLeadSNPClick }) => {
  * New StudiesBreakdownCell component to show studies per population.
  */
 const StudiesPerPopCell = ({ studies }) => (
-  <div className="space-y-1">
-    {Object.entries(studies).map(([pop, studyInfo]) => (
-      <div key={pop} className="flex items-center justify-between">
-        <div className="flex items-center">
-          <Globe className="w-3 h-3 text-gray-400" />
-          <span className={`text-xs ml-1 ${getCohortStyle(pop).text}`}>
-            {pop}:
+    <div className="space-y-1 md:space-y-2">
+      {Object.entries(studies).map(([pop, studyInfo]) => (
+        <div key={pop} className="flex items-center justify-between">
+          <div className="flex items-center space-x-1 md:space-x-2">
+            <Globe className="w-3 h-3 md:w-4 md:h-4 text-gray-400" />
+            <span className={`text-xs md:text-sm md:ml-2 ${getCohortStyle(pop).text}`}>
+              {pop}:
+            </span>
+          </div>
+          <span className="text-xs md:text-sm md:-ml-2 md:right-2 text-gray-600">
+            {studyInfo}
           </span>
         </div>
-        <span className="text-xs text-gray-600">
-          {studyInfo}
-        </span>
-      </div>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
 
 const StudiesBreakdownCell = ({ popGwasData, studies }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -250,18 +250,18 @@ const StudiesBreakdownCell = ({ popGwasData, studies }) => {
         className="cursor-pointer"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center space-x-1">
-          <span className="text-xs md:text-sm font-medium">{studies} studies</span>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm font-medium">{studies} studies</span>
           <ChevronDown className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
         </div>
       </motion.div>
       
       {isExpanded && (
-        <div className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border p-2 min-w-[180px]">
+        <div className="absolute z-50 mt-2 bg-white rounded-lg shadow-lg border p-3 min-w-[200px]">
           {Object.entries(popGwasData).map(([pop, count]) => (
             <div key={pop} className="flex justify-between items-center py-1">
-              <span className={`text-xs ${getCohortStyle(pop).text}`}>{pop}:</span>
-              <span className="text-xs text-gray-600">{count} studies</span>
+              <span className={`text-sm ${getCohortStyle(pop).text}`}>{pop}:</span>
+              <span className="text-sm text-gray-600">{count} studies</span>
             </div>
           ))}
         </div>
@@ -339,22 +339,22 @@ const FilterPopover = ({ column, options, selectedValues, onChange, onClose, anc
 
 const ColumnHeader = ({ title, onSort, sortConfig, hasSort = true }) => {
   return (
-    <th className="px-2 md:px-6 py-3 text-left">
-      <div className="flex items-center space-x-1">
+    <th className="px-6 py-3 text-left">
+      <div className="flex items-center space-x-2">
         {hasSort ? (
           <button 
             onClick={onSort}
-            className="group flex items-center space-x-1 text-xs font-medium text-gray-700 hover:text-gray-900"
+            className="group flex items-center space-x-2 text-sm font-medium text-gray-700 hover:text-gray-900"
           >
             <span>{title}</span>
-            <ArrowUpDown className={`w-3 h-3 md:w-4 md:h-4 ${
+            <ArrowUpDown className={`w-4 h-4 ${
               sortConfig?.key === title.toLowerCase() 
                 ? 'text-blue-600' 
                 : 'text-gray-400 group-hover:text-gray-600'
             }`} />
           </button>
         ) : (
-          <span className="text-xs font-medium text-gray-700">{title}</span>
+          <span className="text-sm font-medium text-gray-700">{title}</span>
         )}
       </div>
     </th>
@@ -435,7 +435,7 @@ const LeadVariantsTable = () => {
     studies: []
   });
   const [activeFilter, setActiveFilter] = useState(null);
-  const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   
   const handleSort = (key) => {
     setSortConfig(current => ({
@@ -445,12 +445,11 @@ const LeadVariantsTable = () => {
   };
   
   const [filterAnchorRef, setFilterAnchorRef] = useState(null);
-  
+
   const handleFilterClick = (columnKey) => {
     const buttonRef = filterRefs[columnKey].current;
     setFilterAnchorRef(buttonRef);
     setActiveFilter(activeFilter === columnKey ? null : columnKey);
-    setShowFilterMenu(false);
   };
   
   const filterRefs = {
@@ -621,6 +620,7 @@ const LeadVariantsTable = () => {
       };
 
       const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}`;
+
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -667,14 +667,59 @@ const LeadVariantsTable = () => {
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-4"
+      className="space-y-6"
     >
-      {/* Search Bar - Mobile Optimized */}
+      {/* Search and Pagination Bar - Desktop */}
       <motion.div 
-        className="bg-white p-3 rounded-lg shadow-sm border border-gray-100"
+        className="hidden md:flex justify-between items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100"
         initial={{ y: -20 }}
         animate={{ y: 0 }}
       >
+        {/* Search Input */}
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by phenotype ID or trait..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-10 z-index 40 pr-4 py-2 w-80 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+          />
+          <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center space-x-4">
+          <span className="text-sm text-gray-600">
+            {filteredData.length} results | Page {currentPage} of {totalPages}
+          </span>
+          <div className="flex space-x-2">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className={`p-2 rounded-lg ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className={`p-2 rounded-lg ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 hover:bg-gray-100'}`}
+            >
+              <ChevronRight className="w-5 h-5" />
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Search Bar - Mobile Only */}
+      <div className="md:hidden bg-white p-3 rounded-lg shadow-sm border border-gray-100">
         <div className="relative w-full">
           <input
             type="text"
@@ -688,74 +733,26 @@ const LeadVariantsTable = () => {
           />
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </div>
-      </motion.div>
+      </div>
 
-      {/* Filter Bar - Mobile Optimized */}
-      <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-gray-700">Filters:</span>
-          
-          {/* Mobile Filter Button */}
-          <button
-            className="md:hidden flex items-center space-x-1 px-2 py-1 rounded-lg border border-gray-200 bg-gray-50 text-gray-700"
-            onClick={() => setShowFilterMenu(!showFilterMenu)}
-          >
-            <Filter className="w-4 h-4" />
-            <span className="text-xs">Filters</span>
-            {Object.values(filters).some(filter => filter.length > 0) && (
-              <span className="ml-1 bg-blue-500 text-white w-4 h-4 rounded-full flex items-center justify-center text-xs">
-                {Object.values(filters).filter(filter => filter.length > 0).length}
-              </span>
-            )}
-          </button>
-          
-          {/* Desktop Filter Buttons */}
-          <div className="hidden md:flex space-x-2">
+      {/* Desktop Filter Bar */}
+      <div className="hidden md:block bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex items-center space-x-4">
+          <span className="text-sm font-medium text-gray-700">Filter by:</span>
+          <div className="flex space-x-2">
             <button
               ref={filterRefs.category}
               onClick={() => handleFilterClick('category')}
-              className="flex items-center px-2 py-1 rounded-lg border bg-gradient-to-r from-emerald-500 to-green-500 text-white text-xs"
+              className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-emerald-500 to-green-500 text-white${
+                filters.category.length > 0 
+                  ? 'border-blue-200 bg-blue-50 text-white' 
+                  : 'border-gray-200 text-white hover:bg-gray-50'
+              }`}
             >
-              Category {filters.category.length > 0 && `(${filters.category.length})`}
-            </button>
-
-            <button
-              ref={filterRefs.populations}
-              onClick={() => handleFilterClick('populations')}
-              className="flex items-center px-2 py-1 rounded-lg border bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs"
-            >
-              Populations {filters.populations.length > 0 && `(${filters.populations.length})`}
-            </button>
-
-            <button
-              ref={filterRefs.leadsnps}
-              onClick={() => handleFilterClick('leadsnps')}
-              className="flex items-center px-2 py-1 rounded-lg border bg-gradient-to-r from-red-400 to-red-600 text-white text-xs"
-            >
-              Lead SNPs {filters.leadsnps.length > 0 && `(${filters.leadsnps.length})`}
-            </button>
-
-            <button
-              ref={filterRefs.studies}
-              onClick={() => handleFilterClick('studies')}
-              className="flex items-center px-2 py-1 rounded-lg border bg-gradient-to-r from-orange-500 to-orange-600 text-white text-xs"
-            >
-              Studies {filters.studies.length > 0 && `(${filters.studies.length})`}
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Filter Menu */}
-        {showFilterMenu && (
-          <div className="mt-3 space-y-2 border-t pt-2 md:hidden">
-            <button
-              ref={filterRefs.category}
-              onClick={() => handleFilterClick('category')}
-              className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 text-white"
-            >
-              <span className="text-xs">Category</span>
+              <SlidersHorizontal className="w-4 h-4 mr-2" />
+              <span className="text-sm">Category</span>
               {filters.category.length > 0 && (
-                <span className="bg-white text-green-600 px-2 rounded-full text-xs">
+                <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
                   {filters.category.length}
                 </span>
               )}
@@ -764,11 +761,16 @@ const LeadVariantsTable = () => {
             <button
               ref={filterRefs.populations}
               onClick={() => handleFilterClick('populations')}
-              className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+              className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-blue-500 to-blue-600 text-white${
+                filters.populations.length > 0 
+                  ? 'border-blue-200 bg-blue-50 text-white' 
+                  : 'border-gray-200 text-white hover:bg-gray-50'
+              }`}
             >
-              <span className="text-xs">Populations</span>
+              <Globe className="w-4 h-4 mr-2" />
+              <span className="text-sm">Populations</span>
               {filters.populations.length > 0 && (
-                <span className="bg-white text-blue-600 px-2 rounded-full text-xs">
+                <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
                   {filters.populations.length}
                 </span>
               )}
@@ -777,11 +779,16 @@ const LeadVariantsTable = () => {
             <button
               ref={filterRefs.leadsnps}
               onClick={() => handleFilterClick('leadsnps')}
-              className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-red-400 to-red-600 text-white"
+              className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-red-400 to-red-600 text-white${
+                filters.leadsnps.length > 0 
+                  ? 'border-blue-200 bg-blue-50 text-white' 
+                  : 'border-gray-200 text-white hover:bg-gray-50'
+              }`}
             >
-              <span className="text-xs">Lead SNPs</span>
+              <Activity className="w-4 h-4 mr-2" />
+              <span className="text-sm">Lead SNPs</span>
               {filters.leadsnps.length > 0 && (
-                <span className="bg-white text-red-600 px-2 rounded-full text-xs">
+                <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
                   {filters.leadsnps.length}
                 </span>
               )}
@@ -790,134 +797,200 @@ const LeadVariantsTable = () => {
             <button
               ref={filterRefs.studies}
               onClick={() => handleFilterClick('studies')}
-              className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+              className={`flex items-center px-3 py-2 rounded-lg border bg-gradient-to-r from-orange-500 to-orange-600 text-white${
+                filters.studies.length > 0 
+                  ? 'border-blue-200 bg-blue-50 text-white' 
+                  : 'border-gray-200 text-white hover:bg-gray-50'
+              }`}
             >
-              <span className="text-xs">Studies</span>
+              <BarChart className="w-4 h-4 mr-2" />
+              <span className="text-sm">Studies</span>
               {filters.studies.length > 0 && (
-                <span className="bg-white text-orange-600 px-2 rounded-full text-xs">
+                <span className="ml-2 bg-blue-100 text-blue-600 px-2 rounded-full text-xs">
                   {filters.studies.length}
                 </span>
               )}
             </button>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Results Count and Pagination */}
-      <div className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-100">
-        <span className="text-xs text-gray-600">
-          {filteredData.length} results
-        </span>
-        
-        <div className="flex items-center space-x-2">
-          <span className="text-xs text-gray-600">
-            Page {currentPage} of {totalPages}
+      {/* Mobile Filters Toggle + Status Bar */}
+      <div className="md:hidden flex justify-between items-center bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+        <div className="flex items-center">
+          <button 
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="flex items-center space-x-1 text-gray-700"
+          >
+            <Filter className="w-4 h-4" />
+            <span className="text-xs font-medium">Filters</span>
+            {Object.values(filters).some(f => f.length > 0) && (
+              <span className="bg-blue-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                {Object.values(filters).filter(f => f.length > 0).length}
+              </span>
+            )}
+          </button>
+        </div>
+        <div className="flex items-center justify-end">
+          <span className="text-xs text-gray-600 mr-2">
+            {filteredData.length} results | Page {currentPage} of {totalPages}
           </span>
-          <div className="flex space-x-1">
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+          <div className="flex">
+            <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className={`p-1 rounded-lg ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 bg-gray-100'}`}
+              className={`p-1 rounded ${currentPage === 1 ? 'text-gray-300' : 'text-gray-600 bg-gray-100'}`}
             >
               <ChevronLeft className="w-4 h-4" />
-            </motion.button>
-            <motion.button
-              whileTap={{ scale: 0.95 }}
+            </button>
+            <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className={`p-1 rounded-lg ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 bg-gray-100'}`}
+              className={`p-1 rounded ${currentPage === totalPages ? 'text-gray-300' : 'text-gray-600 bg-gray-100'}`}
             >
               <ChevronRight className="w-4 h-4" />
-            </motion.button>
+            </button>
           </div>
         </div>
       </div>
+      
+      {/* Mobile Filters Panel */}
+      {showMobileFilters && (
+        <div className="md:hidden bg-white p-3 rounded-lg shadow-sm border border-gray-100 space-y-2">
+          <button
+            ref={filterRefs.category}
+            onClick={() => handleFilterClick('category')}
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-green-500 text-white"
+          >
+            <span className="text-xs">Category</span>
+            {filters.category.length > 0 && (
+              <span className="bg-white text-green-600 px-2 rounded-full text-xs">
+                {filters.category.length}
+              </span>
+            )}
+          </button>
 
-      {/* Mobile Card View */}
-      {isMobile && (
-        <div className="space-y-3">
-          {currentItems.map((item, idx) => (
-            <MobileCard
-              key={idx}
-              item={item}
-              onCohortClick={handleCohortClick}
-              onLeadSNPClick={handleLeadSNPClick}
-            />
-          ))}
+          <button
+            ref={filterRefs.populations}
+            onClick={() => handleFilterClick('populations')}
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white"
+          >
+            <span className="text-xs">Populations</span>
+            {filters.populations.length > 0 && (
+              <span className="bg-white text-blue-600 px-2 rounded-full text-xs">
+                {filters.populations.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            ref={filterRefs.leadsnps}
+            onClick={() => handleFilterClick('leadsnps')}
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-red-400 to-red-600 text-white"
+          >
+            <span className="text-xs">Lead SNPs</span>
+            {filters.leadsnps.length > 0 && (
+              <span className="bg-white text-red-600 px-2 rounded-full text-xs">
+                {filters.leadsnps.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            ref={filterRefs.studies}
+            onClick={() => handleFilterClick('studies')}
+            className="flex items-center justify-between w-full px-3 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-orange-600 text-white"
+          >
+            <span className="text-xs">Studies</span>
+            {filters.studies.length > 0 && (
+              <span className="bg-white text-orange-600 px-2 rounded-full text-xs">
+                {filters.studies.length}
+              </span>
+            )}
+          </button>
         </div>
       )}
 
-      {/* Desktop Table View */}
-      {!isMobile && (
-        <motion.div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  {[
-                    { title: 'Trait', key: 'trait', hasFilter: false, hasSort: false },
-                    { title: 'Category', key: 'category' },
-                    { title: 'Populations', key: 'populations' },
-                    { title: 'Lead SNPs', key: 'leadsnps' },
-                    { title: 'Sample Sizes', key: 'samplesize', hasFilter: false },
-                    { title: 'Studies', key: 'studies' }
-                  ].map(({ title, key, hasSort = true }) => (
-                    <ColumnHeader
-                      key={key}
-                      title={title}
-                      onSort={() => handleSort(key)}
-                      sortConfig={sortConfig}
-                      hasSort={hasSort}
-                    />
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {currentItems.map((group, idx) => (
-                  <tr key={idx} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <motion.div className="flex flex-col space-y-1">
-                        <span className="text-sm font-semibold text-gray-900">{group.trait.name}</span>
-                        <span className="text-xs text-gray-500">{group.trait.description}</span>
-                      </motion.div>
-                    </td>
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-3">
+        {currentItems.map((group, idx) => (
+          <MobileCard
+            key={idx}
+            item={group}
+            onCohortClick={handleCohortClick}
+            onLeadSNPClick={handleLeadSNPClick}
+          />
+        ))}
+      </div>
 
-                    <td className="px-6 py-4">
-                      <motion.span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
-                        {group.category}
-                      </motion.span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <CompactCohortCell 
-                        cohorts={group.cohorts}
-                        onCohortClick={handleCohortClick}
-                        traitName={group.trait.name}
-                      />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <CompactLeadSNPCell 
-                        variants={group.variants}
-                        onLeadSNPClick={handleLeadSNPClick}
-                      />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <SampleSizeCell variants={group.variants} />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <StudiesPerPopCell studies={group.studies_by_pop} />
-                    </td>
-                  </tr>
+      {/* Lead Variants Table - Desktop Only */}
+      <motion.div className="hidden md:block bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                {[
+                  { title: 'Trait', key: 'trait', hasFilter: false, hasSort: false },
+                  { title: 'Category', key: 'category' },
+                  { title: 'Populations', key: 'populations' },
+                  { title: 'Lead SNPs', key: 'leadsnps' },
+                  { title: 'Sample Sizes', key: 'samplesize', hasFilter: false },
+                  { title: 'Studies', key: 'studies' }
+                ].map(({ title, key, hasFilter = true, hasSort = true }) => (
+                  <ColumnHeader
+                    key={key}
+                    title={title}
+                    onSort={() => handleSort(key)}
+                    sortConfig={sortConfig}
+                    hasSort={hasSort}
+                  />
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </motion.div>
-      )}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200">
+              {currentItems.map((group, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <motion.div className="flex flex-col space-y-1">
+                      <span className="text-sm font-semibold text-gray-900">{group.trait.name}</span>
+                      <span className="text-xs text-gray-500">{group.trait.description}</span>
+                    </motion.div>
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <motion.span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-100">
+                      {group.category}
+                    </motion.span>
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <CompactCohortCell 
+                      cohorts={group.cohorts}
+                      onCohortClick={handleCohortClick}
+                      traitName={group.trait.name}
+                    />
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <CompactLeadSNPCell 
+                      variants={group.variants}
+                      onLeadSNPClick={handleLeadSNPClick}
+                    />
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <SampleSizeCell variants={group.variants} />
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <StudiesPerPopCell studies={group.studies_by_pop} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
 
       {activeFilter && (
         <FilterPopover
