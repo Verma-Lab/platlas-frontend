@@ -98,7 +98,21 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
       };
     } else if (typeof plot.data === 'object' && plot.data.labels && plot.data.datasets) {
       chartData = plot.data;
-    } else {
+    } else if (plot.type === 'table' && plot.data.headers && plot.data.rows) {
+      // Convert table data to bar chart format
+      chartType = 'bar'; // Force to bar chart for tables
+      chartData = {
+        labels: plot.data.rows.map(row => row[0]), // Trait names
+        datasets: [{
+          label: plot.data.headers[1] || 'Value', // "Lead SNP Count"
+          data: plot.data.rows.map(row => row[1]), // SNP counts
+          backgroundColor: colorPalette[0],
+          borderColor: borderPalette[0],
+          borderWidth: 2
+        }]
+      };
+    }
+    else {
       return <div className="text-red-500 text-xs">Invalid plot data format</div>;
     }
 
