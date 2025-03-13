@@ -28,8 +28,9 @@ ChartJS.register(
   ArcElement
 );
 
-// const apiUrl = 'https://api.insightdocument.com/apikey/pm_b50e5c924786d730cb1bdf819d117bb4/Gemini-Pro/760ccf37-abb7-45a5-8306-e4ad69d616fc';
 const apiUrl = 'https://api.insightdocument.com/apikey/pm_18b861101da73f588a4d586bf4bb8b32/Gemini-Pro/4f802cae-884c-4d45-b1d4-a082492c3d06'
+
+// const apiUrl = 'http://localhost:3004/apikey/pm_64d3778c7e4eb1499527c43abadf0274/Gemini-Pro/4f802cae-884c-4d45-b1d4-a082492c3d06'
 // Reuse the same components from MiniChat
 const PlotModal = ({ isOpen, onClose, plot }) => {
   if (!isOpen || !plot) return null;
@@ -319,8 +320,12 @@ const HorizontalChatBar = () => {
   
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState(null);
-    
+  const [sessionId, setSessionId] = useState(null);
   useEffect(() => {
+    const storedSessionId = localStorage.getItem('chatSessionId');
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -366,7 +371,8 @@ const HorizontalChatBar = () => {
         },
         body: JSON.stringify({ 
           query: inputValue,
-          generate_report: isReportMode
+          generate_report: isReportMode,
+          sessionId
         })
       });
       
@@ -376,7 +382,10 @@ const HorizontalChatBar = () => {
       
       const data = await response.json();
       console.log("API Response:", data);
-      
+      if (data.sessionId && data.sessionId !== sessionId) {
+        setSessionId(data.sessionId);
+        localStorage.setItem('chatSessionId', data.sessionId);
+      }
       let textContent = '';
       if (typeof data === 'string') {
         textContent = data;
