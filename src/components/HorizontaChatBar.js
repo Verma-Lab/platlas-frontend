@@ -469,7 +469,7 @@ const HorizontalChatBar = () => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onFocus={handleInputFocus}
-              placeholder="Ask Platlas AI a question..."
+              placeholder="Ask Platlas AI a question... (Try to be very specific to query, query's related to retriving large data might be blocked)"
               className="flex-1 py-2 px-3 border-none text-sm focus:outline-none focus:ring-0"
               disabled={isLoading}
             />
