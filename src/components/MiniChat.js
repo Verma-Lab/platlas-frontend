@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, X, MessageSquare, ChevronUp, ChevronDown, ArrowRight, ArrowUpRight, ChartPieIcon, FileText, Search } from 'lucide-react';
+import { Send, X, MessageSquare, ChevronUp, ChevronDown, ArrowRight, ArrowUpRight, ChartPieIcon, FileText, Search, ExternalLink } from 'lucide-react';
 import { Line, Bar, Pie } from 'react-chartjs-2';
+import ReactMarkdown from 'react-markdown'; // Add this import for markdown support
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -75,14 +76,40 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
       pie: ['rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)', 'rgba(255, 206, 86, 0.8)']
     };
 
-    // Get chart type, default to bar
     const chartType = (plot.type || 'bar').toLowerCase();
-    
-    // Select color palette
     const colorPalette = colorPalettes[chartType] || colorPalettes.bar;
     const borderPalette = colorPalette.map(color => color.replace('0.8', '1'));
 
-    // Process chart data
+    if (chartType === 'table' && plot.data.headers && plot.data.rows) {
+      // Render as HTML table
+      return (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                {plot.data.headers.map((header, index) => (
+                  <th key={index} className="px-4 py-2 font-medium border-b border-gray-200">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {plot.data.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="border-b border-gray-200 hover:bg-gray-50">
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="px-4 py-2">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+    
     let chartData = {};
     if (Array.isArray(plot.data)) {
       chartData = {
@@ -105,7 +132,6 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
       return <div className="text-red-500 text-xs">Invalid plot data format</div>;
     }
 
-    // Common chart options
     const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -164,7 +190,6 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
           ticks: { 
             font: { size: fullSize ? 12 : 8 },
             callback: function(value) {
-              // Format large numbers for better readability
               if (Math.abs(value) >= 1000000) {
                 return (value / 1000000).toFixed(1) + 'M';
               } else if (Math.abs(value) >= 1000) {
@@ -177,12 +202,10 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
       }
     };
 
-    // For pie charts, remove the scales
     if (chartType === 'pie') {
       delete options.scales;
     }
 
-    // Return appropriate chart component
     switch (chartType) {
       case 'line':
         return <Line data={chartData} options={options} />;
@@ -218,17 +241,100 @@ const ReportLink = ({ url }) => {
   );
 };
 
-// Web search results component
-const WebSearchResultsPreview = ({ results }) => {
+// Web search results component with expandable detail
+const WebSearchResultsComponent = ({ results }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (!results || results.length === 0) return null;
 
+  const toggleExpand = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
-    <div className="mt-2 p-2 bg-gray-50 rounded-md border border-gray-200 text-xs">
-      <div className="flex items-center gap-1 text-gray-700 mb-1">
-        <Search className="w-3 h-3" />
-        <span className="font-medium">Web results available</span>
+    <div className="mt-2 bg-gray-50 rounded-md border border-gray-200 text-xs overflow-hidden">
+      <div 
+        className="p-2 flex items-center justify-between cursor-pointer hover:bg-gray-100"
+        onClick={toggleExpand}
+      >
+        <div className="flex items-center gap-1 text-gray-700">
+          <Search className="w-3 h-3" />
+          <span className="font-medium">Web results available</span>
+          <span className="text-gray-500 ml-1">({results.length} sources)</span>
+        </div>
+        <div className="flex items-center text-blue-600 gap-1">
+          <span>{isExpanded ? 'Hide' : 'View'} results</span>
+          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </div>
       </div>
-      <div className="text-gray-600">{results.length} sources found</div>
+
+      {isExpanded && (
+        <div className="border-t border-gray-200">
+          {results.map((result, index) => (
+            <div 
+              key={index} 
+              className={`p-3 ${index !== results.length - 1 ? 'border-b border-gray-200' : ''}`}
+            >
+              <div className="flex justify-between items-start mb-1">
+                <h4 className="font-medium text-xs text-gray-800 flex-1">{result.title || 'Search Result'}</h4>
+                {result.source && (
+                  <span className="text-[10px] px-1.5 py-0.5 bg-gray-200 rounded-full text-gray-600">
+                    {result.source}
+                  </span>
+                )}
+              </div>
+              
+              {result.link && result.link !== '#' && (
+                <a 
+                  href={result.link} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[10px] text-blue-600 hover:underline flex items-center gap-0.5 mb-1"
+                >
+                  {result.link.length > 50 ? result.link.substring(0, 50) + '...' : result.link}
+                  <ExternalLink className="w-2 h-2" />
+                </a>
+              )}
+              
+              {result.snippet && (
+                <p className="text-gray-600 text-xs mt-1">{result.snippet}</p>
+              )}
+              
+              {/* For Perplexity's comprehensive content */}
+              {result.source === 'perplexity' && result.content && (
+                <div className="mt-2 text-xs text-gray-700 bg-white p-2 rounded border border-gray-200">
+                  {result.content.split('\n\n').map((paragraph, i) => (
+                    <p key={i} className={`${i > 0 ? 'mt-2' : ''}`}>
+                      {paragraph.startsWith('## ') ? (
+                        <strong className="block text-gray-800 mb-1">{paragraph.replace('## ', '')}</strong>
+                      ) : paragraph}
+                    </p>
+                  ))}
+                  
+                  {result.citations && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <strong className="text-[10px] text-gray-500">Sources:</strong>
+                      <div className="text-[10px] text-blue-600">
+                        {result.citations.split(', ').map((citation, i) => (
+                          <a 
+                            key={i}
+                            href={citation}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block hover:underline mt-0.5"
+                          >
+                            {citation.length > 50 ? citation.substring(0, 50) + '...' : citation}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -239,14 +345,20 @@ const MiniChat = () => {
   const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isReportMode, setIsReportMode] = useState(false); // Added from HorizontalChatBar
   const messagesEndRef = useRef(null);
   
   // State for plot modal
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState(null);
+  const [sessionId, setSessionId] = useState(null); // Added from HorizontalChatBar
   
-  // Scroll to bottom of messages
+  // Scroll to bottom of messages and handle sessionId persistence
   useEffect(() => {
+    const storedSessionId = localStorage.getItem('chatSessionId');
+    if (storedSessionId) {
+      setSessionId(storedSessionId);
+    }
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
@@ -262,6 +374,11 @@ const MiniChat = () => {
   const toggleExpand = (e) => {
     e.stopPropagation();
     setIsExpanded(!isExpanded);
+  };
+
+  const toggleReportMode = (e) => {
+    e.stopPropagation();
+    setIsReportMode(!isReportMode);
   };
 
   const openPlotModal = (plot) => {
@@ -285,12 +402,17 @@ const MiniChat = () => {
     setIsLoading(true);
     
     try {
+      // Use the API with sessionId and report mode from HorizontalChatBar
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ query: inputValue })
+        body: JSON.stringify({ 
+          query: inputValue,
+          generate_report: isReportMode,
+          sessionId
+        })
       });
       
       if (!response.ok) {
@@ -298,7 +420,13 @@ const MiniChat = () => {
       }
       
       const data = await response.json();
-      console.log("API Response:", data); // Log for debugging
+      console.log("API Response:", data);
+      
+      // Handle sessionId persistence from HorizontalChatBar
+      if (data.sessionId && data.sessionId !== sessionId) {
+        setSessionId(data.sessionId);
+        localStorage.setItem('chatSessionId', data.sessionId);
+      }
       
       // Extract text content - handle different response formats
       let textContent = '';
@@ -365,19 +493,46 @@ const MiniChat = () => {
             }`}
           >
             {/* Header */}
-            <div className="bg-blue-600 text-white p-3 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4" />
-                <h3 className="font-medium text-sm">Ask Platlas AI</h3>
+            <div className="bg-blue-600 text-white p-3 flex flex-col">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4" />
+                  <h3 className="font-medium text-sm">Ask Platlas AI</h3>
+                  {isReportMode && (
+                    <span className="bg-blue-700 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
+                      Report Mode
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <button 
+                    onClick={toggleReportMode}
+                    className={`p-1 rounded-md text-xs ${
+                      isReportMode ? 'bg-blue-700' : 'hover:bg-blue-700'
+                    } transition-colors`}
+                    aria-label={isReportMode ? "Disable report mode" : "Enable report mode"}
+                    title={isReportMode ? "Disable report mode" : "Enable report mode"}
+                  >
+                    <FileText className="w-3 h-3" />
+                  </button>
+                  <button 
+                    onClick={toggleExpand}
+                    className="p-1 hover:bg-blue-700 rounded transition-colors"
+                    aria-label={isExpanded ? "Minimize chat" : "Expand chat"}
+                  >
+                    {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <button 
-                  onClick={toggleExpand}
-                  className="p-1 hover:bg-blue-700 rounded transition-colors"
-                  aria-label={isExpanded ? "Minimize chat" : "Expand chat"}
+              <div className="text-xs text-white mt-1 text-center">
+                <a
+                  href="https://www.insightdocument.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-white transition-colors"
                 >
-                  {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-                </button>
+                  Powered by Insight Document
+                </a>
               </div>
             </div>
             
@@ -387,6 +542,11 @@ const MiniChat = () => {
                 <div className="text-center text-gray-500 py-6">
                   <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p className="text-sm">Ask any question about genetic data or GWAS results</p>
+                  {isReportMode && (
+                    <div className="mt-2 text-xs bg-blue-50 text-blue-600 p-2 rounded-md inline-block">
+                      Report Mode is active - AI will generate comprehensive reports
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -407,16 +567,33 @@ const MiniChat = () => {
                           {/* Text Content */}
                           <div className="flex justify-start">
                             <div className="bg-white border border-gray-200 rounded-lg p-3 text-sm text-gray-800 shadow-sm max-w-[85%]">
-                              {message.content}
+                              {/* Use ReactMarkdown for rendering content */}
+                              <ReactMarkdown
+                                components={{
+                                  a: ({ href, children }) => (
+                                    <a
+                                      href={href}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline flex items-center gap-1"
+                                    >
+                                      {children}
+                                      <ArrowUpRight className="w-3 h-3" />
+                                    </a>
+                                  )
+                                }}
+                              >
+                                {message.content}
+                              </ReactMarkdown>
 
-                              {/* Report Link (if available) */}
-                              {message.report && message.report.download_url && (
+                              {/* Only show ReportLink if no link in content */}
+                              {message.report && message.report.download_url && !message.content.includes('[Download Report]') && (
                                 <ReportLink url={message.report.download_url} />
                               )}
 
-                              {/* Web Search Results Preview (if available) */}
+                              {/* Web Search Results (now with expandable component) */}
                               {message.webSearchResults && message.webSearchResults.length > 0 && (
-                                <WebSearchResultsPreview results={message.webSearchResults} />
+                                <WebSearchResultsComponent results={message.webSearchResults} />
                               )}
                             </div>
                           </div>
@@ -457,6 +634,7 @@ const MiniChat = () => {
                           <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
                           <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
                           <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                          <span className="text-xs ml-2">{isReportMode ? 'Generating report...' : 'Loading...'}</span>
                         </div>
                       </div>
                     </div>
