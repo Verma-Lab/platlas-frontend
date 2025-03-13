@@ -80,6 +80,35 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
     const colorPalette = colorPalettes[chartType] || colorPalettes.bar;
     const borderPalette = colorPalette.map(color => color.replace('0.8', '1'));
 
+    if (chartType === 'table' && plot.data.headers && plot.data.rows) {
+      // Render as HTML table
+      return (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
+            <thead className="bg-gray-100">
+              <tr>
+                {plot.data.headers.map((header, index) => (
+                  <th key={index} className="px-4 py-2 font-medium border-b border-gray-200">
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {plot.data.rows.map((row, rowIndex) => (
+                <tr key={rowIndex} className="border-b border-gray-200 hover:bg-gray-50">
+                  {row.map((cell, cellIndex) => (
+                    <td key={cellIndex} className="px-4 py-2">
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
     let chartData = {};
     if (Array.isArray(plot.data)) {
       chartData = {
@@ -98,20 +127,7 @@ const ChartRenderer = ({ plot, fullSize = false }) => {
       };
     } else if (typeof plot.data === 'object' && plot.data.labels && plot.data.datasets) {
       chartData = plot.data;
-    } else if (plot.type === 'table' && plot.data.headers && plot.data.rows) {
-      // Convert table data to bar chart format
-      chartType = 'bar'; // Force to bar chart for tables
-      chartData = {
-        labels: plot.data.rows.map(row => row[0]), // Trait names
-        datasets: [{
-          label: plot.data.headers[1] || 'Value', // "Lead SNP Count"
-          data: plot.data.rows.map(row => row[1]), // SNP counts
-          backgroundColor: colorPalette[0],
-          borderColor: borderPalette[0],
-          borderWidth: 2
-        }]
-      };
-    }
+    } 
     else {
       return <div className="text-red-500 text-xs">Invalid plot data format</div>;
     }
