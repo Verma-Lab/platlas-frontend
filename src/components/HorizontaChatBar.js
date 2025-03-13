@@ -531,7 +531,7 @@ const HorizontalChatBar = () => {
             {messages.length === 0 ? (
               <div className="text-center text-gray-500 py-6">
                 <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-300" />
-                <p className="text-sm">Ask any question about genetic data or GWAS results</p>
+                <p className="text-sm">Ask any question about genetic data</p>
                 {isReportMode && (
                   <div className="mt-2 text-xs bg-blue-50 text-blue-600 p-2 rounded-md inline-block">
                     Report Mode is active - AI will generate comprehensive reports
