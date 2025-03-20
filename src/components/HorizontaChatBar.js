@@ -351,15 +351,42 @@ const HorizontalChatBar = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState(null);
   const [sessionId, setSessionId] = useState(null);
+
+
+  // useEffect(() => {
+  //   const storedSessionId = localStorage.getItem('chatSessionId');
+  //   if (storedSessionId) {
+  //     setSessionId(storedSessionId);
+  //   }
+  //   if (messagesEndRef.current) {
+  //     messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+  //   }
+  // }, [messages]);
   useEffect(() => {
     const storedSessionId = localStorage.getItem('chatSessionId');
     if (storedSessionId) {
       setSessionId(storedSessionId);
     }
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    
+    if (messagesEndRef.current && isOpen) {
+      // Method 1: Scroll only within the chat container without affecting page scroll
+      const chatContainer = messagesEndRef.current.closest('.overflow-y-auto');
+      if (chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } else {
+        // Method 2: Save and restore window scroll position (fallback)
+        const scrollX = window.scrollX;
+        const scrollY = window.scrollY;
+        
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        
+        // Prevent page scroll - restore previous position
+        setTimeout(() => {
+          window.scrollTo(scrollX, scrollY);
+        }, 10);
+      }
     }
-  }, [messages]);
+  }, [messages, isOpen]);
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
