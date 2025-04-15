@@ -21,18 +21,18 @@ const AppLayout = () => {
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
+          {/* <Route path="/" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} /> */}
           <Route path="/homosapieus" element={<HomoSapieus />} />
           <Route path="/landingPageHomo" element={<LandingPageHomo />} />
           <Route path="/downloads" element={<DownloadsPage />} />
 
 
           {/* Protected Routes */}
-          <Route path="/platlas" element={
-            <ProtectedRoute>
+          <Route path="/" element={
+            // <ProtectedRoute>
               <HomePage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path='/gwas/:phenoId' element={
             <ProtectedRoute>

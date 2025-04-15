@@ -554,7 +554,7 @@ const StatsBar = ({ phenoStats, leadVariants, phenoId, selectedCohort, selectedS
 //     </div>
 //   );
 // };
-const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, phenoStats, onOpenSidebar, leadVariants, selectedStudy }) => {
+const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, phenoStats, onOpenSidebar, leadVariants, selectedStudy, phenoCategory }) => {
   return (
     <div className="relative w-full">
       <div 
@@ -589,10 +589,15 @@ const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, pheno
               <div className="flex items-center space-x-2">
                 <span className="text-blue-100 text-lg">Phenotype: </span>
                 <div className="flex items-center bg-white/20 rounded-lg overflow-hidden">
-                  <span className="px-4 py-2 text-white font-semibold text-lg">
-                    {phenoId}
+                <span className="px-4 py-2 text-white font-semibold text-lg">
+                  {phenoId}
+                </span>
+                {phenoCategory && (
+                  <span className="px-3 py-1 bg-blue-500/30 text-white text-sm rounded-r">
+                    {phenoCategory}
                   </span>
-                </div>
+                )}
+              </div>
               </div>
             </div>
             <div className='p-5 -mt-10'>
@@ -843,6 +848,7 @@ const GWASPage = () => {
   const [loadingBottom, setLoadingBottom] = useState(false);
   const [showModal, setShowModal] = useState(false); 
   const [logPval, setLogPval] = useState(-Math.log10(parseFloat('0.00000001'))); 
+  const [phenoCategory, setPhenoCategory] = useState('');
   const [cachedData, setCachedData] = useState({
     cohortData: {}, 
     bottomPlots: {},
@@ -859,7 +865,7 @@ const GWASPage = () => {
   const [gwamaCohorts, setGwamaCohorts] = useState([]);
   const [gwamaAvailable, setGwamaAvailable] = useState(false);
   const [mrmegaAvailable, setMrmegaAvailable] = useState(false);
-  const [filterLimit, setFilterLimit] = useState('None'); // Added this line
+  const [filterLimit, setFilterLimit] = useState('10'); // Added this line
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const history = useNavigate();
 
@@ -1137,6 +1143,12 @@ const loadMetadata = async () => {
         Info: `Phenotype: ${data.phenotype_id}`,
         Description: `Available in ${availableCohorts.length} cohorts: ${availableCohorts.join(', ')}`
       }]);
+
+      const mappingResponse = await fetch(`/api/getPhenotypeMapping`);
+      if (mappingResponse.ok) {
+        const phenoMapping = await mappingResponse.json();
+        setPhenoCategory(phenoMapping[phenoId]?.category || 'Uncategorized');
+      }
     } else {
       console.error('No metadata found for phenotype:', phenoId);
       handleShowModal();
@@ -1669,6 +1681,7 @@ return (
         onOpenSidebar={() => setSidebarOpen(true)}
         leadVariants={leadVariants}
         selectedStudy={selectedStudy}
+        phenoCategory={phenoCategory}
       />
     </div>
 

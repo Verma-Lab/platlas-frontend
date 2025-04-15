@@ -51,9 +51,9 @@ const QQPlotView = ({ phenoId, selectedCohort, selectedStudy }) => {
     <Card className="w-full bg-white shadow-lg rounded-lg overflow-hidden">
       <CardHeader>
         <h3 className="text-lg font-semibold text-gray-800">QQ Plot</h3>
-        <p className="text-sm text-gray-600">
+        {/* <p className="text-sm text-gray-600">
           Quantile-Quantile Plot for {phenoId} - {selectedCohort}
-        </p>
+        </p> */}
       </CardHeader>
       <CardContent className="p-4">
         <div className="relative min-h-[400px] flex items-center justify-center">
