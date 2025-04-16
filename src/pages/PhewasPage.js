@@ -287,7 +287,7 @@ const StatsCard = ({ phewasData, snpAnnotation }) => {
         </div>
 
         {/* New Column for Gene and rsID */}
-        <div className="space-y-4">
+        {/* <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
             <Database className="w-4 h-4" />
             Annotation
@@ -310,7 +310,7 @@ const StatsCard = ({ phewasData, snpAnnotation }) => {
               </span>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );
@@ -448,19 +448,19 @@ const PheWASPage = () => {
         }
 
         // Fetch SNP annotation if we have chromosome and position
-        if (phewasData && phewasData.plot_data && phewasData.plot_data[0]) {
-          const firstSNP = phewasData.plot_data[0];
-          const annotationResponse = await fetch(
-            `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
-          );
-          console.log(annotationResponse)
-          if (annotationResponse.ok) {
-            const annotationData = await annotationResponse.json();
-            if (!annotationData.error) {
-              setSnpAnnotation(annotationData);
-            }
-          }
-        }
+        // if (phewasData && phewasData.plot_data && phewasData.plot_data[0]) {
+        //   const firstSNP = phewasData.plot_data[0];
+        //   const annotationResponse = await fetch(
+        //     `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
+        //   );
+        //   console.log(annotationResponse)
+        //   if (annotationResponse.ok) {
+        //     const annotationData = await annotationResponse.json();
+        //     if (!annotationData.error) {
+        //       setSnpAnnotation(annotationData);
+        //     }
+        //   }
+        // }
       } catch (error) {
         console.error('Error fetching data:', error);
         // Fallback formatting without phenotype mapping
