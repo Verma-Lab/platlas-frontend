@@ -453,7 +453,7 @@ const PheWASPage = () => {
           const annotationResponse = await fetch(
             `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
           );
-          
+          console.log(annotationResponse)
           if (annotationResponse.ok) {
             const annotationData = await annotationResponse.json();
             if (!annotationData.error) {
