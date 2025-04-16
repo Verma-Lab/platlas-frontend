@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { Info, BarChart2, Search, Network, Share2, Databasem, ChevronRight, ChevronLeft, Database } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
 import GenerlaBar from '../components/GeneralNavBar';
+
 const headers = [
   {
     key: 'SNP_ID',
@@ -231,10 +232,10 @@ const AnimatedDNA = () => (
   </div>
 );
 
-const StatsCard = ({ phewasData }) => {
+const StatsCard = ({ phewasData, snpAnnotation }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6 -mt-10 mx-4 relative z-10">
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-3 gap-8">
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
             <Database className="w-4 h-4" />
@@ -284,12 +285,38 @@ const StatsCard = ({ phewasData }) => {
             </div>
           </div>
         </div>
+
+        {/* New Column for Gene and rsID */}
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
+            <Database className="w-4 h-4" />
+            Annotation
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <span className="px-3 py-1.5 rounded-md text-xs font-medium bg-gradient-to-r from-pink-500 to-rose-500 text-white">
+                Gene
+              </span>
+              <span className="text-sm font-medium text-gray-700">
+                {snpAnnotation?.symbol || 'N/A'}
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="px-3 py-1.5 rounded-md text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                rsID
+              </span>
+              <span className="text-sm font-medium text-gray-700">
+                {snpAnnotation?.rsid || 'N/A'}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick }) => {
+const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation }) => {
   return (
     <div className="w-full">
       <div 
@@ -328,14 +355,25 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick }) => {
                     <h1 className="text-4xl font-bold text-white mb-2 mr-4">
                       PheWAS Analysis Page
                     </h1>
-                    {/* Added GeneralBar next to the page title */}
                     <GenerlaBar />
                   </div>
                   <div className="flex items-center">
                     <span className="text-blue-100 mr-4">SNP:</span>
-                    <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg">
+                    <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
                       {selectedSNP}
                     </span>
+                    {snpAnnotation && (
+                      <>
+                        <span className="text-blue-100 mr-4">Gene:</span>
+                        <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
+                          {snpAnnotation.symbol || 'N/A'}
+                        </span>
+                        <span className="text-blue-100 mr-4">rsID:</span>
+                        <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg">
+                          {snpAnnotation.rsid || 'N/A'}
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -361,79 +399,104 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick }) => {
             animation: 'float 6s ease-in-out infinite 1s'
           }}
         />
-        
-        {/* Removed GeneralBar from here as it's now next to the title */}
       </div>
       
       <div className="max-w-7xl mx-auto">
-        <StatsCard phewasData={phewasData} />
+        <StatsCard phewasData={phewasData} snpAnnotation={snpAnnotation} />
       </div>
     </div>
   );
 };
+
+
+
 const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api'
 
 const PheWASPage = () => {
   const location = useLocation();
   const { phewasData, selectedSNP } = location.state || {};
-  const [formattedData, setFormattedData] = useState([]); // Add this
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Add this state
-
+  const [formattedData, setFormattedData] = useState([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [snpAnnotation, setSnpAnnotation] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDataAndAnnotation = async () => {
+      setLoading(true);
       try {
         // Fetch phenotype mappings
-        // const response = await fetch(`${baseURL}/getPhenotypeMapping`);
         const response = await fetch(`/api/getPhenotypeMapping`);
-
         if (!response.ok) throw new Error('Failed to fetch phenotype mapping');
         const phenoMapping = await response.json();
 
-        if (!phewasData || !phewasData.plot_data) {
-          setFormattedData([]);
-          return;
+        // Format the data with phenotype descriptions
+        if (phewasData && phewasData.plot_data) {
+          const formatted = phewasData.plot_data.map(item => ({
+            trait: {
+              name: item.phenotype,
+              description: phenoMapping[item.phenotype]?.description || 'No description available',
+              category: phenoMapping[item.phenotype]?.category || 'Uncategorized'
+            },
+            phenotype: item.phenotype,
+            chromosome: item.chromosome,
+            position: item.position,
+            pvalue: item.pvalue,
+            ref_allele: item.ref_allele,
+            alt_allele: item.alt_allele
+          }));
+          setFormattedData(formatted);
         }
 
-        // Format the data with phenotype descriptions
-        const formatted = phewasData.plot_data.map(item => ({
-          trait: {
-            name: item.phenotype,
-            description: phenoMapping[item.phenotype]?.description || 'No description available',
-            category: phenoMapping[item.phenotype]?.category || 'Uncategorized'
-          },
-          phenotype: item.phenotype,
-          chromosome: item.chromosome,
-          position: item.position,
-          pvalue: item.pvalue,
-          ref_allele: item.ref_allele,
-          alt_allele: item.alt_allele
-        }));
-
-        setFormattedData(formatted);
+        // Fetch SNP annotation if we have chromosome and position
+        if (phewasData && phewasData.plot_data && phewasData.plot_data[0]) {
+          const firstSNP = phewasData.plot_data[0];
+          const annotationResponse = await fetch(
+            `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
+          );
+          
+          if (annotationResponse.ok) {
+            const annotationData = await annotationResponse.json();
+            if (!annotationData.error) {
+              setSnpAnnotation(annotationData);
+            }
+          }
+        }
       } catch (error) {
-        console.error('Error fetching phenotype mapping:', error);
+        console.error('Error fetching data:', error);
         // Fallback formatting without phenotype mapping
-        const formatted = phewasData.plot_data.map(item => ({
-          trait: {
-            name: item.phenotype,
-            description: 'No description available',
-            category: 'Uncategorized'
-          },
-          phenotype: item.phenotype,
-          chromosome: item.chromosome,
-          position: item.position,
-          pvalue: item.pvalue,
-          ref_allele: item.ref_allele,
-          alt_allele: item.alt_allele
-        }));
-        setFormattedData(formatted);
+        if (phewasData && phewasData.plot_data) {
+          const formatted = phewasData.plot_data.map(item => ({
+            trait: {
+              name: item.phenotype,
+              description: 'No description available',
+              category: 'Uncategorized'
+            },
+            phenotype: item.phenotype,
+            chromosome: item.chromosome,
+            position: item.position,
+            pvalue: item.pvalue,
+            ref_allele: item.ref_allele,
+            alt_allele: item.alt_allele
+          }));
+          setFormattedData(formatted);
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
+    fetchDataAndAnnotation();
   }, [phewasData]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   if (!phewasData || !selectedSNP) {
     return (
@@ -452,42 +515,27 @@ const PheWASPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Sidebar */}
-   
       <RelatedPhenotypesSidebar
         currentPhenoId={selectedSNP}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      {/* Full Width Header Section */}
       <PheWASHeader 
         selectedSNP={selectedSNP} 
         phewasData={phewasData} 
         onMenuClick={() => setIsSidebarOpen(true)}
+        snpAnnotation={snpAnnotation}
       />
-      {/* Main Content */}
+      
       <div className="max-w-7xl mx-auto px-8 py-6">
-        {/* Add Related Phenotypes Button */}
-        {/* <div className="mb-6">
-          <button
-            onClick={() => setIsSidebarOpen(true)}
-            className="inline-flex items-center px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm"
-          >
-            <Network className="w-5 h-5 mr-2" />
-            View Related Phenotypes
-          </button>
-        </div> */}
-
         <div className="bg-white rounded-xl shadow p-6">
-          {/* PheWAS Plot */}
           <div className="bg-white flex justify-center items-center rounded-lg shadow p-4 mb-6">
             <div className="overflow-hidden max-h-[600px] flex justify-center w-full">
               <PheWASPlot data={phewasData} selectedSNP={selectedSNP} />
             </div>
           </div>
 
-          {/* Top Results */}
           <div className="bg-gray-100 rounded-lg shadow p-4">
             <h3 className="text-lg font-semibold text-gray-800">SNP Details</h3>
             <TopResults data={formattedData} onSNPClick={handleSNPClick} />
