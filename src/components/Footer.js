@@ -130,7 +130,7 @@ const Footer = () => {
             <h3 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-transparent bg-clip-text mb-4">Connect With Us</h3>
             <div className="space-y-2">
               <a 
-                href="https://github.com/platlas" 
+                href="https://github.com/Verma-Lab/platlas" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-2"
