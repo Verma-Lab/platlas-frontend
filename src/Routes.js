@@ -35,29 +35,29 @@ const AppLayout = () => {
             // </ProtectedRoute>
           } />
           <Route path='/gwas/:phenoId' element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <GWASPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/phewas" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <PheWASPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/about" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <AboutPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/documentation" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <DocumentationPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
           <Route path="/contact" element={
-            <ProtectedRoute>
+            // <ProtectedRoute>
               <ContactPage />
-            </ProtectedRoute>
+            // </ProtectedRoute>
           } />
         </Routes>
       </div>
