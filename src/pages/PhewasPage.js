@@ -290,7 +290,7 @@ const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
             <Database className="w-4 h-4" />
-            Annotation
+           Nearest Gene Annotation
           </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
@@ -370,18 +370,18 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loa
                     <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
                       {selectedSNP}
                     </span>
-                    {snpAnnotation && (
+                    {/* {snpAnnotation && (
                       <>
-                        <span className="text-blue-100 mr-4">Gene:</span>
+                        <span className="text-blue-100 mr-4">Nearest Gene:</span>
                         <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
                           {snpAnnotation.symbol || 'N/A'}
                         </span>
-                        <span className="text-blue-100 mr-4">rsID:</span>
+                        <span className="text-blue-100 mr-4">Nearest Gene rsID:</span>
                         <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg">
                           {snpAnnotation.rsid || 'N/A'}
                         </span>
                       </>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
