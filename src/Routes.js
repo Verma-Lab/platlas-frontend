@@ -13,6 +13,8 @@ import HomoSapieus from './pages/HomoSapieus';
 import LandingPageHomo from './pages/LandingHomoSapieus';
 import DownloadsPage from './pages/Downloads';
 import MiniChat from './components/MiniChat';
+import TermsOfServicePage from './pages/TermsOfServicePage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 const AppLayout = () => {
   const location = useLocation();
   const isHomoSapieusPage = location.pathname === '/homosapieus' || location.pathname === '/landingPageHomo';
@@ -27,6 +29,8 @@ const AppLayout = () => {
           <Route path="/landingPageHomo" element={<LandingPageHomo />} />
           <Route path="/downloads" element={<DownloadsPage />} />
 
+          <Route path="/terms" element={<TermsOfServicePage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
 
           {/* Protected Routes */}
           <Route path="/" element={
