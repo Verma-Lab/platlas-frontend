@@ -1,11 +1,9 @@
-
 import { useLocation } from 'react-router-dom';
 import PheWASPlot from '../plots/PheWASPlot';
-// import { TopResults } from '../plots/TopResults';
 import Spinner from 'react-bootstrap/Spinner';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Info, BarChart2, Search, Network, Share2, Databasem, ChevronRight, ChevronLeft, Database } from 'lucide-react';
+import { Info, BarChart2, Search, Network, Share2, ChevronRight, ChevronLeft, Database } from 'lucide-react';
 import RelatedPhenotypesSidebar from '../components/RelatedPhenotypesSidebar';
 import GenerlaBar from '../components/GeneralNavBar';
 
@@ -46,7 +44,6 @@ const headers = [
     tooltip: 'Statistical significance of the association'
   }
 ];
-
 
 export const TopResults = ({ data, onSNPClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -136,7 +133,7 @@ export const TopResults = ({ data, onSNPClick }) => {
       </div>
       
       <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               {headers.map(header => (
@@ -192,7 +189,6 @@ export const TopResults = ({ data, onSNPClick }) => {
   );
 };
 
-
 const AnimatedDNA = () => (
   <div className="absolute right-0 top-0 h-full w-1/4 overflow-hidden opacity-25">
     <svg viewBox="0 0 100 200" className="h-full w-full">
@@ -232,7 +228,7 @@ const AnimatedDNA = () => (
   </div>
 );
 
-const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
+const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation, geneId }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6 -mt-10 mx-4 relative z-10">
       <div className="grid grid-cols-3 gap-8">
@@ -286,11 +282,10 @@ const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
           </div>
         </div>
 
-        {/* New Column for Gene and rsID */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-gray-600 flex items-center gap-2">
             <Database className="w-4 h-4" />
-           Nearest Gene Annotation
+            Nearest Gene Annotation
           </h3>
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
@@ -301,7 +296,18 @@ const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
                 <span className="text-sm text-gray-500">Loading...</span>
               ) : (
                 <span className="text-sm font-medium text-gray-700">
-                  {snpAnnotation?.symbol || 'N/A'}
+                  {geneId ? (
+                    <a
+                      href={`https://www.ncbi.nlm.nih.gov/gene/${geneId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
+                      {snpAnnotation?.symbol || 'N/A'}
+                    </a>
+                  ) : (
+                    snpAnnotation?.symbol || 'N/A'
+                  )}
                 </span>
               )}
             </div>
@@ -324,7 +330,7 @@ const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
   );
 };
 
-const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loadingAnnotation }) => {
+const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loadingAnnotation, geneId }) => {
   return (
     <div className="w-full">
       <div 
@@ -370,18 +376,6 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loa
                     <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
                       {selectedSNP}
                     </span>
-                    {/* {snpAnnotation && (
-                      <>
-                        <span className="text-blue-100 mr-4">Nearest Gene:</span>
-                        <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg mr-4">
-                          {snpAnnotation.symbol || 'N/A'}
-                        </span>
-                        <span className="text-blue-100 mr-4">Nearest Gene rsID:</span>
-                        <span className="bg-white/20 px-4 py-2 rounded-lg text-white font-semibold text-lg">
-                          {snpAnnotation.rsid || 'N/A'}
-                        </span>
-                      </>
-                    )} */}
                   </div>
                 </div>
               </div>
@@ -410,20 +404,18 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loa
       </div>
       
       <div className="max-w-7xl mx-auto">
-        {/* <StatsCard phewasData={phewasData} snpAnnotation={snpAnnotation} /> */}
         <StatsCard 
-        phewasData={phewasData} 
-        snpAnnotation={snpAnnotation} 
-        loadingAnnotation={loadingAnnotation} 
-      />
+          phewasData={phewasData} 
+          snpAnnotation={snpAnnotation} 
+          loadingAnnotation={loadingAnnotation} 
+          geneId={geneId}
+        />
       </div>
     </div>
   );
 };
 
-
-
-const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api'
+const baseURL = process.env.FRONTEND_BASE_URL || 'http://localhost:5001/api';
 
 const PheWASPage = () => {
   const location = useLocation();
@@ -431,6 +423,7 @@ const PheWASPage = () => {
   const [formattedData, setFormattedData] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [snpAnnotation, setSnpAnnotation] = useState(null);
+  const [geneId, setGeneId] = useState(null);
   const [loadingPhenotypes, setLoadingPhenotypes] = useState(false);
   const [loadingAnnotation, setLoadingAnnotation] = useState(false);
 
@@ -438,13 +431,10 @@ const PheWASPage = () => {
     const fetchPhenotypeMapping = async () => {
       setLoadingPhenotypes(true);
       try {
-        // Fetch phenotype mappings
         const response = await fetch(`/api/getPhenotypeMapping`);
-
         if (!response.ok) throw new Error('Failed to fetch phenotype mapping');
         const phenoMapping = await response.json();
 
-        // Format the data with phenotype descriptions
         if (phewasData && phewasData.plot_data) {
           const formatted = phewasData.plot_data.map(item => ({
             trait: {
@@ -463,7 +453,6 @@ const PheWASPage = () => {
         }
       } catch (error) {
         console.error('Error fetching phenotype mapping:', error);
-        // Fallback formatting without phenotype mapping
         if (phewasData && phewasData.plot_data) {
           const formatted = phewasData.plot_data.map(item => ({
             trait: {
@@ -498,6 +487,9 @@ const PheWASPage = () => {
             const annotationData = await annotationResponse.json();
             if (!annotationData.error) {
               setSnpAnnotation(annotationData);
+              if (annotationData.symbol) {
+                fetchGeneId(annotationData.symbol);
+              }
             }
           }
         } catch (error) {
@@ -505,6 +497,23 @@ const PheWASPage = () => {
         } finally {
           setLoadingAnnotation(false);
         }
+      }
+    };
+
+    const fetchGeneId = async (geneSymbol) => {
+      try {
+        const response = await fetch(
+          `https://clinicaltables.nlm.nih.gov/api/ncbi_genes/v3/search?terms=${geneSymbol}&max_results=1`
+        );
+        if (!response.ok) throw new Error('Failed to fetch Gene ID');
+        const data = await response.json();
+        const geneIds = data[1];
+        if (geneIds && geneIds.length > 0) {
+          setGeneId(geneIds[0]);
+        }
+      } catch (error) {
+        console.error('Error fetching Gene ID:', error);
+        setGeneId(null);
       }
     };
 
@@ -551,6 +560,7 @@ const PheWASPage = () => {
         onMenuClick={() => setIsSidebarOpen(true)}
         snpAnnotation={snpAnnotation}
         loadingAnnotation={loadingAnnotation}
+        geneId={geneId}
       />
       
       <div className="max-w-7xl mx-auto px-8 py-6">
@@ -577,4 +587,5 @@ const PheWASPage = () => {
     </div>
   );
 };
+
 export default PheWASPage;
