@@ -232,7 +232,7 @@ const AnimatedDNA = () => (
   </div>
 );
 
-const StatsCard = ({ phewasData, snpAnnotation }) => {
+const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation }) => {
   return (
     <div className="bg-white rounded-lg shadow p-6 -mt-10 mx-4 relative z-10">
       <div className="grid grid-cols-3 gap-8">
@@ -297,17 +297,25 @@ const StatsCard = ({ phewasData, snpAnnotation }) => {
               <span className="px-3 py-1.5 rounded-md text-xs font-medium bg-gradient-to-r from-pink-500 to-rose-500 text-white">
                 Gene
               </span>
-              <span className="text-sm font-medium text-gray-700">
-                {snpAnnotation?.symbol || 'N/A'}
-              </span>
+              {loadingAnnotation ? (
+                <span className="text-sm text-gray-500">Loading...</span>
+              ) : (
+                <span className="text-sm font-medium text-gray-700">
+                  {snpAnnotation?.symbol || 'N/A'}
+                </span>
+              )}
             </div>
             <div className="flex items-center space-x-2">
               <span className="px-3 py-1.5 rounded-md text-xs font-medium bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
                 rsID
               </span>
-              <span className="text-sm font-medium text-gray-700">
-                {snpAnnotation?.rsid || 'N/A'}
-              </span>
+              {loadingAnnotation ? (
+                <span className="text-sm text-gray-500">Loading...</span>
+              ) : (
+                <span className="text-sm font-medium text-gray-700">
+                  {snpAnnotation?.rsid || 'N/A'}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -316,7 +324,7 @@ const StatsCard = ({ phewasData, snpAnnotation }) => {
   );
 };
 
-const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation }) => {
+const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loadingAnnotation }) => {
   return (
     <div className="w-full">
       <div 
@@ -402,7 +410,12 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation }) =
       </div>
       
       <div className="max-w-7xl mx-auto">
-        <StatsCard phewasData={phewasData} snpAnnotation={snpAnnotation} />
+        {/* <StatsCard phewasData={phewasData} snpAnnotation={snpAnnotation} /> */}
+        <StatsCard 
+        phewasData={phewasData} 
+        snpAnnotation={snpAnnotation} 
+        loadingAnnotation={loadingAnnotation} 
+      />
       </div>
     </div>
   );
@@ -418,14 +431,14 @@ const PheWASPage = () => {
   const [formattedData, setFormattedData] = useState([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [snpAnnotation, setSnpAnnotation] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingPhenotypes, setLoadingPhenotypes] = useState(false);
+  const [loadingAnnotation, setLoadingAnnotation] = useState(false);
 
   useEffect(() => {
-    const fetchDataAndAnnotation = async () => {
-      setLoading(true);
+    const fetchPhenotypeMapping = async () => {
+      setLoadingPhenotypes(true);
       try {
         // Fetch phenotype mappings
-        // const response = await fetch(`${baseURL}/api/getPhenotypeMapping`);
         const response = await fetch(`/api/getPhenotypeMapping`);
 
         if (!response.ok) throw new Error('Failed to fetch phenotype mapping');
@@ -448,26 +461,8 @@ const PheWASPage = () => {
           }));
           setFormattedData(formatted);
         }
-
-        // Fetch SNP annotation if we have chromosome and position
-        if (phewasData && phewasData.plot_data && phewasData.plot_data[0]) {
-          const firstSNP = phewasData.plot_data[0];
-          // const annotationResponse = await fetch(
-          //   `${baseURL}/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
-          // );
-          const annotationResponse = await fetch(
-            `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
-          );
-          console.log(annotationResponse)
-          if (annotationResponse.ok) {
-            const annotationData = await annotationResponse.json();
-            if (!annotationData.error) {
-              setSnpAnnotation(annotationData);
-            }
-          }
-        }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching phenotype mapping:', error);
         // Fallback formatting without phenotype mapping
         if (phewasData && phewasData.plot_data) {
           const formatted = phewasData.plot_data.map(item => ({
@@ -486,14 +481,38 @@ const PheWASPage = () => {
           setFormattedData(formatted);
         }
       } finally {
-        setLoading(false);
+        setLoadingPhenotypes(false);
       }
     };
 
-    fetchDataAndAnnotation();
+    const fetchSNPAnnotation = async () => {
+      if (phewasData && phewasData.plot_data && phewasData.plot_data[0]) {
+        setLoadingAnnotation(true);
+        try {
+          const firstSNP = phewasData.plot_data[0];
+          const annotationResponse = await fetch(
+            `/api/getSNPAnnotation?chromosome=${firstSNP.chromosome}&position=${firstSNP.position}`
+          );
+          
+          if (annotationResponse.ok) {
+            const annotationData = await annotationResponse.json();
+            if (!annotationData.error) {
+              setSnpAnnotation(annotationData);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching SNP annotation:', error);
+        } finally {
+          setLoadingAnnotation(false);
+        }
+      }
+    };
+
+    fetchPhenotypeMapping();
+    fetchSNPAnnotation();
   }, [phewasData]);
 
-  if (loading) {
+  if (loadingPhenotypes) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Spinner animation="border" role="status">
@@ -531,6 +550,7 @@ const PheWASPage = () => {
         phewasData={phewasData} 
         onMenuClick={() => setIsSidebarOpen(true)}
         snpAnnotation={snpAnnotation}
+        loadingAnnotation={loadingAnnotation}
       />
       
       <div className="max-w-7xl mx-auto px-8 py-6">
