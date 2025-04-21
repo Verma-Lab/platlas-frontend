@@ -229,6 +229,9 @@ const AnimatedDNA = () => (
 );
 
 const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation, geneId }) => {
+  // Log the geneId to verify its value
+  console.log('StatsCard geneId:', geneId);
+
   return (
     <div className="bg-white rounded-lg shadow p-6 -mt-10 mx-4 relative z-10">
       <div className="grid grid-cols-3 gap-8">
@@ -296,7 +299,7 @@ const StatsCard = ({ phewasData, snpAnnotation, loadingAnnotation, geneId }) => 
                 <span className="text-sm text-gray-500">Loading...</span>
               ) : (
                 <span className="text-sm font-medium text-gray-700">
-                  {geneId ? (
+                  {geneId && !isNaN(geneId) ? (
                     <a
                       href={`https://www.ncbi.nlm.nih.gov/gene/${geneId}`}
                       target="_blank"
@@ -507,9 +510,15 @@ const PheWASPage = () => {
         );
         if (!response.ok) throw new Error('Failed to fetch Gene ID');
         const data = await response.json();
+        console.log(`API Response for geneSymbol ${geneSymbol}:`, data); // Log the API response
         const geneIds = data[1];
         if (geneIds && geneIds.length > 0) {
-          setGeneId(geneIds[0]);
+          const fetchedGeneId = geneIds[0];
+          console.log(`Setting geneId to ${fetchedGeneId} for geneSymbol ${geneSymbol}`);
+          setGeneId(fetchedGeneId);
+        } else {
+          console.log(`No Gene ID found for geneSymbol ${geneSymbol}`);
+          setGeneId(null);
         }
       } catch (error) {
         console.error('Error fetching Gene ID:', error);
