@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Github, Linkedin, Network, Share2, Database, ChartBar, Dna } from 'lucide-react';
-
+import GenerlaBar from '../components/GeneralNavBar';
 // TeamMember Component (Updated to match landing page style)
 const TeamMember = ({ name, role, description, imageUrl, socialLinks }) => {
   return (
@@ -173,8 +173,11 @@ const AboutPage = () => {
       ]
     },
     mgh: {
-      name: "Mass General Hospital",
-      logo: "/images/masslogo.png", // Update with your actual logo path
+      name: "Mass General Hospital & Broad Institute",
+      logo: {
+        mgh: "/images/masslogo.png",
+        broad: "/images/broadlogo.png" // Add path to the Broad Institute logo
+      },
       investigators: [
         { name: "Pradeep Natarajan"}
       ],
@@ -220,11 +223,16 @@ const AboutPage = () => {
         }}
       >
         <div className="max-w-7xl mx-auto px-4 py-16 relative z-10">
-          <h1 className="text-4xl font-bold text-white mb-4">About PLATLAS</h1>
-          <p className="text-xl text-blue-100 max-w-3xl">
-            Discover, explore, and analyze genetic associations across diverse populations
-          </p>
+      <div className="flex items-center mb-4">
+        <h1 className="text-4xl font-bold text-white mr-4">About PLATLAS</h1>
+        <div className="w-64 self-center">
+          <GenerlaBar />
         </div>
+      </div>
+      <p className="text-xl text-blue-100 max-w-3xl">
+        Discover, explore, and analyze genetic associations across diverse populations
+      </p>
+    </div>
 
         {/* Floating Icons */}
         <Share2 
@@ -247,7 +255,7 @@ const AboutPage = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">What is PLATLAS?</h2>
             <p className="text-lg text-gray-700 leading-relaxed mb-8">
-              <strong className="text-indigo-600">PL</strong>eiotropic <strong className="text-indigo-600">ATLAS</strong> (PLATLAS) is a comprehensive resource that integrates genome-wide association meta-analyses of up to 1,1678 traits and diseases from large, diverse biobanks.
+              <strong className="text-indigo-600">PL</strong>eiotropic <strong className="text-indigo-600">ATLAS</strong> (PLATLAS) is a comprehensive resource that integrates genome-wide association meta-analyses of up to 1913 traits and diseases from large, diverse biobanks.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -273,7 +281,7 @@ const AboutPage = () => {
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Meet Our Team</h2>
-          <p className="text-lg text-gray-600 mb-8">World-class experts in genomics and data science</p>
+          {/* <p className="text-lg text-gray-600 mb-8">World-class experts in genomics and data science</p> */}
           
           {/* Tab Navigation */}
           <div className="flex justify-center space-x-4 mb-10 border-b">
@@ -358,16 +366,17 @@ const AboutPage = () => {
           {/* Argonne National Lab */}
           <div className="border rounded-lg p-6 bg-white shadow-md">
             <div className="flex justify-center mb-6 pb-3 border-b">
-              <img 
-                src={teamData.argonne.logo} 
-                alt="Argonne National Laboratory Logo" 
-                className="h-30 object-contain"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/api/placeholder/200/80";
-                  e.target.alt = "Argonne National Lab Logo (placeholder)";
-                }}
-              />
+            <img 
+      src={teamData.argonne.logo} 
+      alt="Argonne National Laboratory Logo" 
+      className="w-64 max-h-56 object-contain" // Changed approach to use width + max-height
+      style={{ minHeight: "120px" }} // Added explicit minimum height
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = "/api/placeholder/300/150"; // Larger placeholder
+        e.target.alt = "Argonne National Lab Logo (placeholder)";
+      }}
+    />
             </div>
             
             {(activeTab === 'all' || activeTab === 'investigators') && (
@@ -406,54 +415,68 @@ const AboutPage = () => {
           
           {/* Mass General Hospital */}
           <div className="border rounded-lg p-6 bg-white shadow-md">
-            <div className="flex justify-center mb-6 pb-3 border-b">
-              <img 
-                src={teamData.mgh.logo} 
-                alt="Massachusetts General Hospital Logo" 
-                className="h-30 object-contain"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = "/api/placeholder/200/80";
-                  e.target.alt = "Mass General Hospital Logo (placeholder)";
-                }}
-              />
-            </div>
-            
-            {(activeTab === 'all' || activeTab === 'investigators') && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-4">Investigators</h4>
-                <ul className="space-y-1">
-                  {teamData.mgh.investigators.map(person => (
-                    <li key={person.name} className="font-medium">
-                      {person.name}{person.title ? `, ${person.title}` : ''}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {(activeTab === 'all' || activeTab === 'dataAnalysis') && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-4">Data Analysis</h4>
-                <ul className="space-y-1">
-                  {teamData.mgh.dataAnalysts.map(person => (
-                    <li key={person.name} className="font-medium">{person.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
-            {(activeTab === 'all' || activeTab === 'browserDevelopment') && teamData.mgh.developers.length > 0 && (
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold mb-4">Browser Development</h4>
-                <ul className="space-y-1">
-                  {teamData.mgh.developers.map(person => (
-                    <li key={person.name} className="font-medium">{person.name}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+  <div className="flex flex-col mb-6 pb-3 border-b space-y-6">
+    <div className="flex justify-center">
+      <img 
+        src={teamData.mgh.logo.mgh} 
+        alt="Massachusetts General Hospital Logo" 
+        className="h-30 object-contain" 
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = "/api/placeholder/200/80";
+          e.target.alt = "Mass General Hospital Logo (placeholder)";
+        }}
+      />
+    </div>
+    <div className="flex justify-center">
+      <img 
+        src={teamData.mgh.logo.broad} 
+        alt="Broad Institute Logo" 
+        className="h-20 object-contain"
+        onError={(e) => {
+          e.target.onerror = null;
+          e.target.src = "/api/placeholder/200/80";
+          e.target.alt = "Broad Institute Logo (placeholder)";
+        }}
+      />
+    </div>
+  </div>
+  
+  {(activeTab === 'all' || activeTab === 'investigators') && (
+    <div className="mb-6">
+      <h4 className="text-lg font-semibold mb-4">Investigators</h4>
+      <ul className="space-y-1">
+        {teamData.mgh.investigators.map(person => (
+          <li key={person.name} className="font-medium">
+            {person.name}{person.title ? `, ${person.title}` : ''}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+  
+  {(activeTab === 'all' || activeTab === 'dataAnalysis') && (
+    <div className="mb-6">
+      <h4 className="text-lg font-semibold mb-4">Data Analysis</h4>
+      <ul className="space-y-1">
+        {teamData.mgh.dataAnalysts.map(person => (
+          <li key={person.name} className="font-medium">{person.name}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+  
+  {(activeTab === 'all' || activeTab === 'browserDevelopment') && teamData.mgh.developers.length > 0 && (
+    <div className="mb-6">
+      <h4 className="text-lg font-semibold mb-4">Browser Development</h4>
+      <ul className="space-y-1">
+        {teamData.mgh.developers.map(person => (
+          <li key={person.name} className="font-medium">{person.name}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+</div>
         </div>
       </div>
 

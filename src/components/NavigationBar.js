@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Table, Users, FileText, Brain, Download, Menu, X } from 'lucide-react';
+import { Search, Table, Users, FileText, Brain, Download, Menu, X, Home } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const NavigationBar = () => {
@@ -80,6 +80,11 @@ const NavigationBar = () => {
   }, []);
 
   const handleClick = (text) => {
+    if (text === 'Home') {
+      navigate('/');
+      setMobileMenuOpen(false);
+      return;
+    }
     if (text === 'About') {
       navigate('/about');
       setMobileMenuOpen(false);
@@ -102,9 +107,10 @@ const NavigationBar = () => {
   };
 
   const navItems = [
+    { icon: Home, text: 'Home' },
     { icon: Users, text: 'About' },
     { icon: Table, text: 'Association Results' },
-    { icon: FileText, text: 'paper' },
+    { icon: FileText, text: 'Cite' },
     { icon: Download, text: 'Downloads' },
     // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];

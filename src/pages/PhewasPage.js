@@ -370,7 +370,7 @@ const PheWASHeader = ({ selectedSNP, phewasData, onMenuClick, snpAnnotation, loa
                 <div>
                   <div className="flex items-center">
                     <h1 className="text-4xl font-bold text-white mb-2 mr-4">
-                      PheWAS Analysis Page
+                      PheWAS Results
                     </h1>
                     <GenerlaBar />
                   </div>

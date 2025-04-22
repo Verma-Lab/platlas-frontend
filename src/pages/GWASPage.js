@@ -584,7 +584,7 @@ const GWASHeader = ({ phenoId, cohorts, selectedCohort, setSelectedCohort, pheno
             
             <div>
               <h1 className="text-4xl font-bold text-white mb-2 p-2">
-                GWAS Analysis Page
+                GWAS Results
               </h1>
               <div className="flex items-center space-x-2">
                 <span className="text-blue-100 text-lg">Phenotype: </span>
@@ -1785,7 +1785,7 @@ return (
           <Tab eventKey="hudson" title="Compare Ancestries">
             <div className="p-4">
               <div className="bg-gray-100 rounded-lg shadow p-4 mt-4">
-                <h3 className="text-lg font-semibold text-gray-800">Ancestry Comparison (Significant Analyzed SNPs)</h3>
+                <h3 className="text-lg font-semibold text-gray-800">Ancestry Comparison (Significant SNPs Only)</h3>
                 <Hudson
                   dynTop={dynTop}
                   statTop={statTop}

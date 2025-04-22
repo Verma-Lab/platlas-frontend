@@ -873,7 +873,7 @@ export const HomePage = () => {
           </div>
 
           {/* Research Section */}
-          <div id="paper" className="scroll-mt-16">
+          <div id="Cite" className="scroll-mt-16">
             <ResearchSection/>
           </div>
         </div>

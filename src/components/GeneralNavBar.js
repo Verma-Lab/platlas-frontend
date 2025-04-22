@@ -38,7 +38,7 @@ const GenerlaBar = () => {
 
   const handleClick = (text) => {
     if (text === 'Home') {
-      navigate('/platlas');
+      navigate('/');
       return;
     }
     if (text === 'HomoSapieus') {

@@ -287,13 +287,14 @@ export const SearchBar = () => {
         state: { population: item.population } 
       });
     } else if (item.type === 'snp') {
+      console.log('Selected SNP:', item); // Debug selected item
       console.log('ITEMS')
       console.log(item)
       const snpData = {
-        SNP_ID: item.rsId,
+        SNP_ID: item.internalId, // Use internalId (e.g., 10:100000235:C:T)
         chromosome: item.chromosome,
         position: item.position,
-        internalId:item.internalId
+        rsId: item.rsId // Include for display
       };
 
       // Try both study types
@@ -302,7 +303,8 @@ export const SearchBar = () => {
       for (const study of studies) {
         try {
             // const url = `${baseURL}/phewas?snp=${snpData.internalId}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${study}`;
-            const url = `/api/phewas?snp=${snpData.internalId}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${study}`;
+            const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${study}`;
+
             const response = await fetch(url);
             
             if (response.status === 404) {
@@ -310,20 +312,22 @@ export const SearchBar = () => {
             }
             
             if (response.ok) {
-                const data = await response.json();
-                if (data && data.plot_data) {
-                    navigate('/phewas', {
-                        state: {
-                            snpData,
-                            selectedStudy: study
-                        }
-                    });
-                    break; // Exit after finding valid data
-                }
+              const data = await response.json();
+              console.log('PheWAS Response:', data);
+              if (data && data.plot_data) {
+                navigate('/phewas', {
+                  state: {
+                    snpData,
+                    selectedStudy: study,
+                    phewasData: data
+                  }
+                });
+                return;
+              }
             }
-        } catch (error) {
-            console.warn(`Failed to fetch data for study ${study}:`, error);
-        }
+          } catch (error) {
+            console.error(`Failed to fetch PheWAS data for ${study}:`, error);
+          }
     }
 
       // If neither study type worked, navigate without a study type
