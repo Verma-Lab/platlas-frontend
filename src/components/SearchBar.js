@@ -223,16 +223,15 @@ export const SearchBar = () => {
       if (searchTerm.toLowerCase() === 'rs' || searchTerm.toLowerCase().startsWith('rs')) {
         try {
           // const response = await fetch(`${baseURL}/searchSNPs?term=${searchTerm}`);
-          const response = await fetch(`/api/searchSNPs?term=${searchTerm}`);
-
-          if (!response.ok) throw new Error('Failed to fetch SNP results');
-          const data = await response.json();
-          
-          setSNPResults(data.results || []);
-        } catch (err) {
-          console.error('Error fetching SNP results:', err);
-          setSNPResults([]);
-        }
+          const response = await fetch(`/api/searchSNPs?term=${encodeURIComponent(searchTerm)}`);
+if (!response.ok) throw new Error(`Failed to fetch SNP results: ${response.status}`);
+const data = await response.json();
+console.log('SNP Results:', data); // Debug response
+setSNPResults(data.results || []);
+} catch (err) {
+  console.error('Error fetching SNP results:', err);
+  setSNPResults([]);
+}
       } else {
         setSNPResults([]);
       }
@@ -249,18 +248,16 @@ export const SearchBar = () => {
     
     // If searching for RS IDs, only show SNP results
     if (termLower.startsWith('rs')) {
-      return snpResults;
+      return snpResults.slice(0, displayCount);
     }
-    
-    // Otherwise show phenotype results
     const phenoResults = phenotypeMetadata
       .filter(item =>
         item.phenotype.toLowerCase().includes(termLower) ||
         item.traitDescription.toLowerCase().includes(termLower) ||
         item.category.toLowerCase().includes(termLower)
       );
-
     return phenoResults.slice(0, displayCount);
+      
   }, [phenotypeMetadata, snpResults, searchTerm, displayCount]);
 
   const handleInputChange = (e) => {
@@ -287,56 +284,38 @@ export const SearchBar = () => {
         state: { population: item.population } 
       });
     } else if (item.type === 'snp') {
-      console.log('Selected SNP:', item); // Debug selected item
-      console.log('ITEMS')
-      console.log(item)
+      console.log('Selected SNP:', item);
       const snpData = {
-        SNP_ID: item.internalId, // Use internalId (e.g., 10:100000235:C:T)
+        SNP_ID: item.internalId,
         chromosome: item.chromosome,
         position: item.position,
-        rsId: item.rsId // Include for display
+        rsId: item.rsId
       };
-
-      // Try both study types
-      const studies = ['gwama', 'mrmega'];
-
-      for (const study of studies) {
-        try {
-            // const url = `${baseURL}/phewas?snp=${snpData.internalId}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${study}`;
-            const url = `/api/phewas?snp=${snpData.SNP_ID}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=${study}`;
-
-            const response = await fetch(url);
-            
-            if (response.status === 404) {
-                continue; // Try next study type if no data found
-            }
-            
-            if (response.ok) {
-              const data = await response.json();
-              console.log('PheWAS Response:', data);
-              if (data && data.plot_data) {
-                navigate('/phewas', {
-                  state: {
-                    snpData,
-                    selectedStudy: study,
-                    phewasData: data
-                  }
-                });
-                return;
-              }
-            }
-          } catch (error) {
-            console.error(`Failed to fetch PheWAS data for ${study}:`, error);
-          }
-    }
-
-      // If neither study type worked, navigate without a study type
-      navigate('/phewas', {
-        state: {
-          snpData,
-          selectedStudy: 'gwama' // Default to gwama if neither works
+      try {
+        const url = `/api/phewas?snp=${encodeURIComponent(snpData.SNP_ID)}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=mrmega`;
+        console.log('Fetching PheWAS:', url);
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`PheWAS fetch failed: ${response.status}`);
         }
-      });
+        const data = await response.json();
+        console.log('PheWAS Response:', data);
+        navigate('/phewas', {
+          state: {
+            snpData,
+            selectedStudy: 'mrmega',
+            phewasData: data.plot_data ? data : null
+          }
+        });
+      } catch (error) {
+        console.error('Failed to fetch PheWAS data for mrmega:', error);
+        navigate('/phewas', {
+          state: {
+            snpData,
+            selectedStudy: 'mrmega'
+          }
+        });
+      }
     }
 }, [navigate]);
 
