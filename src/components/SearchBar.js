@@ -286,16 +286,16 @@ setSNPResults(data.results || []);
     } else if (item.type === 'snp') {
       console.log('Selected SNP:', item);
       
-      // Construct snpData in the format expected by the PheWAS endpoint
+      // Construct the SNP ID in the format expected by the backend
       const snpData = {
-        SNP_ID: item.internalId, // Make sure this matches what your backend expects
+        SNP_ID: item.internalId,
         chromosome: item.chromosome,
         position: item.position,
         rsId: item.rsId
       };
       
       try {
-        // Construct the URL exactly like the GWAS page does
+        // Make the request to the PheWAS endpoint with mrmega study
         const url = `/api/phewas?snp=${encodeURIComponent(snpData.SNP_ID)}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=mrmega`;
         
         console.log('Fetching PheWAS:', url);
@@ -308,22 +308,22 @@ setSNPResults(data.results || []);
         const data = await response.json();
         console.log('PheWAS Response:', data);
         
-        // Navigate with the fetched data
+        // Navigate with properly formatted state
         navigate('/phewas', {
           state: {
-            snpData,
-            selectedStudy: 'mrmega', // Always use mrmega as requested
-            phewasData: data.plot_data ? data : null
+            phewasData: data,  // Pass the entire data object
+            selectedSNP: snpData.SNP_ID,  // Pass the SNP_ID as selectedSNP
+            study: 'mrmega'
           }
         });
       } catch (error) {
         console.error('Failed to fetch PheWAS data:', error);
         
-        // Still navigate even on error, just without the data
+        // Still navigate even on error, but pass minimal info
         navigate('/phewas', {
           state: {
-            snpData,
-            selectedStudy: 'mrmega' // Always use mrmega
+            selectedSNP: snpData.SNP_ID,
+            study: 'mrmega'
           }
         });
       }
