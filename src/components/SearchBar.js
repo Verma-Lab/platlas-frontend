@@ -285,39 +285,50 @@ setSNPResults(data.results || []);
       });
     } else if (item.type === 'snp') {
       console.log('Selected SNP:', item);
+      
+      // Construct snpData in the format expected by the PheWAS endpoint
       const snpData = {
-        SNP_ID: item.internalId,
+        SNP_ID: item.internalId, // Make sure this matches what your backend expects
         chromosome: item.chromosome,
         position: item.position,
         rsId: item.rsId
       };
+      
       try {
+        // Construct the URL exactly like the GWAS page does
         const url = `/api/phewas?snp=${encodeURIComponent(snpData.SNP_ID)}&chromosome=${snpData.chromosome}&position=${snpData.position}&study=mrmega`;
+        
         console.log('Fetching PheWAS:', url);
         const response = await fetch(url);
+        
         if (!response.ok) {
           throw new Error(`PheWAS fetch failed: ${response.status}`);
         }
+        
         const data = await response.json();
         console.log('PheWAS Response:', data);
+        
+        // Navigate with the fetched data
         navigate('/phewas', {
           state: {
             snpData,
-            selectedStudy: 'mrmega',
+            selectedStudy: 'mrmega', // Always use mrmega as requested
             phewasData: data.plot_data ? data : null
           }
         });
       } catch (error) {
-        console.error('Failed to fetch PheWAS data for mrmega:', error);
+        console.error('Failed to fetch PheWAS data:', error);
+        
+        // Still navigate even on error, just without the data
         navigate('/phewas', {
           state: {
             snpData,
-            selectedStudy: 'mrmega'
+            selectedStudy: 'mrmega' // Always use mrmega
           }
         });
       }
     }
-}, [navigate]);
+  }, [navigate]);
 
   const handleScroll = useCallback((e) => {
     const element = e.target;
