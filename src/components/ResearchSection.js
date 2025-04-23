@@ -40,7 +40,7 @@ const ResearchSection = () => {
   const publicationInfo = {
     title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
     journal: "Medrxiv",
-    year: "2024",
+    year: "2025",
     doi: "https://www.medrxiv.org/content/10.1101/2025.04.18.25326074v1"
   };
 
