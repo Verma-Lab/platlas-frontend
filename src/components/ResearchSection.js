@@ -37,12 +37,17 @@ const ResearchSection = () => {
     }
   ];
 
-    const publicationInfo = {
-      title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
-      journal: "Medrxiv",
-      year: "2024",
-      doi: "https://www.medrxiv.org/content/10.1101/2025.04.18.25326074v1"
-    };
+  const publicationInfo = {
+    title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
+    journal: "Medrxiv",
+    year: "2024",
+    doi: "https://www.medrxiv.org/content/10.1101/2025.04.18.25326074v1"
+  };
+
+  // Function to handle opening the paper
+  const handleOpenPaper = () => {
+    window.open(publicationInfo.doi, '_blank');
+  };
 
   return (
     <div className="space-y-20 py-16">
@@ -84,7 +89,7 @@ const ResearchSection = () => {
               <div className="space-y-2">
                 <p><span className="opacity-75">Journal:</span> {publicationInfo.journal}</p>
                 <p><span className="opacity-75">Year:</span> {publicationInfo.year}</p>
-                <p><span className="opacity-75">DOI:</span> {publicationInfo.doi}</p>
+                <p><span className="opacity-75">DOI:</span> <a href={publicationInfo.doi} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-100">{publicationInfo.doi}</a></p>
               </div>
             </div>
             <div className="space-y-4">
@@ -92,7 +97,10 @@ const ResearchSection = () => {
               <p className="text-sm opacity-90 leading-relaxed">
                 Our research presents a comprehensive platform for analyzing and visualizing genome-wide association studies across multiple ancestries. We introduce novel methodologies for cross-ancestry analysis and provide interactive tools for exploring genetic associations.
               </p>
-              <button className="mt-4 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-opacity-90 transition-colors text-sm font-medium">
+              <button 
+                onClick={handleOpenPaper} 
+                className="mt-4 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-opacity-90 transition-colors text-sm font-medium"
+              >
                 Read Full Paper
               </button>
             </div>
