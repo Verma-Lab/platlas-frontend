@@ -656,7 +656,7 @@ const HorizontalChatBar = () => {
           </div>
           
           {/* Powered by InsightDocument footer */}
-          <div className="p-2 bg-gray-100 border-t border-gray-200 text-xs text-center">
+          {/* <div className="p-2 bg-gray-100 border-t border-gray-200 text-xs text-center">
             <a
               href="https://www.insightdocument.com"
               target="_blank"
@@ -665,7 +665,7 @@ const HorizontalChatBar = () => {
             >
               Powered by Insight Document
             </a>
-          </div>
+          </div> */}
         </div>
       )}
 
