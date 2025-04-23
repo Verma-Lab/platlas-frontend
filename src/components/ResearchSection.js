@@ -37,12 +37,12 @@ const ResearchSection = () => {
     }
   ];
 
-  const publicationInfo = {
-    title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
-    journal: "TBD",
-    year: "2024",
-    doi: "10.1038/xxx-xxx-xxx"
-  };
+    const publicationInfo = {
+      title: "Genome-Wide Assessment of Pleiotropy Across >1000 Traits from Diverse Biobanks",
+      journal: "Medrxiv",
+      year: "2024",
+      doi: "https://www.medrxiv.org/content/10.1101/2025.04.18.25326074v1"
+    };
 
   return (
     <div className="space-y-20 py-16">

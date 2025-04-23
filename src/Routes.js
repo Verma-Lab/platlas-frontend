@@ -65,7 +65,7 @@ const AppLayout = () => {
           } />
         </Routes>
       </div>
-      {/* <MiniChat /> */}
+      <MiniChat />
       {!isHomoSapieusPage && <Footer />}
     </div>
   );

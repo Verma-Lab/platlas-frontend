@@ -112,7 +112,7 @@ const NavigationBar = () => {
     { icon: Table, text: 'Association Results' },
     { icon: FileText, text: 'Cite' },
     { icon: Download, text: 'Downloads' },
-    // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
+    { icon: ' ', text: ' ', secondaryText: ' ' }
   ];
 
   // Desktop version
