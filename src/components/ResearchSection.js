@@ -89,7 +89,7 @@ const ResearchSection = () => {
               <div className="space-y-2">
                 <p><span className="opacity-75">Journal:</span> {publicationInfo.journal}</p>
                 <p><span className="opacity-75">Year:</span> {publicationInfo.year}</p>
-                <p><span className="opacity-75">DOI:</span> <a href={publicationInfo.doi} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-100">{publicationInfo.doi}</a></p>
+                <p><span className="opacity-75">DOI:</span> <a href={publicationInfo.doi} target="_blank" rel="noopener noreferrer" className="underline text-white hover:text-blue-100">{publicationInfo.doi}</a></p>
               </div>
             </div>
             <div className="space-y-4">

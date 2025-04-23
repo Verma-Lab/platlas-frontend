@@ -61,7 +61,55 @@ const PlotModal = ({ isOpen, onClose, plot }) => {
     </div>
   );
 };
-
+const sampleQueries = [
+  "How many traits are associated with Type 2 Diabetes?",
+  "List all traits related to Tuberculosis.",
+  "What are the associations with Bacterial enteritis in the African population?",
+  "How many genetic variants are linked to Intestinal infection in the European population?",
+  "What is the heritability estimate for Tuberculosis across all populations?",
+  "Which lead variants are associated with Phe_008_5 in the multi-ancestry analysis?",
+  "What are the effect sizes for variants linked to Bacterial enteritis in ST5_Lead_GWAMA?",
+  "How many cases and controls are there for Intestinal infection in the UK Biobank studies?",
+  "List the novel associations for Tuberculosis in the multi-ancestry meta-analysis.",
+  "What is the genomic inflation factor for Bacterial enteritis in the African ancestry group?"
+];
+// Sample queries component
+const SampleQueriesComponent = ({ onSelectQuery }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="bg-blue-50 rounded-md border border-blue-200 mt-2 overflow-hidden">
+      <div 
+        className="p-2 flex items-center justify-between cursor-pointer hover:bg-blue-100"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center gap-1 text-blue-700 text-xs font-medium">
+          <MessageSquare className="w-3 h-3" />
+          <span>Sample queries you can ask</span>
+        </div>
+        <div className="text-blue-600 text-xs">
+          {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </div>
+      </div>
+      
+      {isExpanded && (
+        <div className="p-2 border-t border-blue-200 max-h-56 overflow-y-auto">
+          <div className="grid grid-cols-1 gap-1">
+            {sampleQueries.map((query, index) => (
+              <button
+                key={index}
+                onClick={() => onSelectQuery(query)}
+                className="text-xs text-left p-1.5 hover:bg-blue-100 rounded text-blue-700 transition-colors truncate"
+              >
+                {query}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 // Chart renderer component that handles different chart types
 const ChartRenderer = ({ plot, fullSize = false }) => {
   if (!plot?.data) {
@@ -353,6 +401,9 @@ const MiniChat = () => {
   const [selectedPlot, setSelectedPlot] = useState(null);
   const [sessionId, setSessionId] = useState(null); // Added from HorizontalChatBar
   
+  const handleSampleQuerySelect = (query) => {
+    setInputValue(query);
+  };
   // Scroll to bottom of messages and handle sessionId persistence
   useEffect(() => {
     const storedSessionId = localStorage.getItem('chatSessionId');
@@ -524,7 +575,7 @@ const MiniChat = () => {
                   </button>
                 </div>
               </div>
-              <div className="text-xs text-white mt-1 text-center">
+              {/* <div className="text-xs text-white mt-1 text-center">
                 <a
                   href="https://www.insightdocument.com"
                   target="_blank"
@@ -533,7 +584,7 @@ const MiniChat = () => {
                 >
                   Powered by Insight Document
                 </a>
-              </div>
+              </div> */}
             </div>
             
             {/* Messages */}
@@ -542,6 +593,8 @@ const MiniChat = () => {
                 <div className="text-center text-gray-500 py-6">
                   <MessageSquare className="w-8 h-8 mx-auto mb-2 text-gray-300" />
                   <p className="text-sm">Try to be very specific to query, query's related to retriving large data might be blocked
+                  <SampleQueriesComponent onSelectQuery={handleSampleQuerySelect} />
+
                   </p>
                   {isReportMode && (
                     <div className="mt-2 text-xs bg-blue-50 text-blue-600 p-2 rounded-md inline-block">
