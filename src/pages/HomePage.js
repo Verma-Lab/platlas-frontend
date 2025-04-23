@@ -846,11 +846,11 @@ export const HomePage = () => {
         </div>
         
         {/* Horizontal Chat Bar */}
-        <div className="max-w-7xl mx-auto px-4">
+        {/* <div className="max-w-7xl mx-auto px-4">
           <div className="relative max-w-7xl mx-auto mt-16 z-20">
             <HorizontalChatBar />
           </div>
-        </div>
+        </div> */}
 
         <div className="max-w-7xl mx-auto px-4">
           {/* Search Section */}

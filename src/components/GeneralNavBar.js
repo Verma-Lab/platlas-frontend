@@ -10,7 +10,6 @@ const GenerlaBar = () => {
     const maxAttempts = 50;
     const attemptScroll = () => {
       const element = document.getElementById(sectionId);
-      console.log('Attempt', attempts + 1, 'to find', sectionId, element); // Debug log
       
       if (element) {
         const yOffset = -100;
@@ -25,7 +24,7 @@ const GenerlaBar = () => {
       
       if (attempts < maxAttempts) {
         attempts++;
-        setTimeout(attemptScroll, 100); // Try again after 100ms
+        setTimeout(attemptScroll, 100);
         return false;
       }
       
@@ -38,7 +37,7 @@ const GenerlaBar = () => {
 
   const handleClick = (text) => {
     if (text === 'Home') {
-      navigate('/');
+      window.location.href = '/';
       return;
     }
     if (text === 'HomoSapieus') {
@@ -51,17 +50,12 @@ const GenerlaBar = () => {
     }
 
     const sectionId = text.toLowerCase();
-    console.log('Clicking:', sectionId); // Debug log
     scrollToSection(sectionId);
   };
 
   const navItems = [
     { icon: Home, text: 'Home' },
-    // { icon: Table, text: 'Association Results' },
-    // { icon: FileText, text: 'Paper' },
-    // { icon: FileText, text: 'Summary' },
     { icon: Download, text: 'Downloads' },
-    // { icon: Brain, text: 'HomoSapieus', secondaryText: '(Genomics LLM)' }
   ];
 
   return (
