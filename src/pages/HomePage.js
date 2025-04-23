@@ -852,9 +852,9 @@ export const HomePage = () => {
           </div>
         </div> */}
 
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4  ">
           {/* Search Section */}
-          <div id="search" className="scroll-mt-16">
+          <div id="search" className="scroll-mt-20">
             <SearchSection projects={projects} />
           </div>
           

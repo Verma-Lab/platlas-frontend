@@ -304,7 +304,7 @@ const DownloadsPage = () => {
           {/* Top section with Nav and Logo */}
           <div className="flex justify-between items-start -mt-10">
             {/* Logo and Title Section */}
-            <div className="flex items-center -mt-19 cursor-pointer" onClick={() => window.location.href = "/platlas"}>
+            <div className="flex items-center -mt-19 cursor-pointer" onClick={() => window.location.href = "/"}>
               <div>
                 <img 
                   src="/images/platypushomepage.png"
