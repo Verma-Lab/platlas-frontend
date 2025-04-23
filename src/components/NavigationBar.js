@@ -107,7 +107,7 @@ const NavigationBar = () => {
   };
 
   const navItems = [
-    { icon: Home, text: 'Home' },
+    // { icon: Home, text: 'Home' },
     { icon: Users, text: 'About' },
     { icon: Table, text: 'Association Results' },
     { icon: FileText, text: 'Cite' },
