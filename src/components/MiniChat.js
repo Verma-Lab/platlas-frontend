@@ -29,8 +29,8 @@ ChartJS.register(
 );
 
 // const apiUrl = 'https://api.insightdocument.com/apikey/pm_b50e5c924786d730cb1bdf819d117bb4/Gemini-Pro/760ccf37-abb7-45a5-8306-e4ad69d616fc';
-const apiUrl = 'https://api.insightdocument.com/apikey/pm_18b861101da73f588a4d586bf4bb8b32/Gemini-Pro/4f802cae-884c-4d45-b1d4-a082492c3d06'
-
+// const apiUrl = 'https://api.insightdocument.com/apikey/pm_18b861101da73f588a4d586bf4bb8b32/Gemini-Pro/4f802cae-884c-4d45-b1d4-a082492c3d06'
+const apiUrl = 'https://api.insightdocument.com/apikey/pm_cf97d19c075cb063b1cdbf71c6b8fcd1/Gemini-Pro/a6644f7d-bbf0-4279-8d33-37597d48a86f'
 // Plot Modal Component
 const PlotModal = ({ isOpen, onClose, plot }) => {
   if (!isOpen || !plot) return null;
