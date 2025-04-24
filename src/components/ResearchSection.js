@@ -44,6 +44,9 @@ const ResearchSection = () => {
     doi: "https://www.medrxiv.org/content/10.1101/2025.04.18.25326074v1"
   };
 
+  // Truncated abstract text
+  const truncatedAbstract = "Large-scale genetic association studies have identified thousands of trait-associated risk loci, establishing the polygenic basis for common complex traits and diseases. Although prior studies suggest that many trait-associated loci are pleiotropic, the extent to which this pleiotropy reflects shared causal variants or confounding by linkage disequilibrium remains poorly characterized...";
+
   // Function to handle opening the paper
   const handleOpenPaper = () => {
     window.open(publicationInfo.doi, '_blank');
@@ -51,31 +54,6 @@ const ResearchSection = () => {
 
   return (  
     <div className="space-y-20 py-16">
-      {/* Research Highlights Section */}
-      {/* <div className="max-w-7xl mx-auto px-4">
-        <div className="grid md:grid-cols-3 gap-8">
-          {researchHighlights.map((highlight, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <highlight.icon className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">{highlight.title}</h3>
-              </div>
-              <p className="text-gray-600 mb-4">{highlight.description}</p>
-              <ul className="space-y-2">
-                {highlight.points.map((point, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-gray-600">
-                    <ArrowRight className="w-4 h-4 text-blue-500 mt-1 flex-shrink-0" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div> */}
-
       {/* Publication Section */}
       <div className="max-w-7xl mx-auto px-4">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-lg p-8 text-white">
@@ -91,17 +69,18 @@ const ResearchSection = () => {
                 <p><span className="opacity-75">Year:</span> {publicationInfo.year}</p>
                 <p><span className="opacity-75">DOI:</span> <a href={publicationInfo.doi} target="_blank" rel="noopener noreferrer" className="underline text-white hover:text-blue-100">{publicationInfo.doi}</a></p>
               </div>
-            </div>
-            <div className="space-y-4">
-              <h4 className="font-semibold">Abstract Highlight</h4>
-              <p className="text-sm opacity-90 leading-relaxed">
-              Large-scale genetic association studies have identified thousands of trait-associated risk loci, establishing the polygenic basis for common complex traits and diseases. Although prior studies suggest that many trait-associated loci are pleiotropic, the extent to which this pleiotropy reflects shared causal variants or confounding by linkage disequilibrium remains poorly characterized. To define a set of candidate loci with potentially pleiotropic associations, we performed genome-wide association study (GWAS) meta-analyses of up to 1,167 clinically relevant traits and diseases across 1,789,365 diverse individuals genetically similar to Admixed American (AMR, NMax = 60,756), African (AFR, NMax = 128,361), East Asian (EAS, NMax = 307,465), European (EUR, NMax = 1,283,907), and South Asian (SAS, NMax = 8,876) reference populations from the VA Million Veteran Program (MVP), UK Biobank (UKB), FinnGen, Biobank Japan (BBJ), Tohoku Medical Megabank (ToMMO), and Korean Genome and Epidemiology Study... </p>
               <button 
                 onClick={handleOpenPaper} 
                 className="mt-4 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-opacity-90 transition-colors text-sm font-medium"
               >
                 Read Full Paper
               </button>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold">Abstract Highlight</h4>
+              <p className="text-sm opacity-90 leading-relaxed">
+                {truncatedAbstract}
+              </p>
             </div>
           </div>
         </div>
