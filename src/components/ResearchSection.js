@@ -49,7 +49,7 @@ const ResearchSection = () => {
     window.open(publicationInfo.doi, '_blank');
   };
 
-  return (
+  return (  
     <div className="space-y-20 py-16">
       {/* Research Highlights Section */}
       {/* <div className="max-w-7xl mx-auto px-4">
@@ -95,8 +95,7 @@ const ResearchSection = () => {
             <div className="space-y-4">
               <h4 className="font-semibold">Abstract Highlight</h4>
               <p className="text-sm opacity-90 leading-relaxed">
-                Our research presents a comprehensive platform for analyzing and visualizing genome-wide association studies across multiple ancestries. We introduce novel methodologies for cross-ancestry analysis and provide interactive tools for exploring genetic associations.
-              </p>
+              Large-scale genetic association studies have identified thousands of trait-associated risk loci, establishing the polygenic basis for common complex traits and diseases. Although prior studies suggest that many trait-associated loci are pleiotropic, the extent to which this pleiotropy reflects shared causal variants or confounding by linkage disequilibrium remains poorly characterized. To define a set of candidate loci with potentially pleiotropic associations, we performed genome-wide association study (GWAS) meta-analyses of up to 1,167 clinically relevant traits and diseases across 1,789,365 diverse individuals genetically similar to Admixed American (AMR, NMax = 60,756), African (AFR, NMax = 128,361), East Asian (EAS, NMax = 307,465), European (EUR, NMax = 1,283,907), and South Asian (SAS, NMax = 8,876) reference populations from the VA Million Veteran Program (MVP), UK Biobank (UKB), FinnGen, Biobank Japan (BBJ), Tohoku Medical Megabank (ToMMO), and Korean Genome and Epidemiology Study... </p>
               <button 
                 onClick={handleOpenPaper} 
                 className="mt-4 px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-opacity-90 transition-colors text-sm font-medium"
