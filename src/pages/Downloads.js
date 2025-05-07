@@ -131,7 +131,8 @@ const DownloadsPage = () => {
     
     const handleSelectStudy = (studyType) => {
       // Create download URLs based on selected study type
-      const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats/${item.population}/${item.phenotype}.${item.population}.${studyType}.sumstats.txt`;
+      const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/${item.population}/${item.phenotype}.${item.population}.${studyType}.sumstats.txt`;
+      // https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/$%7Bitem.population%7D/$%7Bitem.phenotype%7D.$%7Bitem.population%7D.$%7BstudyType%7D.sumstats.txt
       const gzUrl = `${baseUrl}.gz`;
       const tbiUrl = `${baseUrl}.gz.tbi`;
       
