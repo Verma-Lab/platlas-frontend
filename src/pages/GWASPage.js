@@ -260,8 +260,8 @@ const StatsBar = ({ phenoStats, leadVariants, phenoId, selectedCohort, selectedS
     const studyType = selectedStudy || 'gwama';
     
     // Base URL pattern from DownloadsPage
-    const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats/${population}/${phenoId}.${population}.${studyType}.sumstats.txt`;
-    
+    const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/${population}/${phenoId}.${population}.${studyType}.sumstats.txt`;
+
     return {
       gz: `${baseUrl}.gz`,
       tbi: `${baseUrl}.gz.tbi`

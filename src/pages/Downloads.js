@@ -60,67 +60,67 @@ const DownloadsPage = () => {
   const demoDownloads = [
     {
       phenotype: 'Phe_250',
-      description: 'Heart rate',
+      description: 'Type 2 Diabetes',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
       phenotype: 'Phe_250_1',
-      description: 'Heart rate variability',
+      description: 'Type 1 Diabetes',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250_1.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250_1.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
       phenotype: 'Phe_008',
-      description: 'Weight',
+      description: 'Body Weight',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
       phenotype: 'Phe_008_5',
-      description: 'Body mass index',
+      description: 'Body Mass Index',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008_5.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008_5.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
       phenotype: 'Phe_015_1',
-      description: 'Blood pressure',
+      description: 'Hypertension',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz.tbi'
       }
     }
   ];
