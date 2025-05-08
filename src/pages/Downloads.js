@@ -135,7 +135,8 @@ const DownloadsPage = () => {
       // https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/$%7Bitem.population%7D/$%7Bitem.phenotype%7D.$%7Bitem.population%7D.$%7BstudyType%7D.sumstats.txt
       const gzUrl = `${baseUrl}.gz`;
       const tbiUrl = `${baseUrl}.gz.tbi`;
-      
+      console.log("Opening URL:", gzUrl); // Debug logging
+
       // Open the .gz file in a new tab
       window.open(gzUrl, '_blank');
       
