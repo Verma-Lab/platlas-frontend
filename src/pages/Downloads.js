@@ -111,16 +111,16 @@ const DownloadsPage = () => {
       }
     },
     {
-      phenotype: 'Phe_015_1',
+      phenotype: 'Phe_401_1',
       description: 'Hypertension',
       population: 'EUR',
       gwama: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_401_1.EUR.gwama.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_401_1.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_015_1.ALL.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_015_1.ALL.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_401_1.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_401_1.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     }
   ];
@@ -237,8 +237,8 @@ const DownloadsPage = () => {
           },
           {
             type: 'phenotype',
-            phenotype: 'Phe_015_1',
-            traitDescription: 'Blood pressure',
+            phenotype: 'Phe_401_1',
+            traitDescription: 'Hypertension',
             category: 'Cardiovascular',
             population: 'EAS'
           }
