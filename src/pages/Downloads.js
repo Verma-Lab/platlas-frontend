@@ -56,7 +56,7 @@ const DownloadsPage = () => {
   const [showStudyModal, setShowStudyModal] = useState(false);
   const [selectedPhenotype, setSelectedPhenotype] = useState(null);
   
-  // Demo download links
+  // Demo download links - MRMEGA now uses ALL population
   const demoDownloads = [
     {
       phenotype: 'Phe_250',
@@ -67,8 +67,8 @@ const DownloadsPage = () => {
         tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_250.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_250.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
@@ -80,8 +80,8 @@ const DownloadsPage = () => {
         tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_250_1.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_250_1.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_250_1.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
@@ -93,8 +93,8 @@ const DownloadsPage = () => {
         tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_008.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_008.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
@@ -106,8 +106,8 @@ const DownloadsPage = () => {
         tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_008_5.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_008_5.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_008_5.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     },
     {
@@ -119,8 +119,8 @@ const DownloadsPage = () => {
         tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.gwama.sumstats.txt.gz.tbi'
       },
       mrmega: {
-        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz',
-        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/EUR/Phe_015_1.EUR.mrmega.sumstats.txt.gz.tbi'
+        gz: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_015_1.ALL.mrmega.sumstats.txt.gz',
+        tbi: 'https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/ALL/Phe_015_1.ALL.mrmega.sumstats.txt.gz.tbi'
       }
     }
   ];
@@ -131,8 +131,9 @@ const DownloadsPage = () => {
     
     const handleSelectStudy = (studyType) => {
       // Create download URLs based on selected study type
-      const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/${item.population}/${item.phenotype}.${item.population}.${studyType}.sumstats.txt`;
-      // https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/$%7Bitem.population%7D/$%7Bitem.phenotype%7D.$%7Bitem.population%7D.$%7BstudyType%7D.sumstats.txt
+      // For GWAMA: use actual population, For MRMEGA: always use ALL
+      const population = studyType === 'mrmega' ? 'ALL' : item.population;
+      const baseUrl = `https://g-fce312.fd635.8443.data.globus.org/sumstats_downsized/${population}/${item.phenotype}.${population}.${studyType}.sumstats.txt`;
       const gzUrl = `${baseUrl}.gz`;
       const tbiUrl = `${baseUrl}.gz.tbi`;
       console.log("Opening URL:", gzUrl); // Debug logging
